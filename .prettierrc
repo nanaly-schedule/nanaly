@@ -9,5 +9,5 @@
   "arrowParens": "always",
   "bracketSpacing": true,
   "singleAttributePerLine": false,
-  "endOfLine": "lf"
+  "endOfLine": "auto"
 }
