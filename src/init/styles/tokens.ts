@@ -195,6 +195,7 @@ export const stylesTextR12 = "400 12px/14 Pretendard";
 // 근무상태뱃지
 // 근무카드 날짜
 export const stylesTextMicro = "500 10px/12 Pretendard";
+export const stylesText테스트 = "400 12px/NaNauto Inter"; // 테스트 토큰
 export const stylesGrid나날이Grid = {
   layoutGrids: [
     {
