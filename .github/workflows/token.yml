@@ -16,7 +16,8 @@ jobs:
   build-tokens:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
     env:
       # Change this if your plugin pushes the token document to a different repository path.
       DEFAULT_TOKENS_FILE: tokens.json
@@ -66,4 +67,25 @@ jobs:
         with:
           # Change the artifact name if you want a different name in the Actions UI.
           name: style-dictionary-output
-          path: build/tokens/
+          path: init/styles/
+
+      - name: Create pull request for transformed tokens
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "design: 토큰 변환 내용 업데이트"
+          branch: "automation/token-build"
+          delete-branch: true
+          base: ${{ github.event.repository.default_branch }}
+          add-paths: |
+            init/styles/
+          title: "design: 토큰 변환 내용 업데이트"
+          body: |
+            ## Summary
+            - Run Style Dictionary token transformation from the latest `design` branch changes
+            - Update generated files in `init/styles/`
+
+            ## Source
+            - Workflow: `${{ github.workflow }}`
+            - Trigger branch: `${{ github.ref_name }}`
+            - Commit: `${{ github.sha }}`
