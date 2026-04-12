@@ -4,7 +4,7 @@ on:
   push:
     # Change branch filters if you only want this workflow on specific branches.
     branches:
-      - develop
+      - design
   workflow_dispatch:
     inputs:
       tokens_file:
