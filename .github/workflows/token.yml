@@ -10,7 +10,7 @@ on:
       tokens_file:
         description: Token file path to transform
         required: false
-        default: init/styles/tokens.json
+        default: src/init/styles/tokens.json
 
 jobs:
   build-tokens:
@@ -22,7 +22,7 @@ jobs:
       # Change this if your plugin pushes the token document to a different repository path.
       DEFAULT_TOKENS_FILE: tokens.json
       # Change this if you want the generated files in a different output directory.
-      STYLE_DICTIONARY_BUILD_PATH: init/styles/
+      STYLE_DICTIONARY_BUILD_PATH: src/init/styles/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
         with:
           # Change the artifact name if you want a different name in the Actions UI.
           name: style-dictionary-output
-          path: init/styles/
+          path: src/init/styles/
 
       - name: Create pull request for transformed tokens
         uses: peter-evans/create-pull-request@v7
