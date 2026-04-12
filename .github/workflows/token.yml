@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           # Change the Node.js version only if your Style Dictionary toolchain requires it.
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Resolve token file

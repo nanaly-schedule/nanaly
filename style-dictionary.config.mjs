@@ -18,7 +18,7 @@ export default {
   platforms: {
     js: {
       transforms: [...getTransforms({ platform: "ts" }), "name/camel"],
-      buildPath: "init/styles/",
+      buildPath: "src/init/styles/",
       files: [
         {
           destination: "tokens.ts",
