@@ -41,9 +41,13 @@
   "devDependencies": {
     "@tokens-studio/sd-transforms": "^2.0.3",
     "@types/react": "~19.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.1",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-simple-import-sort": "^13.0.0",
     "prettier": "^3.8.2",
     "style-dictionary": "^5.4.0",
     "typescript": "~5.9.2"
