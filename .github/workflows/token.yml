@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     env:
       # Change this if your plugin pushes the token document to a different repository path.
-      DEFAULT_TOKENS_FILE: tokens.json
+      DEFAULT_TOKENS_FILE: src/init/styles/tokens.json
       # Change this if you want the generated files in a different output directory.
       STYLE_DICTIONARY_BUILD_PATH: src/init/styles/
     steps:
@@ -78,12 +78,12 @@ jobs:
           delete-branch: true
           base: ${{ github.event.repository.default_branch }}
           add-paths: |
-            init/styles/
+            src/init/styles/
           title: "design: 토큰 변환 내용 업데이트"
           body: |
             ## Summary
             - Run Style Dictionary token transformation from the latest `design` branch changes
-            - Update generated files in `init/styles/`
+            - Update generated files in `src/init/styles/`
 
             ## Source
             - Workflow: `${{ github.workflow }}`
