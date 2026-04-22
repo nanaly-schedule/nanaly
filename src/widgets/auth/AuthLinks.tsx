@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import {
   borderDividerPrimary,
@@ -6,17 +6,23 @@ import {
   typoColorPrimary,
 } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
+import { useRouter } from 'expo-router';
 
 export default function AuthLinks() {
+  const router = useRouter();
   return (
     <View style={styles.link}>
-      <NText variant="m12" style={styles.text}>
-        비밀번호 재설정
-      </NText>
+      <Pressable>
+        <NText variant="m12" style={styles.text}>
+          비밀번호 재설정
+        </NText>
+      </Pressable>
       <View style={styles.verticalBorder} />
-      <NText variant="m12" style={styles.text}>
-        회원가입
-      </NText>
+      <Pressable onPress={() => router.push('/auth/signup')}>
+        <NText variant="m12" style={styles.text}>
+          회원가입
+        </NText>
+      </Pressable>
     </View>
   );
 }
