@@ -1,3 +1,4 @@
+import Input from '@/src/shared/ui/Input';
 import Main from '@/src/shared/ui/Main';
 import {
   Image,
@@ -45,8 +46,13 @@ export default function SignInPage() {
           <Text>우리 가게 스케줄 관리</Text>
         </View>
         <View>
-          <TextInput placeholder="아이디를 입력해주세요" />
-          <TextInput placeholder="비밀번호를 입력해주세요" />
+          <Input placeholder="아이디를 입력해주세요" variant="" />
+          <Input
+            placeholder="비밀번호를 입력해주세요"
+            variant=""
+            textContentType="password"
+            secureTextEntry
+          />
           <Pressable>
             <Text>로그인</Text>
           </Pressable>
