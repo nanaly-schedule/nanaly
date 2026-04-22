@@ -1,5 +1,11 @@
+import {
+  basicColorGrey800,
+  typoColorPrimary,
+  typoColorSub1,
+} from '@/src/init/styles/tokens';
 import Input from '@/src/shared/ui/Input';
 import Main from '@/src/shared/ui/Main';
+import NText from '@/src/shared/ui/NText';
 import {
   Image,
   Pressable,
@@ -42,8 +48,12 @@ export default function SignInPage() {
         <View>
           {/* 로고 */}
           <Image src="" />
-          <Text>나날이</Text>
-          <Text>우리 가게 스케줄 관리</Text>
+          <NText variant="h1" style={{ color: basicColorGrey800 }}>
+            나날이
+          </NText>
+          <NText variant="m14" style={{ color: basicColorGrey800 }}>
+            우리 가게 스케줄 관리
+          </NText>
         </View>
         <View>
           <Input placeholder="아이디를 입력해주세요" variant="" />
@@ -54,15 +64,23 @@ export default function SignInPage() {
             secureTextEntry
           />
           <Pressable>
-            <Text>로그인</Text>
+            <NText variant="m16" style={{ color: typoColorPrimary }}>
+              로그인
+            </NText>
           </Pressable>
           <View>
-            <Text>비밀번호 재설정</Text>
-            <Text>회원가입</Text>
+            <NText variant="m12" style={{ color: typoColorPrimary }}>
+              비밀번호 재설정
+            </NText>
+            <NText variant="m12" style={{ color: typoColorPrimary }}>
+              회원가입
+            </NText>
           </View>
         </View>
         <View>
-          <Text>또는</Text>
+          <NText variant="m12" style={{ color: typoColorSub1 }}>
+            또는
+          </NText>
         </View>
         <View>
           <Pressable>
