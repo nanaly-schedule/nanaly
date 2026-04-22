@@ -1,6 +1,6 @@
-import AuthPage from '@/src/pages/auth/AuthPage';
+import SignInPage from '@/src/pages/auth/SignInPage';
 import { Text } from 'react-native';
 
 export default function Auth() {
-  return <AuthPage />;
+  return <SignInPage />;
 }
