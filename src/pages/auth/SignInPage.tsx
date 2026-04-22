@@ -2,8 +2,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { basicColorGrey800 } from '@/src/init/styles/tokens';
 import Main from '@/src/shared/ui/Main';
-import SignInForm from '@/src/widgets/auth/SignInForm';
-import SocialLoginButtons from '@/src/widgets/auth/SocialLoginButtons';
+import SignInForm from '@/src/widgets/auth/sign-in/SignInForm';
+import SocialLoginButtons from '@/src/widgets/auth/sign-in/SocialLoginButtons';
 import Logo from '@/src/widgets/Logo';
 
 /**
