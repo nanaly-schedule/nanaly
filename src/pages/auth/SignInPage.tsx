@@ -1,17 +1,55 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import Main from '@/src/shared/ui/Main';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+
+/**
+ * 기능:
+ * -
+ *
+ * 이유:
+ * -
+ *
+ * 상태 흐름:
+ * -
+ *
+ * 실패 시나리오:
+ * -
+ *
+ * 성능:
+ * -
+ *
+ * 플랫폼 고려:
+ * -
+ *
+ * 의존성:
+ * -
+ *
+ * 트레이드오프:
+ * -
+ */
 
 export default function SignInPage() {
   return (
-    <View>
-      <View style={styles.main}>
+    <Main>
+      <View>
         <View>
+          {/* 로고 */}
+          <Image src="" />
           <Text>나날이</Text>
           <Text>우리 가게 스케줄 관리</Text>
         </View>
         <View>
           <TextInput placeholder="아이디를 입력해주세요" />
           <TextInput placeholder="비밀번호를 입력해주세요" />
-          <Pressable>로그인</Pressable>
+          <Pressable>
+            <Text>로그인</Text>
+          </Pressable>
           <View>
             <Text>비밀번호 재설정</Text>
             <Text>회원가입</Text>
@@ -29,7 +67,7 @@ export default function SignInPage() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </Main>
   );
 }
 
