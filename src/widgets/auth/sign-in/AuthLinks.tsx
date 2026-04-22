@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import {
@@ -6,7 +7,6 @@ import {
   typoColorPrimary,
 } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
-import { useRouter } from 'expo-router';
 
 export default function AuthLinks() {
   const router = useRouter();
