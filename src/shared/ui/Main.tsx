@@ -34,7 +34,7 @@ export default function Main({ children }: MainProps) {
 
 const styles = StyleSheet.create({
   main: {
-    margin: 'auto',
+    marginVertical: 'auto',
     justifyContent: 'center',
     alignItems: 'center',
   },
