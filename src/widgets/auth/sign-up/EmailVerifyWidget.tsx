@@ -27,6 +27,8 @@ interface EmailVerifyWidgetProps {
   email: string;
   code: string;
   status: EmailVerifyStatus;
+  emailErrorMessage?: string;
+  codeErrorMessage?: string;
   timer: number;
   isEmailValid: boolean;
   isCodeValid: boolean;
@@ -42,6 +44,8 @@ export default function EmailVerifyWidget({
   email,
   code,
   status,
+  emailErrorMessage = '',
+  codeErrorMessage = '',
   timer,
   isEmailValid,
   isCodeValid,
@@ -55,10 +59,15 @@ export default function EmailVerifyWidget({
   const isEmailEmpty = email.length === 0;
   const hasSentCode = status === EmailVerifyStatus.Sent;
   const isVerified = status === EmailVerifyStatus.Verified;
-  const isSendDisabled = !isEmailValid || isSending || isVerified;
+  const hasEmailError = emailErrorMessage.length > 0;
+  const hasCodeError = codeErrorMessage.length > 0;
+  const isSendDisabled =
+    !isEmailValid || isSending || isVerified || (hasSentCode && timer > 0);
   const isVerifyDisabled = code.length === 0 || isVerifying || isVerified;
   const emailButtonLabel = isVerified
     ? '인증됨'
+    : hasSentCode && timer === 0
+      ? '재전송'
     : hasSentCode
       ? '발송됨'
       : '인증';
@@ -83,7 +92,9 @@ export default function EmailVerifyWidget({
       <View style={{ marginBottom: spacingSpacing12 }}>
         <View style={styles.inputContainer}>
           <Input
-            variant={isEmailEmpty || isEmailValid ? '' : 'error'}
+            variant={
+              hasEmailError || (!isEmailEmpty && !isEmailValid) ? 'error' : ''
+            }
             placeholder="example@email.com"
             style={{ flex: 1 }}
             textContentType="emailAddress"
@@ -125,14 +136,21 @@ export default function EmailVerifyWidget({
             </NText>
           </Pressable>
         </View>
-        {!isEmailEmpty && !isEmailValid && (
+        {hasEmailError ? (
+          <NText
+            variant="m12"
+            style={{ color: typoColorRed, marginTop: spacingSpacing8 }}
+          >
+            {emailErrorMessage}
+          </NText>
+        ) : !isEmailEmpty && !isEmailValid ? (
           <NText
             variant="m12"
             style={{ color: typoColorRed, marginTop: spacingSpacing8 }}
           >
             올바른 이메일 주소를 입력해 주세요
           </NText>
-        )}
+        ) : null}
       </View>
 
       {hasSentCode && (
@@ -140,7 +158,7 @@ export default function EmailVerifyWidget({
           <View>
             <View style={styles.inputContainer}>
               <Input
-                variant={code.length === 0 || isCodeValid ? '' : 'error'}
+                variant={hasCodeError ? 'error' : ''}
                 placeholder="인증번호를 입력해주세요"
                 style={{ flex: 1 }}
                 value={code}
@@ -152,12 +170,12 @@ export default function EmailVerifyWidget({
                 </NText>
               </Pressable>
             </View>
-            {code.length > 0 && !isCodeValid && (
+            {hasCodeError && (
               <NText
                 variant="m12"
                 style={{ color: typoColorRed, marginTop: spacingSpacing8 }}
               >
-                코드를 다시 확인해 주세요
+                {codeErrorMessage}
               </NText>
             )}
           </View>
