@@ -1,4 +1,9 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import {
+  GestureResponderEvent,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 import {
   backgroundColorWhite,
@@ -7,13 +12,21 @@ import {
 import AppleIcon from '@/src/shared/assets/AppleIcon';
 import GoogleIcon from '@/src/shared/assets/GoogleIcon';
 
-export default function SocialLoginButtons() {
+interface SocialLoginButtonsProps {
+  onGoogle: (e: GestureResponderEvent) => void;
+  onApple: (e: GestureResponderEvent) => void;
+}
+
+export default function SocialLoginButtons({
+  onGoogle,
+  onApple,
+}: SocialLoginButtonsProps) {
   return (
     <View style={styles.iconContainer}>
-      <Pressable style={[styles.googleIcon, styles.icon]}>
+      <Pressable style={[styles.googleIcon, styles.icon]} onPress={onGoogle}>
         <GoogleIcon size={24} />
       </Pressable>
-      <Pressable style={[styles.appleIcon, styles.icon]}>
+      <Pressable style={[styles.appleIcon, styles.icon]} onPress={onApple}>
         <AppleIcon size={21} />
       </Pressable>
     </View>
