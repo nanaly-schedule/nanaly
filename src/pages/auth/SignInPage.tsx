@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { isAxiosError } from 'axios';
 import { StyleSheet, View } from 'react-native';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-import { signIn } from '@/src/features/auth/api/sign';
+import { signIn, socialLogin } from '@/src/features/auth/api/sign';
 import {
   saveAccessToken,
   saveRefreshToken,
@@ -47,6 +48,8 @@ export default function SignInPage() {
   const [loginErrorMessage, setLoginErrorMessage] = useState('');
   const [isLoginErrorModalVisible, setIsLoginErrorModalVisible] =
     useState(false);
+  const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
+  const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 
   const handleSignIn = async ({
     email,
@@ -95,6 +98,58 @@ export default function SignInPage() {
       setIsLoginErrorModalVisible(true);
     }
   };
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: googleWebClientId,
+      iosClientId: googleIosClientId,
+    });
+  }, [googleIosClientId, googleWebClientId]);
+
+  const handlePressGoogleLoginButton = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const googleTokens = await GoogleSignin.getTokens();
+      const idToken = userInfo.data?.idToken ?? googleTokens.idToken ?? null;
+      const accessToken = googleTokens.accessToken;
+
+      const response = await socialLogin({ idToken, accessToken });
+      const tokenPayload = response.data as {
+        accessToken?: string;
+        refreshToken?: string;
+        data?: {
+          accessToken?: string;
+          refreshToken?: string;
+        };
+      };
+
+      const savedAccessToken =
+        tokenPayload.accessToken ?? tokenPayload.data?.accessToken;
+      const refreshToken =
+        tokenPayload.refreshToken ?? tokenPayload.data?.refreshToken;
+
+      if (!savedAccessToken || !refreshToken) {
+        throw new Error('토큰 정보가 없습니다');
+      }
+
+      await saveAccessToken(savedAccessToken);
+      await saveRefreshToken(refreshToken);
+      router.replace('/');
+    } catch (error) {
+      const errorMessage = isAxiosError(error)
+        ? typeof error.response?.data === 'string'
+          ? error.response.data
+          : (error.response?.data as { message?: string } | undefined)?.message
+        : error instanceof Error
+          ? error.message
+          : undefined;
+
+      setLoginErrorMessage(
+        errorMessage ?? '구글 로그인 중 오류가 발생했습니다',
+      );
+      setIsLoginErrorModalVisible(true);
+    }
+  };
 
   return (
     <Main>
@@ -104,7 +159,10 @@ export default function SignInPage() {
           onPressStateChange={setIsSignInButtonPressed}
           onSubmit={handleSignIn}
         />
-        <SocialLoginButtons />
+        <SocialLoginButtons
+          onGoogle={handlePressGoogleLoginButton}
+          onApple={() => {}}
+        />
       </View>
       <BaseModal
         visible={isLoginErrorModalVisible}
