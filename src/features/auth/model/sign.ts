@@ -5,9 +5,13 @@ export interface SignUpRequest {
   birthDate: string; // '1990-01-01';
 }
 
-export interface SocialLoginRequest {
+export interface GoogleLoginRequest {
   idToken: string;
   accessToken: string;
+}
+export interface AppleLoginRequest {
+  identityToken: string;
+  name: string;
 }
 
 export interface SignInRequest {
