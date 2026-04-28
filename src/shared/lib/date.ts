@@ -19,7 +19,7 @@ export function getDaysInMonth(year: number, month: number) {
 }
 
 export function formatBirthDate({ year, month, day }: BirthDateValue) {
-  return `${year}.${String(month).padStart(2, '0')}.${String(day).padStart(
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(
     2,
     '0',
   )}`;
