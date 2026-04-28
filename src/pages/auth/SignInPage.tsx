@@ -4,7 +4,7 @@ import { isAxiosError } from 'axios';
 import { StyleSheet, View } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-import { signIn, socialLogin } from '@/src/features/auth/api/sign';
+import { appleLogin, googleLogin, signIn } from '@/src/features/auth/api/sign';
 import {
   saveAccessToken,
   saveRefreshToken,
@@ -15,6 +15,7 @@ import Main from '@/src/shared/ui/Main';
 import SignInForm from '@/src/widgets/auth/sign-in/SignInForm';
 import SocialLoginButtons from '@/src/widgets/auth/sign-in/SocialLoginButtons';
 import Logo from '@/src/widgets/Logo';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 /**
  * 기능:
@@ -42,6 +43,15 @@ import Logo from '@/src/widgets/Logo';
  * -
  */
 
+interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  isTempPassword: boolean;
+  isProfileComplete: boolean;
+  name?: string | null;
+  birthDate?: string | null;
+}
+
 export default function SignInPage() {
   const router = useRouter();
   const [, setIsSignInButtonPressed] = useState(false);
@@ -67,18 +77,9 @@ export default function SignInPage() {
         email: email.toLowerCase(),
         password,
       });
-      const tokenPayload = response.data as {
-        accessToken?: string;
-        refreshToken?: string;
-        data?: {
-          accessToken?: string;
-          refreshToken?: string;
-        };
-      };
-      const accessToken =
-        tokenPayload.accessToken ?? tokenPayload.data?.accessToken;
-      const refreshToken =
-        tokenPayload.refreshToken ?? tokenPayload.data?.refreshToken;
+      const tokenPayload = response.data as AuthResponse;
+      const accessToken = tokenPayload.accessToken;
+      const refreshToken = tokenPayload.refreshToken;
 
       if (!accessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
@@ -105,6 +106,19 @@ export default function SignInPage() {
     });
   }, [googleIosClientId, googleWebClientId]);
 
+  const shouldRedirectToAuthInfo = ({
+    isProfileComplete,
+    name,
+    birthDate,
+  }: AuthResponse) => {
+    const hasEmptyName = typeof name === 'string' && name.trim().length === 0;
+    const hasEmptyBirthDate =
+      typeof birthDate === 'string' && birthDate.trim().length === 0;
+
+    // return true;
+    return !isProfileComplete || hasEmptyName || hasEmptyBirthDate;
+  };
+
   const handlePressGoogleLoginButton = async () => {
     try {
       await GoogleSignin.hasPlayServices();
@@ -113,28 +127,21 @@ export default function SignInPage() {
       const idToken = userInfo.data?.idToken ?? googleTokens.idToken ?? null;
       const accessToken = googleTokens.accessToken;
 
-      const response = await socialLogin({ idToken, accessToken });
-      const tokenPayload = response.data as {
-        accessToken?: string;
-        refreshToken?: string;
-        data?: {
-          accessToken?: string;
-          refreshToken?: string;
-        };
-      };
+      const response = await googleLogin({ idToken, accessToken });
 
-      const savedAccessToken =
-        tokenPayload.accessToken ?? tokenPayload.data?.accessToken;
-      const refreshToken =
-        tokenPayload.refreshToken ?? tokenPayload.data?.refreshToken;
+      const tokenPayload = response.data as AuthResponse;
+      const savedAccessToken = tokenPayload.accessToken;
+      const refreshToken = tokenPayload.refreshToken;
 
-      if (!savedAccessToken || !refreshToken) {
+      if (!accessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
       }
 
       await saveAccessToken(savedAccessToken);
       await saveRefreshToken(refreshToken);
-      router.replace('/');
+      router.replace(
+        shouldRedirectToAuthInfo(tokenPayload) ? '/auth/info' : '/',
+      );
     } catch (error) {
       const errorMessage = isAxiosError(error)
         ? typeof error.response?.data === 'string'
@@ -150,7 +157,52 @@ export default function SignInPage() {
       setIsLoginErrorModalVisible(true);
     }
   };
+  const handlePressAppleLoginButton = async () => {
+    try {
+      const isAvailable = await AppleAuthentication.isAvailableAsync();
+      if (!isAvailable) throw new Error('잠시 후 다시 시도해주세요');
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+      const { identityToken, fullName } = credential;
 
+      if (!identityToken || !fullName) throw new Error('토큰 정보가 없습니다');
+      const name =
+        `${fullName.givenName ?? ''} ${fullName.familyName ?? ''}`.trim();
+      console.log(fullName);
+      const response = await appleLogin({ identityToken, name });
+      const tokenPayload = response.data as AuthResponse;
+      const savedAccessToken = tokenPayload.accessToken;
+      const refreshToken = tokenPayload.refreshToken;
+
+      if (!savedAccessToken || !refreshToken) {
+        throw new Error('토큰 정보가 없습니다');
+      }
+
+      await saveAccessToken(savedAccessToken);
+      await saveRefreshToken(refreshToken);
+      router.replace(
+        shouldRedirectToAuthInfo(tokenPayload) ? '/auth/info' : '/',
+      );
+    } catch (error) {
+      console.log(error);
+      const errorMessage = isAxiosError(error)
+        ? typeof error.response?.data === 'string'
+          ? error.response.data
+          : (error.response?.data as { message?: string } | undefined)?.message
+        : error instanceof Error
+          ? error.message
+          : undefined;
+
+      setLoginErrorMessage(
+        errorMessage ?? '애플 로그인 중 오류가 발생했습니다',
+      );
+      setIsLoginErrorModalVisible(true);
+    }
+  };
   return (
     <Main>
       <View style={styles.main}>
@@ -161,7 +213,7 @@ export default function SignInPage() {
         />
         <SocialLoginButtons
           onGoogle={handlePressGoogleLoginButton}
-          onApple={() => {}}
+          onApple={handlePressAppleLoginButton}
         />
       </View>
       <BaseModal

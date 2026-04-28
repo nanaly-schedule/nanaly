@@ -1,5 +1,6 @@
 import {
   GestureResponderEvent,
+  Platform,
   Pressable,
   StyleSheet,
   View,
@@ -11,12 +12,14 @@ import {
 } from '@/src/init/styles/tokens';
 import AppleIcon from '@/src/shared/assets/AppleIcon';
 import GoogleIcon from '@/src/shared/assets/GoogleIcon';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 interface SocialLoginButtonsProps {
   onGoogle: (e: GestureResponderEvent) => void;
   onApple: (e: GestureResponderEvent) => void;
 }
 
+const isIOS = Platform.OS == 'ios';
 export default function SocialLoginButtons({
   onGoogle,
   onApple,
@@ -26,9 +29,11 @@ export default function SocialLoginButtons({
       <Pressable style={[styles.googleIcon, styles.icon]} onPress={onGoogle}>
         <GoogleIcon size={24} />
       </Pressable>
-      <Pressable style={[styles.appleIcon, styles.icon]} onPress={onApple}>
-        <AppleIcon size={21} />
-      </Pressable>
+      {isIOS && (
+        <Pressable style={[styles.appleIcon, styles.icon]} onPress={onApple}>
+          <AppleIcon size={21} />
+        </Pressable>
+      )}
     </View>
   );
 }
