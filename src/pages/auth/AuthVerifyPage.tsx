@@ -26,6 +26,7 @@ import PasswordVerifyWidget, {
 } from '@/src/widgets/auth/sign-up/PasswordVerifyWidget';
 import { signUp } from '@/src/features/auth/api/sign';
 import { sendCode, verifyCode } from '@/src/features/auth/api/verify';
+import SignUpButton from '@/src/widgets/auth/sign-up/SignUpButton';
 
 export default function AuthVerifyPage() {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function AuthVerifyPage() {
   ] = useState(false);
   const normalizedEmail = email.trim().toLowerCase();
 
-  const onVerifyCode = async () => {
+  const handleVerifyCode = async () => {
     if (
       !isCodeValid ||
       !isPasswordValid ||
@@ -237,7 +238,7 @@ export default function AuthVerifyPage() {
   };
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <AuthHeader />
       <EmailVerifyWidget
         email={email}
@@ -281,22 +282,7 @@ export default function AuthVerifyPage() {
         />
       )}
       {isPasswordConfirmValid && (
-        <Pressable
-          disabled={isVerifyDisabled}
-          style={[
-            styles.verifyBtn,
-            {
-              backgroundColor: isVerifyDisabled
-                ? basicColorGrey200
-                : buttonColorCta,
-            },
-          ]}
-          onPress={onVerifyCode}
-        >
-          <NText variant="m16" style={{ color: backgroundColorWhite }}>
-            확인
-          </NText>
-        </Pressable>
+        <SignUpButton disabled={isVerifyDisabled} onPress={handleVerifyCode} />
       )}
       <BirthDatePickerBottomSheet
         visible={isBirthDatePickerOpen}
@@ -318,14 +304,3 @@ export default function AuthVerifyPage() {
     </View>
   );
 }
-const styles = StyleSheet.create({
-  verifyBtn: {
-    marginHorizontal: spacingSpacing16,
-    marginTop: spacingSpacing20,
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
-  },
-});
