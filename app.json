@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sleepingoff.nanaly",
+      "bundleIdentifier": "com.nanaly.app",
       "usesAppleSignIn": true
     },
     "android": {
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.sleepingoff.nanaly"
+      "package": "com.nanaly.app"
     },
     "web": {
       "output": "static",
