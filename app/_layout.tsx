@@ -17,26 +17,27 @@ export default function Layout() {
 
         if (!accessToken) {
           clearUser();
+          router.replace('/auth');
           return;
         }
 
         const { data } = await getUserProfile();
 
         setUser({
+          isTempPassword: data.isTempPassword,
           name: data.name ?? '',
           email: data.email ?? '',
           birthDate: data.birthDate ?? '',
         });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
-        useUser.getState().clearUser();
-        await clearTokens();
+        clearUser();
         router.replace('/auth');
       }
     };
 
     fetchUser();
-  }, [user]);
+  }, []);
 
   return <Stack screenOptions={{ headerShown: __DEV__ }} />;
 }
