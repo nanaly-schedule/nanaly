@@ -1,3 +1,4 @@
+import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   GestureResponderEvent,
   Platform,
@@ -12,7 +13,6 @@ import {
 } from '@/src/init/styles/tokens';
 import AppleIcon from '@/src/shared/assets/AppleIcon';
 import GoogleIcon from '@/src/shared/assets/GoogleIcon';
-import * as AppleAuthentication from 'expo-apple-authentication';
 
 interface SocialLoginButtonsProps {
   onGoogle: (e: GestureResponderEvent) => void;
