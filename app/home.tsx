@@ -9,7 +9,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
+    if (!user.email) {
       router.push('/auth');
     } else {
       router.replace('/store');
