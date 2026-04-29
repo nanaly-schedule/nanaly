@@ -10,7 +10,7 @@ import {
 import CheckBox from '@/src/shared/ui/CheckBox';
 import NText from '@/src/shared/ui/NText';
 
-import InputVerifyWidget from '../shared/InputVerifyWidget';
+import InputVerifyWidget from '../../shared/InputVerifyWidget';
 
 export interface PasswordValidationState {
   hasEnglish: boolean;

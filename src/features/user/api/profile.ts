@@ -1,6 +1,8 @@
-import { apiClient } from '@/src/shared/api/api';
-import { UserProfileRequest, UserProfileResponse } from '../model/profile';
 import { AxiosResponse } from 'axios';
+
+import { apiClient } from '@/src/shared/api/api';
+
+import { UserProfileRequest, UserProfileResponse } from '../model/profile';
 
 export async function getUserProfile(): Promise<
   AxiosResponse<UserProfileResponse, any, {}>
