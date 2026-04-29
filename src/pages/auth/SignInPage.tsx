@@ -84,7 +84,11 @@ export default function SignInPage() {
       if (!accessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
       }
-
+      const { isTempPassword } = tokenPayload;
+      if (isTempPassword) {
+        router.replace('/0/my/password');
+        return;
+      }
       await saveAccessToken(accessToken);
       await saveRefreshToken(refreshToken);
       router.replace('/');
