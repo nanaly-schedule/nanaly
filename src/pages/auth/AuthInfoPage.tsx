@@ -1,22 +1,22 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { View } from 'react-native';
 
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
+import {
+  getUserProfile,
+  updateUserProfile,
+} from '@/src/features/user/api/profile';
 import {
   BirthDateValue,
   formatBirthDate,
   parseBirthDate,
 } from '@/src/shared/lib/date';
-import AuthInfo from '@/src/widgets/auth/sign-up/AuthInfo';
 import AuthHeader from '@/src/widgets/auth/sign-up/AuthHeader';
-
-import {
-  getUserProfile,
-  updateUserProfile,
-} from '@/src/features/user/api/profile';
+import AuthInfo from '@/src/widgets/auth/sign-up/AuthInfo';
 import EmailInfo from '@/src/widgets/auth/sign-up/EmailInfo';
-import { View } from 'react-native';
 import SignUpButton from '@/src/widgets/auth/sign-up/SignUpButton';
-import { useRouter } from 'expo-router';
+
 const fetch = async () => {
   try {
     const profile = await getUserProfile();
@@ -41,7 +41,9 @@ export default function AuthInfoPage() {
 
   useEffect(() => {
     fetch().then((info) => {
-      if (!info) return;
+      if (!info) {
+        return;
+      }
       setEmail(info.email);
       setProvider(info.provider ?? null);
       setName(info.name ?? '');

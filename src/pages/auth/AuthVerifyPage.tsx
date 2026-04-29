@@ -1,21 +1,14 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'expo-router';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { isAxiosError } from 'axios';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, View } from 'react-native';
 
+import { signUp } from '@/src/features/auth/api/sign';
+import { sendCode, verifyCode } from '@/src/features/auth/api/verify';
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
 import ExistingEmailModal from '@/src/features/auth/ui/ExistingEmailModal';
 import VerificationCodeResendModal from '@/src/features/auth/ui/VerificationCodeResendModal';
-import {
-  backgroundColorWhite,
-  basicColorGrey200,
-  buttonColorCta,
-  radiusRadius8,
-  spacingSpacing16,
-  spacingSpacing20,
-} from '@/src/init/styles/tokens';
 import { BirthDateValue, formatBirthDate } from '@/src/shared/lib/date';
-import NText from '@/src/shared/ui/NText';
 import AuthHeader from '@/src/widgets/auth/sign-up/AuthHeader';
 import AuthInfo from '@/src/widgets/auth/sign-up/AuthInfo';
 import EmailVerifyWidget, {
@@ -24,8 +17,6 @@ import EmailVerifyWidget, {
 import PasswordVerifyWidget, {
   PasswordValidationState,
 } from '@/src/widgets/auth/sign-up/PasswordVerifyWidget';
-import { signUp } from '@/src/features/auth/api/sign';
-import { sendCode, verifyCode } from '@/src/features/auth/api/verify';
 import SignUpButton from '@/src/widgets/auth/sign-up/SignUpButton';
 
 export default function AuthVerifyPage() {
