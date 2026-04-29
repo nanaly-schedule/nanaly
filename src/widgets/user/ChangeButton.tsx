@@ -10,12 +10,12 @@ import {
 } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 
-interface SignUpButtonProps {
+interface ChangeButtonProps {
   disabled: boolean;
   onPress: (e: GestureResponderEvent) => void;
 }
 
-export default function SignUpButton({ disabled, onPress }: SignUpButtonProps) {
+export default function ChangeButton({ disabled, onPress }: ChangeButtonProps) {
   const insets = useSafeAreaInsets();
   return (
     <Pressable
@@ -30,7 +30,7 @@ export default function SignUpButton({ disabled, onPress }: SignUpButtonProps) {
       onPress={onPress}
     >
       <NText variant="m16" style={{ color: backgroundColorWhite }}>
-        가입하기
+        변경하기
       </NText>
     </Pressable>
   );
