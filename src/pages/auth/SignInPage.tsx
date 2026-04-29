@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'expo-router';
-import { isAxiosError } from 'axios';
-import { StyleSheet, View } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { isAxiosError } from 'axios';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { appleLogin, googleLogin, signIn } from '@/src/features/auth/api/sign';
 import {
@@ -15,7 +17,6 @@ import Main from '@/src/shared/ui/Main';
 import SignInForm from '@/src/widgets/auth/sign-in/SignInForm';
 import SocialLoginButtons from '@/src/widgets/auth/sign-in/SocialLoginButtons';
 import Logo from '@/src/widgets/Logo';
-import * as AppleAuthentication from 'expo-apple-authentication';
 
 /**
  * 기능:
@@ -78,8 +79,8 @@ export default function SignInPage() {
         password,
       });
       const tokenPayload = response.data as AuthResponse;
-      const accessToken = tokenPayload.accessToken;
-      const refreshToken = tokenPayload.refreshToken;
+      const { accessToken } = tokenPayload;
+      const { refreshToken } = tokenPayload;
 
       if (!accessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
@@ -125,13 +126,13 @@ export default function SignInPage() {
       const userInfo = await GoogleSignin.signIn();
       const googleTokens = await GoogleSignin.getTokens();
       const idToken = userInfo.data?.idToken ?? googleTokens.idToken ?? null;
-      const accessToken = googleTokens.accessToken;
+      const { accessToken } = googleTokens;
 
       const response = await googleLogin({ idToken, accessToken });
 
       const tokenPayload = response.data as AuthResponse;
       const savedAccessToken = tokenPayload.accessToken;
-      const refreshToken = tokenPayload.refreshToken;
+      const { refreshToken } = tokenPayload;
 
       if (!accessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
@@ -157,26 +158,38 @@ export default function SignInPage() {
       setIsLoginErrorModalVisible(true);
     }
   };
+
+  console.log(
+    'apple bundle id:',
+    Constants.expoConfig?.ios?.bundleIdentifier ?? 'unknown',
+  );
   const handlePressAppleLoginButton = async () => {
     try {
       const isAvailable = await AppleAuthentication.isAvailableAsync();
-      if (!isAvailable) throw new Error('잠시 후 다시 시도해주세요');
+      if (!isAvailable) {
+        throw new Error('잠시 후 다시 시도해주세요');
+      }
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
       });
+
       const { identityToken, fullName } = credential;
 
-      if (!identityToken || !fullName) throw new Error('토큰 정보가 없습니다');
-      const name =
-        `${fullName.givenName ?? ''} ${fullName.familyName ?? ''}`.trim();
-      console.log(fullName);
+      if (!identityToken) {
+        throw new Error('토큰 정보가 없습니다');
+      }
+      const name = fullName
+        ? `${fullName.givenName ?? ''} ${fullName.familyName ?? ''}`.trim()
+        : '';
+
       const response = await appleLogin({ identityToken, name });
+
       const tokenPayload = response.data as AuthResponse;
       const savedAccessToken = tokenPayload.accessToken;
-      const refreshToken = tokenPayload.refreshToken;
+      const { refreshToken } = tokenPayload;
 
       if (!savedAccessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
@@ -187,8 +200,7 @@ export default function SignInPage() {
       router.replace(
         shouldRedirectToAuthInfo(tokenPayload) ? '/auth/info' : '/',
       );
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
       const errorMessage = isAxiosError(error)
         ? typeof error.response?.data === 'string'
           ? error.response.data
