@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "nanaly",
+    "name": "나날이",
     "slug": "nanaly",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -32,6 +32,7 @@
       [
         "expo-splash-screen",
         {
+          "image": "./src/shared/assets/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
