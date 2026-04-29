@@ -12,7 +12,7 @@ export default function AuthLinks() {
   const router = useRouter();
   return (
     <View style={styles.link}>
-      <Pressable>
+      <Pressable onPress={() => router.push('/auth/password')}>
         <NText variant="m12" style={styles.text}>
           비밀번호 재설정
         </NText>
