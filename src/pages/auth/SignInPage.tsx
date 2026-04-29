@@ -1,7 +1,6 @@
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { isAxiosError } from 'axios';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -159,10 +158,6 @@ export default function SignInPage() {
     }
   };
 
-  console.log(
-    'apple bundle id:',
-    Constants.expoConfig?.ios?.bundleIdentifier ?? 'unknown',
-  );
   const handlePressAppleLoginButton = async () => {
     try {
       const isAvailable = await AppleAuthentication.isAvailableAsync();
