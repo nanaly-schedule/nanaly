@@ -1,4 +1,5 @@
 import { apiClient } from '@/src/shared/api/api';
+
 import {
   AppleLoginRequest,
   GoogleLoginRequest,
@@ -22,4 +23,6 @@ export async function signIn(data: SignInRequest) {
   return await apiClient.post('/auth/login', data);
 }
 
-export async function signOut() {}
+export async function deleteUser() {
+  return await apiClient.delete('/user');
+}
