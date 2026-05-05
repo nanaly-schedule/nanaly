@@ -37,7 +37,7 @@ export default function Layout() {
     };
 
     fetchUser();
-  }, []);
+  }, [router, user]);
 
   return <Stack screenOptions={{ headerShown: __DEV__ }} />;
 }
