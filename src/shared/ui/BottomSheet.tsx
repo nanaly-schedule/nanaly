@@ -1,11 +1,20 @@
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { ViewProps } from 'react-native-svg/lib/typescript/fabric/utils';
 
 import {
   backgroundColorPrimary,
   dimOverlayDefault,
   radiusRadius20,
 } from '@/src/init/styles/tokens';
-import { ViewProps } from 'react-native-svg/lib/typescript/fabric/utils';
 
 interface BottomSheetProps extends ViewProps {
   visible: boolean;
@@ -17,6 +26,26 @@ export default function BottomSheet({
   children,
   onClose,
 }: BottomSheetProps) {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
+    const showSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   return (
     <Modal
       visible={visible}
@@ -26,10 +55,18 @@ export default function BottomSheet({
     >
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
-          {children}
-        </View>
+        <KeyboardAvoidingView
+          style={[
+            styles.sheetContainer,
+            Platform.OS === 'android' && { paddingBottom: keyboardHeight },
+          ]}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <View style={styles.sheet}>
+            <View style={styles.handle} />
+            {children}
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );
@@ -40,12 +77,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
   },
+  sheetContainer: {
+    justifyContent: 'flex-end',
+  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: dimOverlayDefault,
     opacity: 0.2,
   },
   sheet: {
+    minHeight: 360,
     backgroundColor: backgroundColorPrimary,
     borderTopLeftRadius: radiusRadius20,
     borderTopRightRadius: radiusRadius20,
