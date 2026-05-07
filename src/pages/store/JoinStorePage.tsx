@@ -1,5 +1,11 @@
 import { View } from 'react-native';
 
+import JoinHeader from '@/src/widgets/store/JoinHeader';
+
 export default function JoinStorePage() {
-  return <View></View>;
+  return (
+    <View>
+      <JoinHeader />
+    </View>
+  );
 }
