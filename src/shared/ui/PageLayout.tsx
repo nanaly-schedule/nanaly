@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { spacingSpacing16 } from '@/src/init/styles/tokens';
 
@@ -20,11 +21,10 @@ export default function PageLayout({
   showBackButton = true,
   style,
 }: PageLayoutProps) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.container, style]}>
-      {showHeader && (
-        <Header title={title} showBackButton={showBackButton} />
-      )}
+    <View style={[styles.container, { marginTop: insets.top }, style]}>
+      {showHeader && <Header title={title} showBackButton={showBackButton} />}
       {children}
     </View>
   );
