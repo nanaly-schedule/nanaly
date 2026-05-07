@@ -11,10 +11,10 @@ import {
 } from '@/src/init/styles/tokens';
 import CheckBox from '@/src/shared/ui/CheckBox';
 import NText from '@/src/shared/ui/NText';
+import PageLayout from '@/src/shared/ui/PageLayout';
 import { PasswordValidationState } from '@/src/widgets/auth/sign-up/PasswordVerifyWidget';
 import InputVerifyWidget from '@/src/widgets/shared/InputVerifyWidget';
 import ChangeButton from '@/src/widgets/user/ChangeButton';
-import PasswordHeader from '@/src/widgets/user/PasswordHeader';
 
 export default function ChangePasswordPage() {
   const user = useUser();
@@ -44,8 +44,7 @@ export default function ChangePasswordPage() {
 
   const handleChangePassword = () => {};
   return (
-    <View style={{ flex: 1 }}>
-      <PasswordHeader />
+    <PageLayout title="비밀번호 변경">
       <View style={styles.container}>
         {isTempPassword && (
           <InputVerifyWidget
@@ -98,7 +97,7 @@ export default function ChangePasswordPage() {
         </View>
       </View>
       <ChangeButton disabled={isDisabled} onPress={handleChangePassword} />
-    </View>
+    </PageLayout>
   );
 }
 

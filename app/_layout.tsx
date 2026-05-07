@@ -1,7 +1,7 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 
-import { clearTokens, getAccessToken } from '@/src/features/auth/lib/storage';
+import { getAccessToken } from '@/src/features/auth/lib/storage';
 import { getUserProfile } from '@/src/features/user/api/profile';
 import useUser from '@/src/features/user/lib/useUser';
 
@@ -13,31 +13,24 @@ export default function Layout() {
       const { setUser, clearUser } = user;
 
       try {
-        const accessToken = await getAccessToken();
-
-        if (!accessToken) {
-          clearUser();
-          router.replace('/auth');
-          return;
-        }
-
         const { data } = await getUserProfile();
-
+        const { name, email, birthDate, isTempPassword } = data;
         setUser({
-          isTempPassword: data.isTempPassword,
-          name: data.name ?? '',
-          email: data.email ?? '',
-          birthDate: data.birthDate ?? '',
+          isTempPassword,
+          name,
+          email,
+          birthDate,
         });
+        router.push('/store');
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
-        clearUser();
+        await clearUser();
         router.replace('/auth');
       }
     };
 
     fetchUser();
-  }, []);
+  }, [router]);
 
   return <Stack screenOptions={{ headerShown: __DEV__ }} />;
 }

@@ -1,9 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
 
 import { resetPassword } from '@/src/features/auth/api/password';
-import PasswordHeader from '@/src/widgets/auth/password/PasswordHeader';
+import PageLayout from '@/src/shared/ui/PageLayout';
 import SendEmailWidget from '@/src/widgets/auth/password/SendEmailWidget';
 import { EmailVerifyStatus } from '@/src/widgets/auth/sign-up/EmailVerifyWidget';
 
@@ -38,8 +37,7 @@ export default function ResetPasswordPage() {
     }
   };
   return (
-    <View>
-      <PasswordHeader />
+    <PageLayout>
       <SendEmailWidget
         email={email}
         onEmailChange={(t) => setEmail(t)}
@@ -48,6 +46,6 @@ export default function ResetPasswordPage() {
         emailErrorMessage={emailErrorMessage}
         onSendPassword={handleSendPassword}
       />
-    </View>
+    </PageLayout>
   );
 }

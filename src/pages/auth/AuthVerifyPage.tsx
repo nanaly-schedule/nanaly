@@ -1,7 +1,7 @@
 import { isAxiosError } from 'axios';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert } from 'react-native';
 
 import { signUp } from '@/src/features/auth/api/sign';
 import { sendCode, verifyCode } from '@/src/features/auth/api/verify';
@@ -9,7 +9,7 @@ import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBo
 import ExistingEmailModal from '@/src/features/auth/ui/ExistingEmailModal';
 import VerificationCodeResendModal from '@/src/features/auth/ui/VerificationCodeResendModal';
 import { BirthDateValue, formatBirthDate } from '@/src/shared/lib/date';
-import AuthHeader from '@/src/widgets/auth/sign-up/AuthHeader';
+import PageLayout from '@/src/shared/ui/PageLayout';
 import AuthInfo from '@/src/widgets/auth/sign-up/AuthInfo';
 import EmailVerifyWidget, {
   EmailVerifyStatus,
@@ -229,8 +229,7 @@ export default function AuthVerifyPage() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <AuthHeader />
+    <PageLayout title="회원가입">
       <EmailVerifyWidget
         email={email}
         code={code}
@@ -292,6 +291,6 @@ export default function AuthVerifyPage() {
         onConfirm={() => setIsVerificationCodeResendModalVisible(false)}
         onClose={() => setIsVerificationCodeResendModalVisible(false)}
       />
-    </View>
+    </PageLayout>
   );
 }
