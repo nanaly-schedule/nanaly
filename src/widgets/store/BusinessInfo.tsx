@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
+import { spacingSpacing20 } from '@/src/init/styles/tokens';
 import {
   BirthDateValue,
   formatBirthDate,
@@ -85,6 +86,6 @@ export default function BusinessInfo({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 21,
+    gap: spacingSpacing20,
   },
 });
