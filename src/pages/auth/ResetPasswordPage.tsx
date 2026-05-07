@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { resetPassword } from '@/src/features/auth/api/password';
-import PasswordHeader from '@/src/widgets/auth/password/PasswordHeader';
 import SendEmailWidget from '@/src/widgets/auth/password/SendEmailWidget';
 import { EmailVerifyStatus } from '@/src/widgets/auth/sign-up/EmailVerifyWidget';
+import BackHeader from '@/src/widgets/shared/BackHeader';
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('');
@@ -39,7 +39,7 @@ export default function ResetPasswordPage() {
   };
   return (
     <View>
-      <PasswordHeader />
+      <BackHeader />
       <SendEmailWidget
         email={email}
         onEmailChange={(t) => setEmail(t)}
