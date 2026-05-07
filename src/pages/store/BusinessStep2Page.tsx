@@ -8,12 +8,11 @@ import {
   buttonColorCta,
   radiusRadius8,
   spacingSpacing12,
-  spacingSpacing16,
   spacingSpacing24,
   spacingSpaicng14,
 } from '@/src/init/styles/tokens';
-import Header from '@/src/shared/ui/Header';
 import NText from '@/src/shared/ui/NText';
+import PageLayout from '@/src/shared/ui/PageLayout';
 import BusinessInfo from '@/src/widgets/store/BusinessInfo';
 import SectionHeader from '@/src/widgets/store/SectionHeader';
 import Stepper from '@/src/widgets/store/Stepper';
@@ -34,11 +33,9 @@ export default function BusinessStep2Page() {
 
   const insets = useSafeAreaInsets();
   return (
-    <View style={{ flex: 1 }}>
-      <Header title="" />
+    <PageLayout>
       <View
         style={{
-          paddingHorizontal: spacingSpacing16,
           marginTop: spacingSpaicng14,
         }}
       >
@@ -74,14 +71,13 @@ export default function BusinessStep2Page() {
           다음으로
         </NText>
       </Pressable>
-    </View>
+    </PageLayout>
   );
 }
 
 const styles = StyleSheet.create({
   nextBtn: {
     marginTop: 'auto',
-    marginHorizontal: spacingSpacing16,
     backgroundColor: buttonColorCta,
     borderRadius: radiusRadius8,
     justifyContent: 'center',

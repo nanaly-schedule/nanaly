@@ -5,11 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   spacingSpacing12,
-  spacingSpacing16,
   spacingSpacing24,
   spacingSpaicng14,
 } from '@/src/init/styles/tokens';
-import Header from '@/src/shared/ui/Header';
+import PageLayout from '@/src/shared/ui/PageLayout';
 import VerifyButton from '@/src/widgets/shared/VerifyButton';
 import BusinessInfo from '@/src/widgets/store/BusinessInfo';
 import SectionHeader from '@/src/widgets/store/SectionHeader';
@@ -34,11 +33,9 @@ export default function BusinessStep1Page() {
 
   const insets = useSafeAreaInsets();
   return (
-    <View style={{ flex: 1 }}>
-      <Header title="" />
+    <PageLayout>
       <View
         style={{
-          paddingHorizontal: spacingSpacing16,
           marginTop: spacingSpaicng14,
         }}
       >
@@ -63,9 +60,8 @@ export default function BusinessStep1Page() {
         style={{
           marginTop: 'auto',
           marginBottom: insets.bottom + spacingSpacing12,
-          marginHorizontal: spacingSpacing16,
         }}
       />
-    </View>
+    </PageLayout>
   );
 }

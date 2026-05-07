@@ -10,7 +10,6 @@ import {
   radiusRadius8,
   spacingSpacing8,
   spacingSpacing12,
-  spacingSpacing16,
   typoColorPrimary,
   typoColorRed,
 } from '@/src/init/styles/tokens';
@@ -195,7 +194,6 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 14,
     marginBottom: 20,
-    paddingHorizontal: spacingSpacing16,
   },
   inputContainer: {
     flexDirection: 'row',

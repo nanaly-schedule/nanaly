@@ -8,7 +8,6 @@ import {
   buttonColorCta,
   radiusRadius8,
   spacingSpacing8,
-  spacingSpacing16,
   spacingSpacing30,
   typoColorPrimary,
   typoColorRed,
@@ -43,7 +42,7 @@ export default function SendEmailWidget({
   const isSendDisabled = !isEmailValid || isVerified;
   const emailButtonLabel = !isVerified ? '발송' : '발송됨';
   return (
-    <View style={{ marginHorizontal: spacingSpacing16 }}>
+    <View style={styles.content}>
       <NText
         variant="m16"
         style={{ color: typoColorPrimary, marginBottom: spacingSpacing30 }}
@@ -113,10 +112,9 @@ export default function SendEmailWidget({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
     marginTop: 14,
     marginBottom: 20,
-    paddingHorizontal: spacingSpacing16,
   },
   inputContainer: {
     flexDirection: 'row',

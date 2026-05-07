@@ -1,13 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
-import {
-  spacingSpacing16,
-  spacingSpacing20,
-  spacingSpaicng14,
-  typoColorPrimary,
-} from '@/src/init/styles/tokens';
+import { spacingSpacing20 } from '@/src/init/styles/tokens';
 import Input from '@/src/shared/ui/Input';
-import NText from '@/src/shared/ui/NText';
 
 import InputLabel from '../../shared/InputLabel';
 
@@ -56,7 +50,6 @@ export default function AuthInfo({
 const styles = StyleSheet.create({
   container: {
     marginTop: spacingSpacing20,
-    paddingHorizontal: spacingSpacing16,
     gap: spacingSpacing20,
   },
 });

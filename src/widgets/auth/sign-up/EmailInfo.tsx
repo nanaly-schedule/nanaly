@@ -5,9 +5,7 @@ import {
   basicColorBlackBase,
   radiusRadius8,
   spacingSpacing8,
-  spacingSpacing16,
   spacingSpaicng14,
-  typoColorPrimary,
 } from '@/src/init/styles/tokens';
 import AppleIcon from '@/src/shared/assets/AppleIcon';
 import GoogleIcon from '@/src/shared/assets/GoogleIcon';
@@ -47,7 +45,6 @@ export default function EmailInfo({ provider, email }: EmailInfoProps) {
 const styles = StyleSheet.create({
   container: {
     marginTop: spacingSpaicng14,
-    paddingHorizontal: spacingSpacing16,
   },
   emailContainer: {
     borderRadius: radiusRadius8,

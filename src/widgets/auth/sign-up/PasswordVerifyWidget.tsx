@@ -3,8 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import {
   spacingSpacing8,
   spacingSpacing12,
-  spacingSpacing16,
-  typoColorPrimary,
   typoColorRed,
 } from '@/src/init/styles/tokens';
 import CheckBox from '@/src/shared/ui/CheckBox';
@@ -76,9 +74,7 @@ export default function PasswordVerifyWidget({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: spacingSpacing16,
-  },
+  container: {},
   errorConditionContainer: {
     flexDirection: 'row',
     gap: spacingSpacing12,
