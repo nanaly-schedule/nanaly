@@ -9,6 +9,8 @@ import {
 import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
 
+import InputLabel from '../../shared/InputLabel';
+
 interface AuthInfoProps {
   name: string;
   birthDate: string;
@@ -25,12 +27,7 @@ export default function AuthInfo({
   return (
     <View style={styles.container}>
       <View>
-        <NText
-          variant="sb14"
-          style={{ color: typoColorPrimary, marginBottom: spacingSpaicng14 }}
-        >
-          이름
-        </NText>
+        <InputLabel label="이름" />
         <Input
           placeholder="이름을 입력해 주세요"
           variant=""
@@ -39,12 +36,7 @@ export default function AuthInfo({
         />
       </View>
       <View>
-        <NText
-          variant="sb14"
-          style={{ color: typoColorPrimary, marginBottom: spacingSpaicng14 }}
-        >
-          생년월일
-        </NText>
+        <InputLabel label="생년월일" />
         <Input
           placeholder="생년월일을 선택해 주세요"
           variant=""

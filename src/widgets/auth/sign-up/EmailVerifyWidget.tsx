@@ -17,6 +17,8 @@ import {
 import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
 
+import VerifyButton from '../../shared/VerifyButton';
+
 export enum EmailVerifyStatus {
   Idle = 'idle',
   Sent = 'sent',
@@ -68,9 +70,9 @@ export default function EmailVerifyWidget({
     ? '인증됨'
     : hasSentCode && timer === 0
       ? '재전송'
-    : hasSentCode
-      ? '발송됨'
-      : '인증';
+      : hasSentCode
+        ? '발송됨'
+        : '인증';
 
   return (
     <View style={styles.container}>
@@ -179,22 +181,10 @@ export default function EmailVerifyWidget({
               </NText>
             )}
           </View>
-          <Pressable
-            disabled={isVerifyDisabled}
-            style={[
-              styles.verifyBtn,
-              {
-                backgroundColor: isVerifyDisabled
-                  ? basicColorGrey200
-                  : buttonColorCta,
-              },
-            ]}
-            onPress={onVerifyCode}
-          >
-            <NText variant="m16" style={{ color: backgroundColorWhite }}>
-              인증하기
-            </NText>
-          </Pressable>
+          <VerifyButton
+            isVerifyDisabled={isVerifyDisabled}
+            onVerify={onVerifyCode}
+          />
         </>
       )}
     </View>
@@ -223,13 +213,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 46,
     width: 56,
-  },
-  verifyBtn: {
-    marginTop: 20,
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
   },
 });

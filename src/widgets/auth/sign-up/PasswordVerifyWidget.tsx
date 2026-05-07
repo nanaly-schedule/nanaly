@@ -10,6 +10,7 @@ import {
 import CheckBox from '@/src/shared/ui/CheckBox';
 import NText from '@/src/shared/ui/NText';
 
+import InputLabel from '../../shared/InputLabel';
 import InputVerifyWidget from '../../shared/InputVerifyWidget';
 
 export interface PasswordValidationState {
@@ -43,12 +44,7 @@ export default function PasswordVerifyWidget({
 
   return (
     <View style={styles.container}>
-      <NText
-        variant="sb14"
-        style={{ color: typoColorPrimary, marginBottom: 14 }}
-      >
-        비밀번호
-      </NText>
+      <InputLabel label="비밀번호" />
       <InputVerifyWidget
         placeholder="비밀번호를 입력해주세요"
         value={password}

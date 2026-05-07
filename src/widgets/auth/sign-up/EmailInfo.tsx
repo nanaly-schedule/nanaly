@@ -1,16 +1,19 @@
+import { StyleSheet, View } from 'react-native';
+
 import {
   backgroundColorWhite,
   basicColorBlackBase,
   radiusRadius8,
-  spacingSpacing16,
   spacingSpacing8,
+  spacingSpacing16,
   spacingSpaicng14,
   typoColorPrimary,
 } from '@/src/init/styles/tokens';
 import AppleIcon from '@/src/shared/assets/AppleIcon';
 import GoogleIcon from '@/src/shared/assets/GoogleIcon';
 import NText from '@/src/shared/ui/NText';
-import { StyleSheet, View } from 'react-native';
+
+import InputLabel from '../../shared/InputLabel';
 
 interface EmailInfoProps {
   provider: 'google' | 'apple' | null;
@@ -22,18 +25,13 @@ interface EmailInfoProps {
 export default function EmailInfo({ provider, email }: EmailInfoProps) {
   return (
     <View style={styles.container}>
-      <NText
-        variant="sb14"
-        style={{ color: typoColorPrimary, marginBottom: spacingSpaicng14 }}
-      >
-        이메일
-      </NText>
+      <InputLabel label="이메일" />
       <View style={styles.emailContainer}>
-        {provider && provider == 'google' ? (
+        {provider && provider === 'google' ? (
           <View style={[styles.icon, styles.googleIcon]}>
             <GoogleIcon size={13} />
           </View>
-        ) : provider == 'apple' ? (
+        ) : provider === 'apple' ? (
           <View style={[styles.icon, styles.appleIcon]}>
             <AppleIcon size={10} />
           </View>

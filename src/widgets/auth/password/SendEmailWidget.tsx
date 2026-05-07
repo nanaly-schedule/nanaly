@@ -10,13 +10,13 @@ import {
   spacingSpacing8,
   spacingSpacing16,
   spacingSpacing30,
-  spacingSpaicng14,
   typoColorPrimary,
   typoColorRed,
 } from '@/src/init/styles/tokens';
 import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
 
+import InputLabel from '../../shared/InputLabel';
 import { EmailVerifyStatus } from '../sign-up/EmailVerifyWidget';
 
 interface SendEmailWidgetProps {
@@ -50,12 +50,7 @@ export default function SendEmailWidget({
       >
         가입하신 이메일로 임시 비밀번호를 보내드립니다.
       </NText>
-      <NText
-        variant="sb14"
-        style={{ color: typoColorPrimary, marginBottom: spacingSpaicng14 }}
-      >
-        이메일
-      </NText>
+      <InputLabel label="이메일" />
       <View style={styles.inputContainer}>
         <Input
           variant={
