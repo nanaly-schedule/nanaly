@@ -1,6 +1,10 @@
 import { StyleSheet, View, ViewStyle } from 'react-native';
 
-import { spacingSpacing12, spacingSpacing30 } from '@/src/init/styles/tokens';
+import {
+  spacingSpacing12,
+  spacingSpacing30,
+  spacingSpaicng14,
+} from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 
 interface SectionHeaderProps {
@@ -25,6 +29,7 @@ export default function SectionHeader({
 const styles = StyleSheet.create({
   headerContainer: {
     gap: spacingSpacing12,
+    marginTop: spacingSpaicng14,
     marginBottom: spacingSpacing30,
   },
 });
