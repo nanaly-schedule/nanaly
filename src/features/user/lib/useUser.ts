@@ -8,9 +8,7 @@ type UserStoreState = User;
 
 type UserStoreActions = {
   setUser: (user: User) => void;
-  setName: (nextName: string) => void;
-  setBirthDate: (nextBirthDate: string) => void;
-  clearUser: () => void;
+  clearUser: () => Promise<void>;
 };
 
 type UserStore = UserStoreState & UserStoreActions;
@@ -22,9 +20,6 @@ const useUser = create<UserStore>((set) => ({
   birthDate: '',
 
   setUser: (nextUser) => set((state) => ({ ...state, ...nextUser })),
-  setName: (nextName) => set((state) => ({ ...state, name: nextName })),
-  setBirthDate: (nextBirthDate) =>
-    set((state) => ({ ...state, birthDate: nextBirthDate })),
   clearUser: async () => {
     set({
       isTempPassword: false,
