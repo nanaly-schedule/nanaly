@@ -1,8 +1,10 @@
-import { Pressable, StyleSheet, View } from 'react-native';
-import NText from './NText';
-import LeftArrowIcon from '../assets/LeftArrowIcon';
-import { typoColorPrimary } from '@/src/init/styles/tokens';
 import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
+
+import { typoColorPrimary } from '@/src/init/styles/tokens';
+
+import LeftArrowIcon from '../assets/LeftArrowIcon';
+import NText from './NText';
 
 interface HeaderProps {
   title: string;
