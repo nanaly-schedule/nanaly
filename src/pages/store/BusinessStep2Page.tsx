@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,17 +19,27 @@ import Stepper from '@/src/widgets/store/Stepper';
 
 export default function BusinessStep2Page() {
   const router = useRouter();
+  const {
+    businessRegistrationNumber,
+    representativeName,
+    openingDate,
+    businessName,
+  } = useLocalSearchParams<{
+    businessRegistrationNumber?: string;
+    representativeName?: string;
+    openingDate?: string;
+    businessName?: string;
+  }>();
 
   const [businessNumber, setBusinessNumber] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [startDate, setStartDate] = useState('');
 
-  //todo: set api for store info
   useEffect(() => {
-    setBusinessNumber('');
-    setOwnerName('');
-    setStartDate('');
-  }, []);
+    setBusinessNumber(businessRegistrationNumber ?? '');
+    setOwnerName(representativeName ?? '');
+    setStartDate(openingDate ?? '');
+  }, [businessRegistrationNumber, openingDate, representativeName]);
 
   const insets = useSafeAreaInsets();
   return (
@@ -60,7 +70,17 @@ export default function BusinessStep2Page() {
           styles.nextBtn,
           { marginBottom: insets.bottom + spacingSpacing12 },
         ]}
-        onPress={() => router.push('/store/create/step3')}
+        onPress={() =>
+          router.push({
+            pathname: '/store/create/step3',
+            params: {
+              businessRegistrationNumber,
+              representativeName,
+              openingDate,
+              businessName,
+            },
+          })
+        }
       >
         <NText
           variant="m16"

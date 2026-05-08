@@ -34,13 +34,24 @@ export default function BusinessStep1Page() {
 
   const handleVerifyBusinessInfo = async () => {
     try {
-      await verifyBusiness({
+      const { data } = await verifyBusiness({
         businessRegistrationNumber: normalizedBusinessNumber,
         representativeName: ownerName.trim(),
         openingDate: startDate,
       });
 
-      router.push('/store/create/step2');
+      const { businessName, openingDate, representativeName, valid } = data;
+      if (valid) {
+        router.push({
+          pathname: '/store/create/step2',
+          params: {
+            businessRegistrationNumber: normalizedBusinessNumber,
+            businessName,
+            openingDate,
+            representativeName,
+          },
+        });
+      }
     } catch (error) {
       if (isAxiosError(error)) {
         setIsVerificationErrorModalVisible(true);
@@ -87,7 +98,9 @@ export default function BusinessStep1Page() {
         onClose={() => setIsVerificationErrorModalVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Text>입력한 사업자 정보를 다시 확인해 주세요</BaseModal.Text>
+          <BaseModal.Text>
+            입력한 사업자 정보를 다시 확인해 주세요
+          </BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
