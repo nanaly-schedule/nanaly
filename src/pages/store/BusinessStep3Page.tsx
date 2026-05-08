@@ -1,4 +1,5 @@
-import { useRouter } from 'expo-router';
+import { isAxiosError } from 'axios';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -9,6 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { createStore } from '@/src/features/store/api/create';
 import {
   backgroundColorWhite,
   buttonColorCta,
@@ -17,6 +19,7 @@ import {
   spacingSpacing24,
   spacingSpaicng14,
 } from '@/src/init/styles/tokens';
+import BaseModal from '@/src/shared/ui/BaseModal';
 import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -26,17 +29,79 @@ import Stepper from '@/src/widgets/store/Stepper';
 
 export default function BusinessStep3Page() {
   const router = useRouter();
+  const {
+    businessRegistrationNumber,
+    representativeName,
+    openingDate,
+    businessName,
+  } = useLocalSearchParams<{
+    businessRegistrationNumber: string;
+    representativeName: string;
+    openingDate: string;
+    businessName: string;
+  }>();
 
-  const [initialStoreName] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [
+    isDuplicateBusinessNumberModalVisible,
+    setIsDuplicateBusinessNumberModalVisible,
+  ] = useState(false);
 
   const handleChangeStoreName = (t: string) => {
     setStoreName(t);
   };
 
   const insets = useSafeAreaInsets();
+  const handlePressNextButton = async () => {
+    const nextStoreName = storeName.trim() || businessName;
 
-  //! KeyboardAvoidingView에서 다음으로 버튼이 키보드보다 위로 안 올라오는 이유는 개발모드에서 헤더를 보이게 만들었기 때문입니다. 라우터 헤더를 숨기면 올라옵니다.
+    if (!storeName.trim()) {
+      setStoreName(businessName);
+    }
+    try {
+      if (__DEV__) {
+        const { data } = await createStore({
+          businessName: '테스트 상호명',
+          businessRegistrationNumber: '1231231230',
+          representativeName: '나날이',
+          openingDate: '2020-01-01',
+          storeName: '테스트 매장명',
+        });
+
+        if (data?.storeId) {
+          router.replace(`/${data.storeId}`);
+        }
+
+        return;
+      }
+
+      const { data } = await createStore({
+        businessName,
+        businessRegistrationNumber,
+        representativeName,
+        openingDate,
+        storeName: nextStoreName,
+      });
+
+      if (data?.storeId) {
+        router.replace(`/${data?.storeId}`);
+      }
+    } catch (error) {
+      const errorMessage = isAxiosError(error)
+        ? typeof error.response?.data === 'string'
+          ? error.response.data
+          : (error.response?.data as { message?: string } | undefined)?.message
+        : error instanceof Error
+          ? error.message
+          : undefined;
+      if (isAxiosError(error) && error.response?.status === 400) {
+        setIsDuplicateBusinessNumberModalVisible(true);
+        return;
+      }
+
+      console.log(errorMessage);
+    }
+  };
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -57,7 +122,7 @@ export default function BusinessStep3Page() {
           <InputLabel label="상호명" />
           <Input
             variant=""
-            placeholder={initialStoreName}
+            placeholder={businessName}
             value={storeName}
             onChangeText={handleChangeStoreName}
           />
@@ -68,7 +133,7 @@ export default function BusinessStep3Page() {
             styles.createBtn,
             { marginBottom: insets.bottom + spacingSpacing12 },
           ]}
-          onPress={() => router.push('/store/create/step3')}
+          onPress={handlePressNextButton}
         >
           <NText
             variant="m16"
@@ -79,6 +144,22 @@ export default function BusinessStep3Page() {
             다음으로
           </NText>
         </Pressable>
+        <BaseModal
+          visible={isDuplicateBusinessNumberModalVisible}
+          onClose={() => setIsDuplicateBusinessNumberModalVisible(false)}
+        >
+          <BaseModal.Content>
+            <BaseModal.Text>이미 등록된 사업자번호입니다</BaseModal.Text>
+          </BaseModal.Content>
+          <BaseModal.Actions>
+            <BaseModal.Button
+              fullWidth
+              onPress={() => setIsDuplicateBusinessNumberModalVisible(false)}
+            >
+              확인
+            </BaseModal.Button>
+          </BaseModal.Actions>
+        </BaseModal>
       </PageLayout>
     </KeyboardAvoidingView>
   );
