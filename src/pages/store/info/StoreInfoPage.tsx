@@ -45,6 +45,20 @@ export default function StoreInfoPage() {
     }
   };
 
+  const handlePressStoreName = () => {
+    router.push({
+      pathname: `/store/[storeId]/info/name`,
+      params: { storeId, storeName, storeNumber },
+    });
+  };
+
+  const handlePressStoreNumber = () => {
+    router.push({
+      pathname: `/store/[storeId]/info/number`,
+      params: { storeId, storeNumber, storeName },
+    });
+  };
+
   const insets = useSafeAreaInsets();
   return (
     <PageLayout showBackButton showHeader title="매장정보">
@@ -52,10 +66,8 @@ export default function StoreInfoPage() {
         storeName={storeName}
         storeNumber={storeNumber ?? ''}
         representativeName={representativeName}
-        onPressStoreName={() => {
-          router.push(`/store/${storeId}/info/name`);
-        }}
-        onPressStoreNumber={() => () => {}}
+        onPressStoreName={handlePressStoreName}
+        onPressStoreNumber={handlePressStoreNumber}
       />
       <Pressable
         onPress={() => setDeleteModalStep('first')}
@@ -106,7 +118,9 @@ export default function StoreInfoPage() {
           >
             취소
           </BaseModal.Button>
-          <BaseModal.Button onPress={handleDeleteStore}>삭제하기</BaseModal.Button>
+          <BaseModal.Button onPress={handleDeleteStore}>
+            삭제하기
+          </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
     </PageLayout>

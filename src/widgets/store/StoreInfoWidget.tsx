@@ -10,9 +10,7 @@ interface StoreInfoWidgetProps {
   representativeName: string;
   storeNumber: string;
   onPressStoreName: (e: GestureResponderEvent) => void;
-  onPressStoreNumber: (
-    storeNumber: string,
-  ) => (e: GestureResponderEvent) => void;
+  onPressStoreNumber: (e: GestureResponderEvent) => void;
 }
 
 export default function StoreInfoWidget({
@@ -40,7 +38,7 @@ export default function StoreInfoWidget({
         <InputLabel label="대표번호" />
         <TitleButton
           title={!!storeNumber ? storeNumber : '등록된 대표번호가 없어요'}
-          onPress={onPressStoreNumber(storeNumber)}
+          onPress={onPressStoreNumber}
           isPlaceholder={!storeNumber}
         />
       </View>
