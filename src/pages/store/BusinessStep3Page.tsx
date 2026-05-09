@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { createStore } from '@/src/features/store/api/create';
+import { createStore } from '@/src/features/store/api/store';
 import {
   backgroundColorWhite,
   buttonColorCta,
@@ -62,7 +62,7 @@ export default function BusinessStep3Page() {
       if (__DEV__) {
         const { data } = await createStore({
           businessName: '테스트 상호명',
-          businessRegistrationNumber: '1231231230',
+          businessRegistrationNumber: '1231231235',
           representativeName: '나날이',
           openingDate: '2020-01-01',
           storeName: '테스트 매장명',
