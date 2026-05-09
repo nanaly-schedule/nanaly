@@ -11,6 +11,8 @@ interface PageLayoutProps {
   title?: string;
   showHeader?: boolean;
   showBackButton?: boolean;
+  showCheckIcon?: boolean;
+  onPressCheckIcon?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -19,12 +21,21 @@ export default function PageLayout({
   title = '',
   showHeader = true,
   showBackButton = true,
+  showCheckIcon = false,
+  onPressCheckIcon,
   style,
 }: PageLayoutProps) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.container, { marginTop: insets.top }, style]}>
-      {showHeader && <Header title={title} showBackButton={showBackButton} />}
+      {showHeader && (
+        <Header
+          title={title}
+          showBackButton={showBackButton}
+          showCheckIcon={showCheckIcon}
+          onPressCheckIcon={onPressCheckIcon}
+        />
+      )}
       {children}
     </View>
   );
