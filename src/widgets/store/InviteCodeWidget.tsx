@@ -25,12 +25,13 @@ export default function InviteCodeWidget() {
     setIsSubmitting(true);
 
     try {
-      const response = await createInviteCode(storeId);
-      //todo: re test when getting domain
-      //   await Share.share({
-      //     message: inviteLink,
-      //     url: inviteLink,
-      //   });
+      const { data } = await createInviteCode(storeId);
+
+      const { inviteLink } = data;
+      await Share.share({
+        message: inviteLink,
+        url: inviteLink,
+      });
     } catch (error) {
       console.log(error);
     } finally {
@@ -39,14 +40,17 @@ export default function InviteCodeWidget() {
   };
 
   return (
-    <View style={styles.container}>
+    <Pressable
+      style={styles.container}
+      disabled={isSubmitting}
+      onPress={handleShareInviteLink}
+    >
       <NText variant="r14" style={{ color: typoColorSub1 }}>
-        초대하기
+        초대 하기
       </NText>
-      <Pressable disabled={isSubmitting} onPress={handleShareInviteLink}>
-        <ShareIcon size={20} color={typoColorPrimary} />
-      </Pressable>
-    </View>
+
+      <ShareIcon size={20} color={typoColorPrimary} />
+    </Pressable>
   );
 }
 
