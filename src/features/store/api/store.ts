@@ -17,3 +17,7 @@ export async function updateStore(storeId: string, data: StoreInfoRequest) {
 export async function deleteStore(storeId: string) {
   return await apiClient.delete(`/stores/${storeId}`);
 }
+
+export async function getMyStore() {
+  return await apiClient.get('/stores/me');
+}
