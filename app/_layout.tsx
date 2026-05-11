@@ -22,16 +22,6 @@ export default function Layout() {
           birthDate,
         });
 
-        const { data: myStores } = await getMyStore();
-        if (myStores[0]) {
-          const [{ permissions, storeId, role }] = myStores;
-          router.push({
-            pathname: '/[storeId]',
-            params: { storeId, role, permissions },
-          });
-        } else {
-          router.push('/store');
-        }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
         await clearUser();
