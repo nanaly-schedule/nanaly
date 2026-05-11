@@ -6,7 +6,6 @@ import {
   basicColorGrey200,
   buttonColorCta,
   radiusRadius8,
-  spacingSpacing16,
 } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 
@@ -39,7 +38,6 @@ export default function ChangeButton({ disabled, onPress }: ChangeButtonProps) {
 const styles = StyleSheet.create({
   verifyBtn: {
     marginTop: 'auto',
-    marginHorizontal: spacingSpacing16,
     backgroundColor: buttonColorCta,
     borderRadius: radiusRadius8,
     justifyContent: 'center',

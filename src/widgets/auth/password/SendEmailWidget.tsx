@@ -8,15 +8,14 @@ import {
   buttonColorCta,
   radiusRadius8,
   spacingSpacing8,
-  spacingSpacing16,
   spacingSpacing30,
-  spacingSpaicng14,
   typoColorPrimary,
   typoColorRed,
 } from '@/src/init/styles/tokens';
 import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
 
+import InputLabel from '../../shared/InputLabel';
 import { EmailVerifyStatus } from '../sign-up/EmailVerifyWidget';
 
 interface SendEmailWidgetProps {
@@ -43,19 +42,14 @@ export default function SendEmailWidget({
   const isSendDisabled = !isEmailValid || isVerified;
   const emailButtonLabel = !isVerified ? '발송' : '발송됨';
   return (
-    <View style={{ marginHorizontal: spacingSpacing16 }}>
+    <View style={styles.content}>
       <NText
         variant="m16"
         style={{ color: typoColorPrimary, marginBottom: spacingSpacing30 }}
       >
         가입하신 이메일로 임시 비밀번호를 보내드립니다.
       </NText>
-      <NText
-        variant="sb14"
-        style={{ color: typoColorPrimary, marginBottom: spacingSpaicng14 }}
-      >
-        이메일
-      </NText>
+      <InputLabel label="이메일" />
       <View style={styles.inputContainer}>
         <Input
           variant={
@@ -118,10 +112,9 @@ export default function SendEmailWidget({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
     marginTop: 14,
     marginBottom: 20,
-    paddingHorizontal: spacingSpacing16,
   },
   inputContainer: {
     flexDirection: 'row',

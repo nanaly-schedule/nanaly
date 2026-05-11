@@ -1,6 +1,5 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
 
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
 import {
@@ -12,7 +11,7 @@ import {
   formatBirthDate,
   parseBirthDate,
 } from '@/src/shared/lib/date';
-import AuthHeader from '@/src/widgets/auth/sign-up/AuthHeader';
+import PageLayout from '@/src/shared/ui/PageLayout';
 import AuthInfo from '@/src/widgets/auth/sign-up/AuthInfo';
 import EmailInfo from '@/src/widgets/auth/sign-up/EmailInfo';
 import SignUpButton from '@/src/widgets/auth/sign-up/SignUpButton';
@@ -74,8 +73,7 @@ export default function AuthInfoPage() {
     }
   };
   return (
-    <View style={{ flex: 1 }}>
-      <AuthHeader />
+    <PageLayout title="회원가입">
       <EmailInfo provider={provider} email={email} />
       <AuthInfo
         name={name}
@@ -90,6 +88,6 @@ export default function AuthInfoPage() {
         onClose={() => setIsBirthDatePickerOpen(false)}
       />
       <SignUpButton onPress={handleSignUpButton} disabled={isVerifyDisabled} />
-    </View>
+    </PageLayout>
   );
 }

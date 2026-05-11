@@ -1,3 +1,10 @@
+import axios, {
+  AxiosError,
+  AxiosRequestHeaders,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios';
+
 import {
   clearTokens,
   getAccessToken,
@@ -5,12 +12,6 @@ import {
   saveAccessToken,
   saveRefreshToken,
 } from '@/src/features/auth/lib/storage';
-import axios, {
-  AxiosError,
-  AxiosRequestHeaders,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from 'axios';
 
 export const apiClient = axios.create({
   baseURL: 'http://43.202.8.87:8080/',

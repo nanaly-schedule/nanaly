@@ -1,5 +1,13 @@
-import { Text } from 'react-native';
+import { View } from 'react-native';
+
+import InviteCodeWidget from '@/src/widgets/store/InviteCodeWidget';
+import StoreInfoBtn from '@/src/widgets/store/StoreInfoBtn';
 
 export default function HomePage() {
-  return <Text>HomePage</Text>;
+  return (
+    <View>
+      <StoreInfoBtn />
+      <InviteCodeWidget />
+    </View>
+  );
 }
