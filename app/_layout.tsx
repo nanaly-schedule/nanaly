@@ -1,7 +1,7 @@
-import { Stack, usePathname, useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 
-import { getAccessToken } from '@/src/features/auth/lib/storage';
+import { getMyStore } from '@/src/features/store/api/store';
 import { getUserProfile } from '@/src/features/user/api/profile';
 import useUser from '@/src/features/user/lib/useUser';
 
@@ -21,7 +21,17 @@ export default function Layout() {
           email,
           birthDate,
         });
-        router.push('/store');
+
+        const { data: myStores } = await getMyStore();
+        if (myStores[0]) {
+          const [{ permissions, storeId, role }] = myStores;
+          router.push({
+            pathname: '/[storeId]',
+            params: { storeId, role, permissions },
+          });
+        } else {
+          router.push('/store');
+        }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
         await clearUser();
