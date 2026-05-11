@@ -1,13 +1,12 @@
-import { View } from 'react-native';
-
+import PageLayout from '@/src/shared/ui/PageLayout';
 import InviteCodeWidget from '@/src/widgets/store/InviteCodeWidget';
 import StoreInfoBtn from '@/src/widgets/store/StoreInfoBtn';
 
-export default function HomePage() {
+export default function AdminHomePage() {
   return (
-    <View>
+    <PageLayout showHeader={false}>
       <StoreInfoBtn />
       <InviteCodeWidget />
-    </View>
+    </PageLayout>
   );
 }
