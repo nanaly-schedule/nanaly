@@ -30,6 +30,7 @@ export default function StoreInfoBtn() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     flexDirection: 'row',
     borderRadius: radiusRadius12,
     paddingHorizontal: spacingSpacing8,
