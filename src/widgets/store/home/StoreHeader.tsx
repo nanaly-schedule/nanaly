@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import {
@@ -25,6 +25,7 @@ export default function StoreHeader({
   isActiveOwner,
 }: StoreHeaderProps) {
   const route = useRouter();
+  const { storeId } = useLocalSearchParams<{ storeId: string }>();
   const displayStoreName =
     storeName.length > 10 ? `${storeName.slice(0, 10)}...` : storeName;
 
@@ -36,7 +37,11 @@ export default function StoreHeader({
       {isOwner && (
         <Pressable
           style={[styles.default, isActiveOwner && styles.active]}
-          onPress={() => route.push('/')}
+          onPress={() =>
+            isActiveOwner
+              ? route.push(`/${storeId}/home`)
+              : route.push(`/${storeId}/home/admin`)
+          }
         >
           <NText
             variant="m12"
