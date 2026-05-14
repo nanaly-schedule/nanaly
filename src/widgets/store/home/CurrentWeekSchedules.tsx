@@ -25,7 +25,7 @@ export default function CurrentWeekSchedules({
         contentContainerStyle={{ flex: 1 }}
         horizontal
         data={schedules}
-        keyExtractor={(item) => `current-week-${item.id}`}
+        keyExtractor={(item) => `current-week-${item?.id}`}
         renderItem={({ item, index }) => (
           <ScheduleCard
             isCurrent={index === 0}
