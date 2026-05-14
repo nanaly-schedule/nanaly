@@ -1,3 +1,5 @@
+import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
+
 import {
   backgroundColorRed,
   backgroundColorWhite,
@@ -7,7 +9,6 @@ import {
   typoColorPrimary,
   typoColorRed,
 } from '@/src/init/styles/tokens';
-import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 
 interface InputProps extends TextInputProps {
   variant: 'disabled' | '' | 'error';
@@ -21,7 +22,7 @@ export default function Input({
   style,
   ...props
 }: InputProps) {
-  const isDisabled = variant == 'disabled';
+  const isDisabled = variant === 'disabled';
 
   return (
     <TextInput
@@ -30,7 +31,7 @@ export default function Input({
         styles.container,
         isDisabled
           ? styles.disabled
-          : variant == 'error'
+          : variant === 'error'
             ? styles.error
             : styles.input,
         style,

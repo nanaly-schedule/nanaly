@@ -45,7 +45,11 @@ export default function AdminHomePage() {
   }, []);
   return (
     <PageLayout showHeader={false}>
-      <StoreHeader storeName={displayStoreName ?? ''} isOwner isActiveOwner />
+      <StoreHeader
+        storeName={displayStoreName ?? headerInfo?.storeName ?? ''}
+        isOwner
+        isActiveOwner
+      />
       <View style={{ flexDirection: 'row', gap: spacingSpacing12 }}>
         <TodayWorker todayWorker={summaryInfo?.todayWorkerCount ?? 0} />
         <View style={{ gap: spacingSpacing8, flex: 1 }}>
