@@ -37,17 +37,23 @@ export default function HomePage() {
 
         const { header, notices, schedules } = data;
         setHeaderInfo(header);
-        setSchedule([schedules?.current, ...schedules.upcoming]);
-      } catch {}
+
+        setSchedule([
+          ...(schedules?.current ? [schedules.current] : []),
+          ...schedules.upcoming,
+        ]);
+      } catch (error) {
+        console.log(error);
+        //todo: 403 -> not found redirect
+      }
     };
     fetch();
   }, [storeId]);
-
   return (
     <PageLayout showHeader={false}>
       <StoreHeader
         storeName={headerInfo?.storeName ?? ''}
-        isOwner={headerInfo?.role !== 'staff'}
+        isOwner={!!headerInfo && headerInfo.role !== 'staff'}
         isActiveOwner={false}
       />
       <CurrentWeekSchedules schedules={schedule} />
