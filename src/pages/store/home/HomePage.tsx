@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
@@ -18,9 +18,11 @@ type TypeSchedules = {
 };
 
 export default function HomePage() {
-  const route = useRouter();
-  const { storeId } = useLocalSearchParams<{ storeId: string }>();
-
+  const { storeId, displayStoreName, isOwner } = useLocalSearchParams<{
+    storeId: string;
+    displayStoreName: string;
+    isOwner?: string;
+  }>();
   const [headerInfo, setHeaderInfo] = useState<TypeHeaderInfo | null>(null);
   //todo: 스케줄 구현 후 데이터 삭제
   const [schedule, setSchedule] = useState<TypeSchedules[]>([
@@ -52,8 +54,8 @@ export default function HomePage() {
   return (
     <PageLayout showHeader={false}>
       <StoreHeader
-        storeName={headerInfo?.storeName ?? ''}
-        isOwner={!!headerInfo && headerInfo.role !== 'staff'}
+        storeName={displayStoreName ?? headerInfo?.storeName ?? ''}
+        isOwner={isOwner === 'true' || (!!headerInfo && headerInfo.role !== 'staff')}
         isActiveOwner={false}
       />
       <CurrentWeekSchedules schedules={schedule} />

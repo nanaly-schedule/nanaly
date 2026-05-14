@@ -39,8 +39,14 @@ export default function StoreHeader({
           style={[styles.default, isActiveOwner && styles.active]}
           onPress={() =>
             isActiveOwner
-              ? route.push(`/${storeId}/home`)
-              : route.push(`/${storeId}/home/admin`)
+              ? route.push({
+                  pathname: `/[storeId]/home`,
+                  params: { storeId, displayStoreName, isOwner: 'true' },
+                })
+              : route.push({
+                  pathname: `/[storeId]/home/admin`,
+                  params: { storeId, displayStoreName, isOwner: 'true' },
+                })
           }
         >
           <NText
