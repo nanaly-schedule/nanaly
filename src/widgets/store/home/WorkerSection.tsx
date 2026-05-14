@@ -107,10 +107,7 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
             <NText variant="r14">·</NText>
             <NText variant="r14">{item.role}</NText>
             <View style={{ margin: 'auto' }} />
-            <NText variant="r14">
-              {item.joinDate}
-              {item.leaveDate && '- ' + item.leaveDate}
-            </NText>
+            <NText variant="r14">{item.joinDate}</NText>
             {item.leaveDate && <NText variant="r14">-</NText>}
             {item.leaveDate && <NText variant="r14">{item.leaveDate}</NText>}
           </Pressable>
