@@ -17,6 +17,7 @@ import {
 } from '@/src/features/store/api/member';
 import DatePickerBottomSheet from '@/src/features/store/ui/DatePickerBottomSheet';
 import DeleteMemberModal from '@/src/features/store/ui/DeleteMemberModal';
+import useUser from '@/src/features/user/lib/useUser';
 import {
   spacingSpacing12,
   spacingSpacing30,
@@ -64,6 +65,7 @@ export default function MemberInfoPage() {
     memberId: string;
   }>();
   const access = useCurrentStoreAccess();
+  const currentUser = useUser();
 
   const [editable, setEditable] = useState(false);
 
@@ -106,7 +108,7 @@ export default function MemberInfoPage() {
   const handlePressEditMode = () => {
     if (editable) {
       setIsConfirmModalVisible(true);
-    } else if (canEditMemberInfo(access)) {
+    } else if (canEditTargetMember) {
       setEditable(true);
     }
   };
@@ -231,6 +233,16 @@ export default function MemberInfoPage() {
     onChangeMemo: handleChangeMemo,
     onChangeRole: handleChangeRole,
   };
+  const isEditingSelf =
+    !!currentUser.name &&
+    !!currentUser.birthDate &&
+    !!user.name &&
+    !!user.birthDate &&
+    currentUser.name === user.name &&
+    currentUser.birthDate === user.birthDate;
+  const canEditTargetMember =
+    canEditMemberInfo(access) &&
+    !(access.role === MemberRole.MANAGER && isEditingSelf);
 
   const insets = useSafeAreaInsets();
 
@@ -254,7 +266,7 @@ export default function MemberInfoPage() {
     <PageLayout
       title="근무자 정보"
       icon={
-        canEditMemberInfo(access) ? (
+        canEditTargetMember ? (
           editable ? (
             <CheckIcon size={20} color={typoColorPrimary} />
           ) : (
@@ -279,7 +291,7 @@ export default function MemberInfoPage() {
             actions={memberActions}
           />
         </ScrollView>
-        {canEditMemberInfo(access) && (
+        {canEditTargetMember && (
           <Pressable
             onPress={() => setIsDeleteMemberModalVisible(true)}
             style={{
@@ -303,7 +315,7 @@ export default function MemberInfoPage() {
       </View>
 
       <DeleteMemberModal
-        visible={canEditMemberInfo(access) && isDeleteMemberModalVisible}
+        visible={canEditTargetMember && isDeleteMemberModalVisible}
         onClose={() => setIsDeleteMemberModalVisible(false)}
         onConfirm={handleDeleteMember}
       />
