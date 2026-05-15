@@ -16,6 +16,7 @@ import {
   updateMember,
 } from '@/src/features/store/api/member';
 import DatePickerBottomSheet from '@/src/features/store/ui/DatePickerBottomSheet';
+import DeleteMemberModal from '@/src/features/store/ui/DeleteMemberModal';
 import {
   spacingSpacing12,
   spacingSpacing30,
@@ -301,25 +302,12 @@ export default function MemberInfoPage() {
         )}
       </View>
 
-      <BaseModal
+      <DeleteMemberModal
         visible={canEditMemberInfo(access) && isDeleteMemberModalVisible}
         onClose={() => setIsDeleteMemberModalVisible(false)}
-      >
-        <BaseModal.Content>
-          <BaseModal.Title>근무자를 삭제할까요?</BaseModal.Title>
-        </BaseModal.Content>
-        <BaseModal.Actions>
-          <BaseModal.Button
-            variant="secondary"
-            onPress={() => setIsDeleteMemberModalVisible(false)}
-          >
-            취소
-          </BaseModal.Button>
-          <BaseModal.Button onPress={handleDeleteMember}>
-            근무자 삭제
-          </BaseModal.Button>
-        </BaseModal.Actions>
-      </BaseModal>
+        onConfirm={handleDeleteMember}
+      />
+
       <DatePickerBottomSheet
         visible={!!visibleDatePicker}
         value={parseBirthDate(user.leaveDate)}
