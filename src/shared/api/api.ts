@@ -13,6 +13,7 @@ import {
   saveAccessToken,
   saveRefreshToken,
 } from '@/src/features/auth/lib/storage';
+import { getDevMockPath, isDevMockToken } from '@/src/mocks/server';
 
 export const apiClient = axios.create({
   baseURL: 'http://43.202.8.87:8080/',
@@ -28,6 +29,17 @@ apiClient.interceptors.request.use(
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+
+      if (__DEV__ && isDevMockToken(accessToken) && config.url) {
+        const mockablePaths = ['/user/profile', '/stores'];
+        const shouldUseMock = mockablePaths.some((path) =>
+          config.url?.startsWith(path),
+        );
+
+        if (shouldUseMock) {
+          config.url = getDevMockPath(config.url);
+        }
+      }
     }
     return config;
   },
