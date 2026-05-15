@@ -2,14 +2,25 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
+import { canEditStoreInfo } from '@/src/features/permission/lib/access';
+import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import { updateStore } from '@/src/features/store/api/store';
-import { spacingSpaicng14 } from '@/src/init/styles/tokens';
+import { spacingSpaicng14, typoColorPrimary } from '@/src/init/styles/tokens';
+import CheckIcon from '@/src/shared/assets/CheckIcon';
+import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import Input from '@/src/shared/ui/Input';
 import PageLayout from '@/src/shared/ui/PageLayout';
 
+/**
+ *
+ * 접근 권한: 오너
+ *
+ * 편집 권한: 오너
+ */
 export default function StoreInfoNamePage() {
   const router = useRouter();
+  const access = useCurrentStoreAccess();
   const { storeId, storeName, storeNumber } = useLocalSearchParams<{
     storeId: string;
     storeName: string;
@@ -42,11 +53,20 @@ export default function StoreInfoNamePage() {
     } catch {}
   };
 
+  if (!canEditStoreInfo(access)) {
+    return (
+      <AccessDenied
+        title="매장명을 수정할 수 없어요"
+        message="오너 권한이 있어야 매장명을 수정할 수 있어요"
+      />
+    );
+  }
+
   return (
     <PageLayout
       showBackButton
       showHeader
-      showCheckIcon
+      icon={<CheckIcon size={20} color={typoColorPrimary} />}
       title="매장명 수정"
       onPressCheckIcon={handleOpenConfirmModal}
     >

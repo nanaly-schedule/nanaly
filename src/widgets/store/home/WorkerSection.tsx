@@ -1,7 +1,9 @@
+import { useIsFocused } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { getMemberRoleLabel, MemberRole } from '@/src/entities/member/member';
 import { getMembers } from '@/src/features/store/api/member';
 import {
   backgroundColorWhite,
@@ -12,6 +14,7 @@ import {
   spacingSpacing30,
   spacingSpaicng14,
 } from '@/src/init/styles/tokens';
+import { getDevMockMemberList } from '@/src/mocks/server';
 import SearchIcon from '@/src/shared/assets/SearchIcon';
 import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
@@ -21,22 +24,18 @@ interface WorkerSectionProps {
 }
 //{"id": "c9c5ce71-3b8d-4447-96c6-21dbc1ee99d8", "joinDate": "2026-05-11", "leaveDate": null, "name": "이지현", "role": "staff"}
 
-enum Role {
-  staff = '알바',
-  owner = '오너',
-  manager = '매니저',
-}
-
 type TypeMember = {
-  id: string;
+  id?: string;
+  memberId?: string;
   joinDate: string;
   leaveDate: string | null;
   name: string;
-  role: 'staff' | 'owner' | 'manager';
+  role: MemberRole;
 };
 
 export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
   const route = useRouter();
+  const isFocused = useIsFocused();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
 
   const [workers, setWorkers] = useState<TypeMember[]>([]);
@@ -52,13 +51,15 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
       try {
         const { data } = await getMembers(storeId, debouncedWorker);
         setWorkers(data);
-      } catch (error) {
-        console.log(error);
+      } catch {
+        if (__DEV__) {
+          setWorkers(getDevMockMemberList(debouncedWorker));
+        }
       }
     };
 
     fetchMembers();
-  }, [storeId, debouncedWorker]);
+  }, [storeId, debouncedWorker, isFocused]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -71,7 +72,6 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
   const handleChangeTextWorker = (t: string) => {
     setWorker(t);
   };
-
   const handlePressSearch = () => {};
   return (
     <View style={styles.container}>
@@ -93,32 +93,49 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
         />
       </View>
 
-      <FlatList
+      <ScrollView
+        style={{ flex: 1, marginBottom: spacingSpacing12 }}
         contentContainerStyle={styles.workersContainer}
-        data={workers}
-        keyExtractor={(item) => `workers-${item.id}`}
-        renderItem={({ item }) => (
-          <Pressable
-            style={[styles.row, styles.workerContainer]}
-            onPress={() => route.push(`/member/${storeId}/${item.id}`)}
-          >
-            <NText variant="sb14">{item.name}</NText>
-            {/* todo: Role을 사용해서 한글로 표현 */}
-            <NText variant="r14">·</NText>
-            <NText variant="r14">{item.role}</NText>
-            <View style={{ margin: 'auto' }} />
-            <NText variant="r14">{item.joinDate}</NText>
-            {item.leaveDate && <NText variant="r14">-</NText>}
-            {item.leaveDate && <NText variant="r14">{item.leaveDate}</NText>}
-          </Pressable>
-        )}
-      />
+      >
+        {workers.map((item) => {
+          const memberId = item?.memberId ?? item.id;
+
+          if (!memberId) {
+            return null;
+          }
+
+          return (
+            <Pressable
+              key={`workers-${memberId}`}
+              style={[styles.row, styles.workerContainer]}
+              onPress={() =>
+                route.push({
+                  pathname: '/member/[storeId]/[memberId]',
+                  params: {
+                    storeId,
+                    memberId,
+                  },
+                })
+              }
+            >
+              <NText variant="sb14">{item.name}</NText>
+              <NText variant="r14">·</NText>
+              <NText variant="r14">{getMemberRoleLabel(item.role)}</NText>
+              <View style={{ margin: 'auto' }} />
+              <NText variant="r14">{item.joinDate}</NText>
+              {item.leaveDate && <NText variant="r14">-</NText>}
+              {item.leaveDate && <NText variant="r14">{item.leaveDate}</NText>}
+            </Pressable>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     marginTop: spacingSpacing30,
   },
   header: {
@@ -128,6 +145,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginTop: spacingSpaicng14,
+    marginBottom: spacingSpacing16,
     borderRadius: radiusRadius8,
     paddingHorizontal: spacingSpacing8,
     backgroundColor: backgroundColorWhite,
@@ -139,7 +157,7 @@ const styles = StyleSheet.create({
   },
 
   workersContainer: {
-    marginTop: spacingSpacing16,
+    // marginTop: spacingSpacing16,
     backgroundColor: backgroundColorWhite,
     borderRadius: spacingSpacing12,
     paddingHorizontal: spacingSpacing8,

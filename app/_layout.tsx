@@ -1,9 +1,13 @@
 import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 
-import { getMyStore } from '@/src/features/store/api/store';
 import { getUserProfile } from '@/src/features/user/api/profile';
 import useUser from '@/src/features/user/lib/useUser';
+import { startMockServer } from '@/src/mocks/server';
+
+if (__DEV__) {
+  startMockServer();
+}
 
 export default function Layout() {
   const user = useUser();
@@ -20,6 +24,9 @@ export default function Layout() {
           name,
           email,
           birthDate,
+          currentStoreId: null,
+          currentStoreRole: null,
+          currentStorePermissions: null,
         });
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
