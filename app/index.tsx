@@ -11,10 +11,15 @@ export default function Home() {
       try {
         const { data: myStores } = await getMyStore();
         if (myStores[0]) {
-          const [{ permissions, storeId, role }] = myStores;
+          const [{ permissions, storeId, role, storeName }] = myStores;
           router.push({
             pathname: '/[storeId]',
-            params: { storeId, role, permissions },
+            params: {
+              storeId,
+              role,
+              permissions,
+              displayStoreName: storeName,
+            },
           });
         } else {
           router.push('/store');

@@ -8,21 +8,23 @@ import Header from './Header';
 
 interface PageLayoutProps {
   children: ReactNode;
+  icon?: ReactNode;
   title?: string;
   showHeader?: boolean;
   showBackButton?: boolean;
-  showCheckIcon?: boolean;
   onPressCheckIcon?: () => void;
+  onPressBack?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
 export default function PageLayout({
   children,
+  icon,
   title = '',
   showHeader = true,
   showBackButton = true,
-  showCheckIcon = false,
   onPressCheckIcon,
+  onPressBack,
   style,
 }: PageLayoutProps) {
   const insets = useSafeAreaInsets();
@@ -32,9 +34,11 @@ export default function PageLayout({
         <Header
           title={title}
           showBackButton={showBackButton}
-          showCheckIcon={showCheckIcon}
           onPressCheckIcon={onPressCheckIcon}
-        />
+          onPressBack={onPressBack}
+        >
+          {icon && (icon as ReactNode)}
+        </Header>
       )}
       {children}
     </View>

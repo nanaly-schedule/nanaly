@@ -4,6 +4,7 @@ import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from 'axios';
+import { router } from 'expo-router';
 
 import {
   clearTokens,
@@ -12,6 +13,7 @@ import {
   saveAccessToken,
   saveRefreshToken,
 } from '@/src/features/auth/lib/storage';
+import { getDevMockPath, isDevMockToken } from '@/src/mocks/server';
 
 export const apiClient = axios.create({
   baseURL: 'http://43.202.8.87:8080/',
@@ -27,6 +29,17 @@ apiClient.interceptors.request.use(
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+
+      if (__DEV__ && isDevMockToken(accessToken) && config.url) {
+        const mockablePaths = ['/user/profile', '/stores'];
+        const shouldUseMock = mockablePaths.some((path) =>
+          config.url?.startsWith(path),
+        );
+
+        if (shouldUseMock) {
+          config.url = getDevMockPath(config.url);
+        }
+      }
     }
     return config;
   },
@@ -59,10 +72,11 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return apiClient(originalRequest);
         }
+
+        await handleAuthFailure();
       } catch (refreshError: unknown) {
         // Refresh Token도 만료된 경우 로그아웃 처리
-        await clearTokens();
-        // 로그인 화면으로 리다이렉트 (필요시)
+        await handleAuthFailure();
         return Promise.reject(refreshError);
       }
     }
@@ -107,4 +121,9 @@ async function refreshAccessToken(): Promise<string | null> {
     console.error('토큰 재발급 실패:', error);
     return null;
   }
+}
+
+async function handleAuthFailure() {
+  await clearTokens();
+  router.replace('/auth');
 }

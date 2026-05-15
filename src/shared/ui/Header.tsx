@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { PropsWithChildren, ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { typoColorPrimary } from '@/src/init/styles/tokens';
@@ -10,15 +11,17 @@ import NText from './NText';
 interface HeaderProps {
   title: string;
   showBackButton?: boolean;
-  showCheckIcon?: boolean;
+  onPressBack?: () => void;
   onPressCheckIcon?: () => void;
+  children?: ReactNode;
 }
 
 export default function Header({
   title,
   showBackButton = true,
-  showCheckIcon = false,
+  onPressBack,
   onPressCheckIcon,
+  children,
 }: HeaderProps) {
   const router = useRouter();
   return (
@@ -26,7 +29,13 @@ export default function Header({
       {showBackButton && (
         <Pressable
           style={[styles.btn, styles.left]}
-          onPress={() => router.back()}
+          onPress={() => {
+            if (onPressBack) {
+              onPressBack();
+            } else {
+              router.back();
+            }
+          }}
         >
           <LeftArrowIcon size={20} color={typoColorPrimary} />
         </Pressable>
@@ -34,12 +43,12 @@ export default function Header({
       <NText variant="b16" style={styles.text}>
         {title}
       </NText>
-      {showCheckIcon && (
+      {children && (
         <Pressable
           style={[styles.btn, styles.right]}
           onPress={onPressCheckIcon}
         >
-          <CheckIcon size={30} color={typoColorPrimary} />
+          {children as React.ReactNode}
         </Pressable>
       )}
     </View>
