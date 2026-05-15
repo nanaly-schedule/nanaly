@@ -3,16 +3,28 @@ import { useEffect, useState } from 'react';
 import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import {
+  canAccessStoreInfo,
+  canEditStoreInfo,
+} from '@/src/features/permission/lib/access';
+import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import { deleteStore, getStore } from '@/src/features/store/api/store';
 import { spacingSpacing12, typoColorRed } from '@/src/init/styles/tokens';
+import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import StoreInfoWidget from '@/src/widgets/store/StoreInfoWidget';
-
+/**
+ *
+ * 접근 권한: 오너, 매니저
+ *
+ * 편집 권한: 오너
+ */
 export default function StoreInfoPage() {
   const router = useRouter();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
+  const access = useCurrentStoreAccess();
 
   const [storeName, setStoreName] = useState('');
   const [storeNumber, setStoreNumber] = useState<string | null>(null);
@@ -46,6 +58,10 @@ export default function StoreInfoPage() {
   };
 
   const handlePressStoreName = () => {
+    if (!canEditStoreInfo(access)) {
+      return;
+    }
+
     router.push({
       pathname: `/store/[storeId]/info/name`,
       params: { storeId, storeName, storeNumber },
@@ -53,6 +69,10 @@ export default function StoreInfoPage() {
   };
 
   const handlePressStoreNumber = () => {
+    if (!canEditStoreInfo(access)) {
+      return;
+    }
+
     router.push({
       pathname: `/store/[storeId]/info/number`,
       params: { storeId, storeNumber, storeName },
@@ -60,6 +80,16 @@ export default function StoreInfoPage() {
   };
 
   const insets = useSafeAreaInsets();
+
+  if (!canAccessStoreInfo(access)) {
+    return (
+      <AccessDenied
+        title="매장 정보에 접근할 수 없어요"
+        message="매니저 이상 권한이 있어야 매장 정보를 볼 수 있어요"
+      />
+    );
+  }
+
   return (
     <PageLayout showBackButton showHeader title="매장정보">
       <StoreInfoWidget
@@ -69,23 +99,25 @@ export default function StoreInfoPage() {
         onPressStoreName={handlePressStoreName}
         onPressStoreNumber={handlePressStoreNumber}
       />
-      <Pressable
-        onPress={() => setDeleteModalStep('first')}
-        style={{ marginTop: 'auto' }}
-      >
-        <NText
-          variant="sb14"
-          style={{
-            color: typoColorRed,
-            marginBottom: spacingSpacing12 + insets.bottom,
-            textAlign: 'center',
-          }}
+      {canEditStoreInfo(access) && (
+        <Pressable
+          onPress={() => setDeleteModalStep('first')}
+          style={{ marginTop: 'auto' }}
         >
-          매장 삭제
-        </NText>
-      </Pressable>
+          <NText
+            variant="sb14"
+            style={{
+              color: typoColorRed,
+              marginBottom: spacingSpacing12 + insets.bottom,
+              textAlign: 'center',
+            }}
+          >
+            매장 삭제
+          </NText>
+        </Pressable>
+      )}
       <BaseModal
-        visible={deleteModalStep === 'first'}
+        visible={canEditStoreInfo(access) && deleteModalStep === 'first'}
         onClose={() => setDeleteModalStep('none')}
       >
         <BaseModal.Content>
@@ -104,7 +136,7 @@ export default function StoreInfoPage() {
         </BaseModal.Actions>
       </BaseModal>
       <BaseModal
-        visible={deleteModalStep === 'second'}
+        visible={canEditStoreInfo(access) && deleteModalStep === 'second'}
         onClose={() => setDeleteModalStep('none')}
       >
         <BaseModal.Content>

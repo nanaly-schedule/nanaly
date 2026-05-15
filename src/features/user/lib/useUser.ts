@@ -7,7 +7,7 @@ import { clearTokens } from '../../auth/lib/storage';
 type UserStoreState = User;
 
 type UserStoreActions = {
-  setUser: (user: User) => void;
+  setUser: (user: Partial<User>) => void;
   clearUser: () => Promise<void>;
 };
 
@@ -18,6 +18,9 @@ const useUser = create<UserStore>((set) => ({
   name: '',
   email: '',
   birthDate: '',
+  currentStoreId: null,
+  currentStoreRole: null,
+  currentStorePermissions: null,
 
   setUser: (nextUser) => set((state) => ({ ...state, ...nextUser })),
   clearUser: async () => {
@@ -26,6 +29,9 @@ const useUser = create<UserStore>((set) => ({
       name: '',
       email: '',
       birthDate: '',
+      currentStoreId: null,
+      currentStoreRole: null,
+      currentStorePermissions: null,
     });
     await clearTokens();
   },

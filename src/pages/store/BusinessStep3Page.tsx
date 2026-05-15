@@ -59,22 +59,6 @@ export default function BusinessStep3Page() {
       setStoreName(businessName);
     }
     try {
-      if (__DEV__) {
-        const { data } = await createStore({
-          businessName: '테스트 상호명',
-          businessRegistrationNumber: '1231231235',
-          representativeName: '나날이',
-          openingDate: '2020-01-01',
-          storeName: '테스트 매장명',
-        });
-
-        if (data?.storeId) {
-          router.replace(`/${data.storeId}`);
-        }
-
-        return;
-      }
-
       const { data } = await createStore({
         businessName,
         businessRegistrationNumber,
@@ -87,19 +71,10 @@ export default function BusinessStep3Page() {
         router.replace(`/${data?.storeId}`);
       }
     } catch (error) {
-      const errorMessage = isAxiosError(error)
-        ? typeof error.response?.data === 'string'
-          ? error.response.data
-          : (error.response?.data as { message?: string } | undefined)?.message
-        : error instanceof Error
-          ? error.message
-          : undefined;
       if (isAxiosError(error) && error.response?.status === 400) {
         setIsDuplicateBusinessNumberModalVisible(true);
         return;
       }
-
-      console.log(errorMessage);
     }
   };
   return (
