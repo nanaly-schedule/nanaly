@@ -11,6 +11,7 @@ export interface User {
   email: string;
   birthDate: string; //YYYY-MM-DD
   isTempPassword: boolean;
+  currentStoreAccessLoaded: boolean;
   currentStoreId: string | null;
   currentStoreRole: MemberRole | null;
   currentStorePermissions: UserStorePermissions | null;

@@ -29,12 +29,14 @@ export default function Layout() {
         );
 
         setUser({
+          currentStoreAccessLoaded: true,
           currentStoreId: currentStore?.storeId ?? null,
           currentStoreRole: currentStore?.role ?? null,
           currentStorePermissions: currentStore?.permissions ?? null,
         });
       } catch {
         setUser({
+          currentStoreAccessLoaded: true,
           currentStoreId: storeId,
           currentStoreRole: null,
           currentStorePermissions: null,

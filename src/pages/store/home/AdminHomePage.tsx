@@ -43,7 +43,7 @@ export default function AdminHomePage() {
   const [summaryInfo, setSummaryInfo] = useState<TypeSummaryInfo | null>(null);
 
   useEffect(() => {
-    if (!canAccessAdminHome(access)) {
+    if (!access.loaded || !canAccessAdminHome(access)) {
       return;
     }
 
@@ -59,13 +59,8 @@ export default function AdminHomePage() {
     fetch();
   }, [access, storeId]);
 
-  if (!canAccessAdminHome(access)) {
-    return (
-      <AccessDenied
-        title="관리자 화면에 접근할 수 없어요"
-        message="매니저 이상 권한이 있어야 관리자 홈을 사용할 수 있어요"
-      />
-    );
+  if (!access.loaded) {
+    return <View />;
   }
 
   return (
