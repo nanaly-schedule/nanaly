@@ -11,11 +11,6 @@ import {
   saveRefreshToken,
 } from '@/src/features/auth/lib/storage';
 import { basicColorGrey800 } from '@/src/init/styles/tokens';
-import {
-  DEV_MOCK_STORE,
-  DEV_MOCK_STORE_ID,
-  getDevMockAuthResponse,
-} from '@/src/mocks/server';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import Main from '@/src/shared/ui/Main';
 import SignInForm from '@/src/widgets/auth/sign-in/SignInForm';
@@ -74,18 +69,18 @@ export default function SignInPage() {
     password: string;
   }) => {
     if (!email || !password) {
+      setLoginErrorMessage('이메일 또는 비밀번호를 입력해주세요');
+      setIsLoginErrorModalVisible(true);
       return;
     }
-
     try {
       const response = await signIn({
-        email: email.toLowerCase(),
+        email,
         password,
       });
       const tokenPayload = response.data as AuthResponse;
       const { accessToken } = tokenPayload;
       const { refreshToken } = tokenPayload;
-
       if (!accessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
       }
@@ -96,40 +91,23 @@ export default function SignInPage() {
       // }
       await saveAccessToken(accessToken);
       await saveRefreshToken(refreshToken);
+
       router.replace('/');
     } catch (error) {
-      if (__DEV__) {
-        try {
-          const tokenPayload = getDevMockAuthResponse() as AuthResponse;
-          const { accessToken, refreshToken } = tokenPayload;
-
-          if (!accessToken || !refreshToken) {
-            throw new Error('토큰 정보가 없습니다');
-          }
-
-          await saveAccessToken(accessToken);
-          await saveRefreshToken(refreshToken);
-          router.replace({
-            pathname: '/[storeId]/home/admin',
-            params: {
-              storeId: DEV_MOCK_STORE_ID,
-              role: 'owner',
-              displayStoreName: DEV_MOCK_STORE.storeName,
-              isOwner: 'true',
-            },
-          });
-          return;
-        } catch {}
-      }
-
+      const statusCode = isAxiosError(error)
+        ? error.response?.status
+        : undefined;
       const errorMessage = isAxiosError(error)
         ? typeof error.response?.data === 'string'
           ? error.response.data
           : (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
-
-      setLoginErrorMessage(errorMessage ?? '로그인 중 오류가 발생했습니다');
-      setIsLoginErrorModalVisible(true);
+      setLoginErrorMessage((prev) =>
+        statusCode === 401
+          ? '이메일 또는 비밀번호를 확인해주세요'
+          : (errorMessage ?? '로그인 중 오류가 발생했습니다'),
+      );
+      setIsLoginErrorModalVisible((prev) => true);
     }
   };
   useEffect(() => {

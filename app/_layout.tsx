@@ -5,9 +5,9 @@ import { getUserProfile } from '@/src/features/user/api/profile';
 import useUser from '@/src/features/user/lib/useUser';
 import { startMockServer } from '@/src/mocks/server';
 
-if (__DEV__) {
-  startMockServer();
-}
+// if (__DEV__) {
+//   startMockServer();
+// }
 
 export default function Layout() {
   const user = useUser();
@@ -24,6 +24,7 @@ export default function Layout() {
           name,
           email,
           birthDate,
+          currentStoreAccessLoaded: false,
           currentStoreId: null,
           currentStoreRole: null,
           currentStorePermissions: null,

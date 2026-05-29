@@ -25,22 +25,12 @@ apiClient.interceptors.request.use(
   async (
     config: InternalAxiosRequestConfig,
   ): Promise<InternalAxiosRequestConfig> => {
-    const accessToken: string | null = await getAccessToken();
+    const accessToken = await getAccessToken();
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
-
-      if (__DEV__ && isDevMockToken(accessToken) && config.url) {
-        const mockablePaths = ['/user/profile', '/stores'];
-        const shouldUseMock = mockablePaths.some((path) =>
-          config.url?.startsWith(path),
-        );
-
-        if (shouldUseMock) {
-          config.url = getDevMockPath(config.url);
-        }
-      }
     }
+
     return config;
   },
   (error: unknown): Promise<never> => {
@@ -58,9 +48,15 @@ apiClient.interceptors.response.use(
     }
 
     const originalRequest = error.config as ExtendedAxiosRequestConfig;
+    const requestUrl = originalRequest?.url ?? '';
+    const isLoginRequest = requestUrl.includes('/auth/login');
 
     // 401 에러이고, 아직 재시도하지 않은 경우
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !isLoginRequest &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {

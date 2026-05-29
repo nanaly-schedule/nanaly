@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -18,8 +19,10 @@ import ChangeButton from '@/src/widgets/user/ChangeButton';
 
 export default function ChangePasswordPage() {
   const user = useUser();
+  const { isSocialLogin } = useLocalSearchParams<{ isSocialLogin?: string }>();
 
   const { isTempPassword } = user;
+  const shouldShowCurrentPassword = isTempPassword || isSocialLogin === 'false';
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
@@ -46,7 +49,7 @@ export default function ChangePasswordPage() {
   return (
     <PageLayout title="비밀번호 변경">
       <View style={styles.container}>
-        {isTempPassword && (
+        {shouldShowCurrentPassword && (
           <InputVerifyWidget
             placeholder="현재 비밀번호를 입력해주세요"
             value={currentPassword}

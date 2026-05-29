@@ -2,6 +2,7 @@ import { MemberRole } from '@/src/entities/member/member';
 import { UserStorePermissions } from '@/src/entities/user/user';
 
 export type CurrentStoreAccess = {
+  loaded: boolean;
   role: MemberRole | null;
   permissions: UserStorePermissions | null;
   isOwner: boolean;
@@ -14,14 +15,15 @@ export type CurrentStoreAccess = {
 };
 
 export function getCurrentStoreAccess(input: {
+  loaded: boolean;
   role: MemberRole | null;
   permissions: UserStorePermissions | null;
 }): CurrentStoreAccess {
-  const { role, permissions } = input;
+  const { loaded, role, permissions } = input;
   const isOwner = role === MemberRole.OWNER;
   const isManager = role === MemberRole.MANAGER;
-
   return {
+    loaded,
     role,
     permissions,
     isOwner,
