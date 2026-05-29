@@ -73,7 +73,6 @@ export default function SignInPage() {
       setIsLoginErrorModalVisible(true);
       return;
     }
-
     try {
       const response = await signIn({
         email,
@@ -82,7 +81,6 @@ export default function SignInPage() {
       const tokenPayload = response.data as AuthResponse;
       const { accessToken } = tokenPayload;
       const { refreshToken } = tokenPayload;
-      console.log(accessToken);
       if (!accessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
       }
@@ -96,14 +94,20 @@ export default function SignInPage() {
 
       router.replace('/');
     } catch (error) {
+      const statusCode = isAxiosError(error)
+        ? error.response?.status
+        : undefined;
       const errorMessage = isAxiosError(error)
         ? typeof error.response?.data === 'string'
           ? error.response.data
           : (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
-
-      setLoginErrorMessage(errorMessage ?? '로그인 중 오류가 발생했습니다');
-      setIsLoginErrorModalVisible(true);
+      setLoginErrorMessage((prev) =>
+        statusCode === 401
+          ? '이메일 또는 비밀번호를 확인해주세요'
+          : (errorMessage ?? '로그인 중 오류가 발생했습니다'),
+      );
+      setIsLoginErrorModalVisible((prev) => true);
     }
   };
   useEffect(() => {
