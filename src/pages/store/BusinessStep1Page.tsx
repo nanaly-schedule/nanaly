@@ -25,6 +25,9 @@ export default function BusinessStep1Page() {
   const [startDate, setStartDate] = useState('');
   const [isVerificationErrorModalVisible, setIsVerificationErrorModalVisible] =
     useState(false);
+  const [verificationErrorMessage, setVerificationErrorMessage] = useState(
+    '입력한 사업자 정보를 다시 확인해 주세요',
+  );
 
   const normalizedBusinessNumber = businessNumber.replace(/\D/g, '');
   const isVerify =
@@ -54,11 +57,17 @@ export default function BusinessStep1Page() {
       }
     } catch (error) {
       if (isAxiosError(error)) {
+        const errorMessageByStatus =
+          error.response?.status === 400
+            ? '사업자 정보가 일치하지 않습니다'
+            : error.response?.status === 401
+              ? '인증에 실패했습니다'
+              : '입력한 사업자 정보를 다시 확인해 주세요';
+
+        setVerificationErrorMessage(errorMessageByStatus);
         setIsVerificationErrorModalVisible(true);
         return;
       }
-
-      setIsVerificationErrorModalVisible(true);
     }
   };
 
@@ -98,9 +107,7 @@ export default function BusinessStep1Page() {
         onClose={() => setIsVerificationErrorModalVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Text>
-            입력한 사업자 정보를 다시 확인해 주세요
-          </BaseModal.Text>
+          <BaseModal.Text>{verificationErrorMessage}</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
