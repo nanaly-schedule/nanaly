@@ -25,6 +25,12 @@ apiClient.interceptors.request.use(
   async (
     config: InternalAxiosRequestConfig,
   ): Promise<InternalAxiosRequestConfig> => {
+    const accessToken = await getAccessToken();
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
     return config;
   },
   (error: unknown): Promise<never> => {
