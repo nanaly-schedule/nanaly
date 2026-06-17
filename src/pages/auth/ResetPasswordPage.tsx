@@ -13,7 +13,7 @@ export default function ResetPasswordPage() {
   );
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
 
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = email.trim();
 
   const isEmailValid = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(
     normalizedEmail,
@@ -33,6 +33,7 @@ export default function ResetPasswordPage() {
         router.back();
       }, 1000);
     } catch (error) {
+      //todo: 400 에러 시 이메일이 존재하지 않는다는 에러 메세지 띄우기
       console.error(error);
     }
   };

@@ -3,11 +3,6 @@ import { useEffect } from 'react';
 
 import { getUserProfile } from '@/src/features/user/api/profile';
 import useUser from '@/src/features/user/lib/useUser';
-import { startMockServer } from '@/src/mocks/server';
-
-// if (__DEV__) {
-//   startMockServer();
-// }
 
 export default function Layout() {
   const user = useUser();

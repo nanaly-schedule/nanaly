@@ -14,7 +14,6 @@ import {
   spacingSpacing30,
   spacingSpaicng14,
 } from '@/src/init/styles/tokens';
-import { getDevMockMemberList } from '@/src/mocks/server';
 import SearchIcon from '@/src/shared/assets/SearchIcon';
 import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
@@ -52,9 +51,7 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
         const { data } = await getMembers(storeId, debouncedWorker);
         setWorkers(data);
       } catch {
-        if (__DEV__) {
-          setWorkers(getDevMockMemberList(debouncedWorker));
-        }
+        setWorkers([]);
       }
     };
 
