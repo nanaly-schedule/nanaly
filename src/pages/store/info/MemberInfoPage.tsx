@@ -24,7 +24,6 @@ import {
   typoColorPrimary,
   typoColorRed,
 } from '@/src/init/styles/tokens';
-import { getDevMockMember } from '@/src/mocks/server';
 import CheckIcon from '@/src/shared/assets/CheckIcon';
 import EditIcon from '@/src/shared/assets/EditIcon';
 import {
@@ -93,13 +92,7 @@ export default function MemberInfoPage() {
         const { data } = await getMember(storeId, memberId);
         setUser(data);
       } catch {
-        if (__DEV__) {
-          const mockMember = getDevMockMember(memberId);
-
-          if (mockMember) {
-            setUser(mockMember);
-          }
-        }
+        setUser({});
       }
     };
     fetch();

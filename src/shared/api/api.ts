@@ -13,11 +13,10 @@ import {
   saveAccessToken,
   saveRefreshToken,
 } from '@/src/features/auth/lib/storage';
-import { getDevMockPath, isDevMockToken } from '@/src/mocks/server';
 
 export const apiClient = axios.create({
-  baseURL: 'http://43.202.8.87:8080/',
-  timeout: 10000,
+  baseURL: 'https://nanaly-backend-dev.up.railway.app/',
+  timeout: 1000,
 });
 
 // 요청 인터셉터: 모든 API 요청에 Access Token 자동 추가
@@ -113,8 +112,7 @@ async function refreshAccessToken(): Promise<string | null> {
     await saveRefreshToken(data.refreshToken);
 
     return data.accessToken;
-  } catch (error) {
-    console.error('토큰 재발급 실패:', error);
+  } catch {
     return null;
   }
 }
