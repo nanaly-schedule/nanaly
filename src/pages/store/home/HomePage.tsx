@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import { MemberRole } from '@/src/entities/member/member';
@@ -7,6 +7,7 @@ import useUser from '@/src/features/user/lib/useUser';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import CurrentWeekSchedules from '@/src/widgets/store/home/CurrentWeekSchedules';
 import StoreHeader from '@/src/widgets/store/home/StoreHeader';
+import NoticeWidget from '@/src/widgets/notice/NoticeWidget';
 
 type TypeHeaderInfo = {
   role: MemberRole;
@@ -59,6 +60,12 @@ export default function HomePage() {
         isActiveOwner={false}
       />
       <CurrentWeekSchedules schedules={schedule} />
+        <NoticeWidget onPressHeader={() => {
+          router.push({ 
+            pathname: `/(notice)/[storeId]/notice`,
+            params: { storeId, displayStoreName }
+           })
+        }} />
     </PageLayout>
   );
 }
