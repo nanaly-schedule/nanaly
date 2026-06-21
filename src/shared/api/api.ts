@@ -15,8 +15,8 @@ import {
 } from '@/src/features/auth/lib/storage';
 
 export const apiClient = axios.create({
-  baseURL: 'https://nanaly-backend-dev.up.railway.app/',
-  timeout: 1000,
+  baseURL: 'https://staging-api.nanaly-schedule.com/',
+  timeout: 10000,
 });
 
 // 요청 인터셉터: 모든 API 요청에 Access Token 자동 추가
