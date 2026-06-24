@@ -1,20 +1,18 @@
-import {Text, View} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Pressable, Text, View } from 'react-native';
 
-export type Notice ={
-    id: number;
-    title: string;
-    content: string;
-    createdAt: string;
-}
+import { Notice } from '@/src/entities/notice/notice';
 
 type NoticeCardProps = {
-    notice: Notice;
+  notice: Notice;
+  onPress?: () => void;
 }
 
-export default function NoticeCard({notice}: NoticeCardProps) {
+export default function NoticeCard({ notice, onPress }: NoticeCardProps) {
     return (
-        <View
+        <Pressable
+            disabled={!onPress}
+            onPress={onPress}
             style={{
                 backgroundColor: '#fff',
         borderRadius: 16,
@@ -55,9 +53,9 @@ export default function NoticeCard({notice}: NoticeCardProps) {
                         color: '#666',
                     }}
                 >
-                    {notice.content}
+                    {notice.content?.trim() || '내용이 표시됩니다'}
                 </Text>
             </View>
-        </View>
+        </Pressable>
     );
-}   
+}
