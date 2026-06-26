@@ -1,8 +1,10 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
+import { getNotices } from '@/src/features/notice/api/notice';
 import { getDashboardInfos } from '@/src/features/store/api/dashboard';
 import useUser from '@/src/features/user/lib/useUser';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -32,32 +34,34 @@ export default function HomePage() {
   const [schedule, setSchedule] = useState<TypeSchedules[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        //{"header": {"role": "staff", "storeName": "나날이 ", "unreadNotificationCount": 0}, "notices": [], "schedules": {"current": null, "upcoming": []}}
-        const { data } = await getDashboardInfos(storeId);
-
-        const { header, schedules, notices: dashboardNotices } = data;
-        setHeaderInfo(header);
-        setNotices(
-          dashboardNotices.map((notice: Notice) => ({
-            ...notice,
-            id: notice.id ?? notice.noticeId,
-          })),
-        );
-
-        setSchedule([
-          ...(schedules?.current ? [schedules.current] : []),
-          ...schedules.upcoming,
-        ]);
-      } catch (error) {
-        console.log(error);
-        //todo: 403 -> not found redirect
+  useFocusEffect(
+    useCallback(() => {
+      if (!storeId) {
+        return;
       }
-    };
-    fetch();
-  }, [storeId]);
+
+      const fetchDashboard = async () => {
+        try {
+          const [{ data: dashboard }, { data: noticeList }] = await Promise.all([
+            getDashboardInfos(storeId),
+            getNotices(storeId),
+          ]);
+          const { header, schedules } = dashboard;
+
+          setHeaderInfo(header);
+          setNotices((noticeList as Notice[]).slice(0, 3));
+          setSchedule([
+            ...(schedules?.current ? [schedules.current] : []),
+            ...schedules.upcoming,
+          ]);
+        } catch {
+          // todo: 403 -> not found redirect
+        }
+      };
+
+      fetchDashboard();
+    }, [storeId]),
+  );
   return (
     <PageLayout showHeader={false}>
       <StoreHeader

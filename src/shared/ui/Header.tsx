@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router';
-import { PropsWithChildren, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { typoColorPrimary } from '@/src/init/styles/tokens';
 
-import CheckIcon from '../assets/CheckIcon';
 import LeftArrowIcon from '../assets/LeftArrowIcon';
 import NText from './NText';
 
@@ -79,6 +78,9 @@ const styles = StyleSheet.create({
   },
   right: {
     right: 2,
-    top: 8,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    paddingVertical: 0,
   },
 });

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Notice } from '@/src/entities/notice/notice';
@@ -34,36 +35,37 @@ import NoticeTabs, {
 // ];
 
 export default function NoticePage() {
-const { storeId } = useLocalSearchParams<{ storeId: string }>();
+  const { storeId } = useLocalSearchParams<{ storeId: string }>();
 
   const [tab, setTab] = useState<NoticeTabType>('all');
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    if(!storeId) {return;}
-
-    const fetchNotices = async () => {
-      try {
-        setLoading(true);
-
-        const filter: NoticeFilter | undefined =
-          tab === 'all' ? undefined : tab;
-          
-        const { data } = await getNotices(storeId, filter);
-
-        console.log('공지 목록 응답:', data);
-        setNotices(data);
-      } catch (error) {
-        console.error('공지 목록 조회 실패:', error);
-        setNotices([]);
-      } finally {
-        setLoading(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (!storeId) {
+        return;
       }
-    };
 
-    fetchNotices();
-  }, [storeId, tab]);
+      const fetchNotices = async () => {
+        try {
+          setLoading(true);
+
+          const filter: NoticeFilter | undefined =
+            tab === 'all' ? undefined : tab;
+
+          const { data } = await getNotices(storeId, filter);
+          setNotices(data);
+        } catch {
+          setNotices([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchNotices();
+    }, [storeId, tab]),
+  );
 
   return (
     <PageLayout title="공지">
@@ -79,6 +81,7 @@ const { storeId } = useLocalSearchParams<{ storeId: string }>();
           <NoticeCard
             key={notice.id}
             notice={notice}
+            variant="list"
             onPress={() => {
               router.push({
                 pathname: '/(notice)/[storeId]/notice-detail',
@@ -92,7 +95,10 @@ const { storeId } = useLocalSearchParams<{ storeId: string }>();
       <Pressable
         style={styles.floatingButton}
         onPress={() => {
-          console.log('공지 작성');
+          router.push({
+            pathname: '/(notice)/[storeId]/notice-create',
+            params: { storeId },
+          });
         }}
       >
         <Ionicons
@@ -107,7 +113,7 @@ const { storeId } = useLocalSearchParams<{ storeId: string }>();
 
 const styles = StyleSheet.create({
   list: {
-    marginTop: 16,
+    marginTop: 4,
   },
 
   floatingButton: {

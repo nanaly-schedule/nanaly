@@ -1,4 +1,5 @@
-import { Pressable, View, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet,View } from 'react-native';
+
 import NText from '@/src/shared/ui/NText';
 
 export type NoticeTabType = 'all' | 'public' | 'private'
@@ -25,8 +26,8 @@ export default function NoticeTabs({
         <View
             style={{
                 flexDirection: 'row',
-                gap: 20,
-                marginBottom: 20,
+                gap: 24,
+                marginBottom: 22,
             }}
         >
             {TABS.map((tab)=>{
@@ -38,7 +39,7 @@ export default function NoticeTabs({
                     style={styles.tab}
                     >
                         <NText
-                            variant='r14'
+                            variant='m16'
                             style={[
                                 styles.label,
                                 selected && styles.selectedLabel,
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
   },
   tab: {
     alignItems: 'center',
-    paddingBottom: 8,
+    paddingBottom: 10,
   },
   label: {
     color: '#A0A0A0',
@@ -72,9 +73,12 @@ const styles = StyleSheet.create({
     color: '#222222',
   },
   indicator: {
-    marginTop: 6,
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    left: 0,
     width: '100%',
-    height: 2,
+    height: 3,
     backgroundColor: '#222222',
   },
 });

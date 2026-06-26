@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { isAxiosError } from 'axios';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Notice } from '@/src/entities/notice/notice';
-import { getNotice } from '@/src/features/notice/api/notice';
+import { getNotice, updateNotice } from '@/src/features/notice/api/notice';
 import {
   typoColorPrimary,
   typoColorSecondary,
@@ -29,6 +31,7 @@ function formatNoticeDate(createdAt?: string) {
 }
 
 export default function NoticeDetailPage() {
+  const router = useRouter();
   const { storeId, noticeId } = useLocalSearchParams<{
     storeId: string;
     noticeId: string;
@@ -37,30 +40,79 @@ export default function NoticeDetailPage() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [updatingVisibility, setUpdatingVisibility] = useState(false);
 
-  useEffect(() => {
-    if (!storeId || !noticeId) {
-      setErrorMessage('공지 정보를 확인할 수 없어요.');
-      setLoading(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (!storeId || !noticeId) {
+        setErrorMessage('공지 정보를 확인할 수 없어요.');
+        setLoading(false);
+        return;
+      }
+
+      const fetchNotice = async () => {
+        try {
+          setLoading(true);
+          setErrorMessage(null);
+
+          const { data } = await getNotice(storeId, noticeId);
+          setNotice(data);
+        } catch {
+          setErrorMessage('공지를 불러오지 못했어요.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchNotice();
+    }, [storeId, noticeId]),
+  );
+
+  const handleToggleVisibility = async () => {
+    if (!notice || !storeId || !noticeId || updatingVisibility) {
       return;
     }
 
-    const fetchNotice = async () => {
-      try {
-        setLoading(true);
-        setErrorMessage(null);
+    if (!notice.content?.trim()) {
+      setMenuVisible(false);
+      setErrorMessage('공지 내용이 없어 공개 상태를 변경할 수 없어요.');
+      return;
+    }
 
-        const { data } = await getNotice(storeId, noticeId);
-        setNotice(data);
-      } catch {
-        setErrorMessage('공지를 불러오지 못했어요.');
-      } finally {
-        setLoading(false);
+    try {
+      setUpdatingVisibility(true);
+      setErrorMessage(null);
+
+      await updateNotice(storeId, noticeId, {
+        title: notice.title,
+        content: notice.content,
+        isPublic: !notice.isPublic,
+      });
+
+      setNotice((current) =>
+        current ? { ...current, isPublic: !current.isPublic } : current,
+      );
+      setMenuVisible(false);
+    } catch (error) {
+      setMenuVisible(false);
+
+      if (isAxiosError(error) && error.response?.status === 403) {
+        setErrorMessage('공지 공개 상태를 변경할 권한이 없어요.');
+      } else {
+        setErrorMessage('공지 공개 상태를 변경하지 못했어요.');
       }
-    };
+    } finally {
+      setUpdatingVisibility(false);
+    }
+  };
 
-    fetchNotice();
-  }, [storeId, noticeId]);
+  const handlePressEdit = () => {
+    setMenuVisible(false);
+    router.push({
+      pathname: '/(notice)/[storeId]/notice-create',
+      params: { storeId, noticeId },
+    });
+  };
 
   const createdAt = formatNoticeDate(notice?.createdAt);
   const metaItems = [
@@ -90,16 +142,21 @@ export default function NoticeDetailPage() {
           <View style={styles.menu}>
             <Pressable
               style={styles.menuItem}
-              onPress={() => setMenuVisible(false)}
+              disabled={updatingVisibility}
+              onPress={handleToggleVisibility}
             >
               <NText variant="r14" style={styles.menuText}>
-                {notice?.isPublic ? '비공개로 전환' : '공개로 전환'}
+                {updatingVisibility
+                  ? '변경 중'
+                  : notice?.isPublic
+                    ? '비공개로 전환'
+                    : '공개로 전환'}
               </NText>
             </Pressable>
 
             <Pressable
               style={styles.menuItem}
-              onPress={() => setMenuVisible(false)}
+              onPress={handlePressEdit}
             >
               <NText variant="r14" style={styles.menuText}>
                 수정
@@ -158,7 +215,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
     top: 48,
     right: 0,
-    width: 260,
+    width: 180,
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
