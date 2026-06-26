@@ -91,24 +91,15 @@ async function refreshAccessToken(): Promise<string | null> {
       return null;
     }
 
-    // Refresh Token을 Authorization 헤더에 Bearer 형식으로 전송
     const { data } = await axios.post<{
       accessToken: string;
-      refreshToken: string; // 새 Refresh Token도 함께 받아야 함
+      refreshToken: string;
     }>(
-      `${apiClient.defaults.baseURL}/auth/refresh`, // 실제 엔드포인트 확인 필요
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${refreshToken}`, // Bearer 형식으로 전송
-        },
-      },
+      `${apiClient.defaults.baseURL}auth/refresh`,
+      { refreshToken },
     );
 
-    // 새 Access Token 저장
     await saveAccessToken(data.accessToken);
-
-    // 새 Refresh Token도 저장 (기존 토큰 폐기되므로 필수!)
     await saveRefreshToken(data.refreshToken);
 
     return data.accessToken;
