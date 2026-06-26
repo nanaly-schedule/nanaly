@@ -51,11 +51,7 @@ export default function NoticeCard({
             ]}
             >
                 <Ionicons
-                    name={
-                        notice.isPublic
-                            ? 'lock-open-outline'
-                            : 'lock-closed-outline'
-                    }
+                    name="megaphone-outline"
                     size={20}
                     color="#fff"
                 />
