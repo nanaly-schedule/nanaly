@@ -14,7 +14,7 @@ export function getNotices(
     filter?: NoticeFilter
 ) {
   return apiClient.get(`/stores/${storeId}/notices`, {
-    params: filter ? { filter } : undefined,
+    params: filter ? { filter } : { filter: 'all' },
   });
 }
 
