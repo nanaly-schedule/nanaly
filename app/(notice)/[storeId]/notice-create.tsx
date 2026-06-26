@@ -2,6 +2,7 @@ import { isAxiosError } from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
+  BackHandler,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -19,6 +20,7 @@ import {
   buttonColorCta,
   typoColorPrimary,
 } from '@/src/init/styles/tokens';
+import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 
@@ -35,6 +37,12 @@ export default function NoticeCreatePage() {
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [exitModalVisible, setExitModalVisible] = useState(false);
+  const [initialForm, setInitialForm] = useState({
+    title: '',
+    content: '',
+    isPublic: true,
+  });
 
   useEffect(() => {
     if (!isEditMode || !storeId || !noticeId) {
@@ -50,6 +58,11 @@ export default function NoticeCreatePage() {
         setTitle(data.title);
         setContent(data.content ?? '');
         setIsPublic(data.isPublic);
+        setInitialForm({
+          title: data.title,
+          content: data.content ?? '',
+          isPublic: data.isPublic,
+        });
       } catch {
         setErrorMessage('수정할 공지를 불러오지 못했어요.');
       } finally {
@@ -59,6 +72,40 @@ export default function NoticeCreatePage() {
 
     fetchNotice();
   }, [isEditMode, noticeId, storeId]);
+
+  const hasUnsavedChanges =
+    title !== initialForm.title ||
+    content !== initialForm.content ||
+    isPublic !== initialForm.isPublic;
+
+  const handlePressBack = () => {
+    if (submitting) {
+      return;
+    }
+
+    if (hasUnsavedChanges) {
+      setExitModalVisible(true);
+      return;
+    }
+
+    router.back();
+  };
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (hasUnsavedChanges) {
+          setExitModalVisible(true);
+          return true;
+        }
+
+        return false;
+      },
+    );
+
+    return () => subscription.remove();
+  }, [hasUnsavedChanges]);
 
   const handleSubmit = async () => {
     const trimmedTitle = title.trim();
@@ -124,6 +171,7 @@ export default function NoticeCreatePage() {
         </NText>
       }
       onPressCheckIcon={handleSubmit}
+      onPressBack={handlePressBack}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -191,6 +239,33 @@ export default function NoticeCreatePage() {
           </NText>
         )}
       </KeyboardAvoidingView>
+
+      <BaseModal
+        visible={exitModalVisible}
+        onClose={() => setExitModalVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>
+            뒤로 가면 작성 중인 내용이 사라져요
+          </BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            variant="secondary"
+            onPress={() => setExitModalVisible(false)}
+          >
+            취소
+          </BaseModal.Button>
+          <BaseModal.Button
+            onPress={() => {
+              setExitModalVisible(false);
+              router.back();
+            }}
+          >
+            뒤로가기
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
     </PageLayout>
   );
 }

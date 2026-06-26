@@ -6,11 +6,16 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Notice } from '@/src/entities/notice/notice';
-import { getNotice, updateNotice } from '@/src/features/notice/api/notice';
+import {
+  deleteNotice,
+  getNotice,
+  updateNotice,
+} from '@/src/features/notice/api/notice';
 import {
   typoColorPrimary,
   typoColorSecondary,
 } from '@/src/init/styles/tokens';
+import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 
@@ -41,6 +46,8 @@ export default function NoticeDetailPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [updatingVisibility, setUpdatingVisibility] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -114,6 +121,33 @@ export default function NoticeDetailPage() {
     });
   };
 
+  const handleDelete = async () => {
+    if (!storeId || !noticeId || deleting) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setErrorMessage(null);
+
+      await deleteNotice(storeId, noticeId);
+      setDeleteModalVisible(false);
+      setMenuVisible(false);
+      router.back();
+    } catch (error) {
+      setDeleteModalVisible(false);
+      setMenuVisible(false);
+
+      if (isAxiosError(error) && error.response?.status === 403) {
+        setErrorMessage('공지를 삭제할 권한이 없어요.');
+      } else {
+        setErrorMessage('공지 삭제 중 오류가 발생했어요.');
+      }
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const createdAt = formatNoticeDate(notice?.createdAt);
   const metaItems = [
     createdAt,
@@ -162,6 +196,19 @@ export default function NoticeDetailPage() {
                 수정
               </NText>
             </Pressable>
+
+            <Pressable
+              style={styles.menuItem}
+              disabled={deleting}
+              onPress={() => {
+                setMenuVisible(false);
+                setDeleteModalVisible(true);
+              }}
+            >
+              <NText variant="r14" style={styles.menuText}>
+                삭제하기
+              </NText>
+            </Pressable>
           </View>
         </>
       )}
@@ -201,6 +248,29 @@ export default function NoticeDetailPage() {
           </>
         )}
       </ScrollView>
+
+      <BaseModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>공지를 삭제할까요?</BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            variant="secondary"
+            onPress={() => setDeleteModalVisible(false)}
+          >
+            취소
+          </BaseModal.Button>
+          <BaseModal.Button
+            disabled={deleting}
+            onPress={handleDelete}
+          >
+            {deleting ? '삭제 중' : '삭제'}
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
     </PageLayout>
   );
 }
