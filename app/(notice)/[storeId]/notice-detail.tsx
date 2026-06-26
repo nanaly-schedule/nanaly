@@ -5,12 +5,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
 import {
   deleteNotice,
   getNotice,
   updateNotice,
 } from '@/src/features/notice/api/notice';
+import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import {
   typoColorPrimary,
   typoColorSecondary,
@@ -37,6 +39,13 @@ function formatNoticeDate(createdAt?: string) {
 
 export default function NoticeDetailPage() {
   const router = useRouter();
+  const access = useCurrentStoreAccess();
+  const canViewPrivateNotice =
+    access.isOwner || access.role === MemberRole.MANAGER;
+  const canManageNotice =
+    access.isOwner ||
+    (access.role === MemberRole.MANAGER &&
+      !!access.permissions?.canManageNotice);
   const { storeId, noticeId } = useLocalSearchParams<{
     storeId: string;
     noticeId: string;
@@ -76,7 +85,13 @@ export default function NoticeDetailPage() {
   );
 
   const handleToggleVisibility = async () => {
-    if (!notice || !storeId || !noticeId || updatingVisibility) {
+    if (
+      !canManageNotice ||
+      !notice ||
+      !storeId ||
+      !noticeId ||
+      updatingVisibility
+    ) {
       return;
     }
 
@@ -114,6 +129,10 @@ export default function NoticeDetailPage() {
   };
 
   const handlePressEdit = () => {
+    if (!canManageNotice) {
+      return;
+    }
+
     setMenuVisible(false);
     router.push({
       pathname: '/(notice)/[storeId]/notice-create',
@@ -122,7 +141,7 @@ export default function NoticeDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!storeId || !noticeId || deleting) {
+    if (!canManageNotice || !storeId || !noticeId || deleting) {
       return;
     }
 
@@ -152,22 +171,28 @@ export default function NoticeDetailPage() {
   const metaItems = [
     createdAt,
     notice?.authorName,
-    notice ? (notice.isPublic ? '공개' : '비공개') : '',
+    canViewPrivateNotice && notice
+      ? notice.isPublic
+        ? '공개'
+        : '비공개'
+      : '',
   ].filter(Boolean);
 
   return (
     <PageLayout
       title="공지사항"
       icon={
-        <Ionicons
-          name="ellipsis-vertical"
-          size={20}
-          color={typoColorPrimary}
-        />
+        canManageNotice ? (
+          <Ionicons
+            name="ellipsis-vertical"
+            size={20}
+            color={typoColorPrimary}
+          />
+        ) : undefined
       }
       onPressCheckIcon={() => setMenuVisible((visible) => !visible)}
     >
-      {menuVisible && (
+      {canManageNotice && menuVisible && (
         <>
           <Pressable
             style={styles.menuBackdrop}

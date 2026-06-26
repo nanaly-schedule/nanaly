@@ -11,21 +11,29 @@ import {
   View,
 } from 'react-native';
 
+import { MemberRole } from '@/src/entities/member/member';
 import {
   createNotice,
   getNotice,
   updateNotice,
 } from '@/src/features/notice/api/notice';
+import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import {
   buttonColorCta,
   typoColorPrimary,
 } from '@/src/init/styles/tokens';
+import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 
 export default function NoticeCreatePage() {
   const router = useRouter();
+  const access = useCurrentStoreAccess();
+  const canManageNotice =
+    access.isOwner ||
+    (access.role === MemberRole.MANAGER &&
+      !!access.permissions?.canManageNotice);
   const { storeId, noticeId } = useLocalSearchParams<{
     storeId: string;
     noticeId?: string;
@@ -45,7 +53,13 @@ export default function NoticeCreatePage() {
   });
 
   useEffect(() => {
-    if (!isEditMode || !storeId || !noticeId) {
+    if (
+      !access.loaded ||
+      !canManageNotice ||
+      !isEditMode ||
+      !storeId ||
+      !noticeId
+    ) {
       return;
     }
 
@@ -71,7 +85,7 @@ export default function NoticeCreatePage() {
     };
 
     fetchNotice();
-  }, [isEditMode, noticeId, storeId]);
+  }, [access.loaded, canManageNotice, isEditMode, noticeId, storeId]);
 
   const hasUnsavedChanges =
     title !== initialForm.title ||
@@ -155,6 +169,19 @@ export default function NoticeCreatePage() {
       setSubmitting(false);
     }
   };
+
+  if (!access.loaded) {
+    return <View />;
+  }
+
+  if (!canManageNotice) {
+    return (
+      <AccessDenied
+        title="공지를 관리할 수 없어요"
+        message="현재 매장 권한으로는 공지를 작성하거나 수정할 수 없어요"
+      />
+    );
+  }
 
   return (
     <PageLayout

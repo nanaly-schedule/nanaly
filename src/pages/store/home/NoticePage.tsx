@@ -4,8 +4,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
 import { getNotices, NoticeFilter } from '@/src/features/notice/api/notice';
+import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import NoticeCard from '@/src/widgets/notice/NoticeCard';
@@ -36,6 +38,13 @@ import NoticeTabs, {
 
 export default function NoticePage() {
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
+  const access = useCurrentStoreAccess();
+  const canViewPrivateNotice =
+    access.isOwner || access.role === MemberRole.MANAGER;
+  const canManageNotice =
+    access.isOwner ||
+    (access.role === MemberRole.MANAGER &&
+      !!access.permissions?.canManageNotice);
 
   const [tab, setTab] = useState<NoticeTabType>('all');
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -43,7 +52,7 @@ export default function NoticePage() {
 
   useFocusEffect(
     useCallback(() => {
-      if (!storeId) {
+      if (!access.loaded || !storeId) {
         return;
       }
 
@@ -51,8 +60,11 @@ export default function NoticePage() {
         try {
           setLoading(true);
 
-          const filter: NoticeFilter | undefined =
-            tab === 'all' ? undefined : tab;
+          const filter: NoticeFilter | undefined = !canViewPrivateNotice
+            ? 'public'
+            : tab === 'all'
+              ? undefined
+              : tab;
 
           const { data } = await getNotices(storeId, filter);
           setNotices(data);
@@ -64,15 +76,21 @@ export default function NoticePage() {
       };
 
       fetchNotices();
-    }, [storeId, tab]),
+    }, [access.loaded, canViewPrivateNotice, storeId, tab]),
   );
+
+  if (!access.loaded) {
+    return <View />;
+  }
 
   return (
     <PageLayout title="공지">
-      <NoticeTabs
-        value={tab}
-        onChange={setTab}
-      />
+      {canViewPrivateNotice && (
+        <NoticeTabs
+          value={tab}
+          onChange={setTab}
+        />
+      )}
 
       <View style={styles.list}>
         {loading && <NText variant="r14">불러오는 중...</NText>}
@@ -92,21 +110,23 @@ export default function NoticePage() {
         ))}
       </View>
 
-      <Pressable
-        style={styles.floatingButton}
-        onPress={() => {
-          router.push({
-            pathname: '/(notice)/[storeId]/notice-create',
-            params: { storeId },
-          });
-        }}
-      >
-        <Ionicons
-          name="add"
-          size={28}
-          color="#fff"
-        />
-      </Pressable>
+      {canManageNotice && (
+        <Pressable
+          style={styles.floatingButton}
+          onPress={() => {
+            router.push({
+              pathname: '/(notice)/[storeId]/notice-create',
+              params: { storeId },
+            });
+          }}
+        >
+          <Ionicons
+            name="add"
+            size={28}
+            color="#fff"
+          />
+        </Pressable>
+      )}
     </PageLayout>
   );
 }

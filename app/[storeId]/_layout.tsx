@@ -28,6 +28,9 @@ export default function Layout() {
           (store: MyStoreItem) => store.storeId === storeId,
         );
 
+        console.log('내 매장 목록:', myStores);
+        console.log('현재 매장 권한:', currentStore);
+
         setUser({
           currentStoreAccessLoaded: true,
           currentStoreId: currentStore?.storeId ?? null,
