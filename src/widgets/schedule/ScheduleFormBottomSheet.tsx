@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { isAxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import {
   Pressable,
@@ -9,6 +10,9 @@ import {
 } from 'react-native';
 
 import DateWheelColumn from '@/src/features/auth/ui/DateWheelColumn';
+import { createSchedule } from '@/src/features/schedule/api/schedule';
+import { getMembers } from '@/src/features/store/api/member';
+import { getMemberRoleLabel, MemberRole } from '@/src/entities/member/member';
 import {
   backgroundColorWhite,
   buttonColorCta,
@@ -30,7 +34,6 @@ import NText from '@/src/shared/ui/NText';
 
 import {
   MOCK_MEMBERS,
-  MOCK_POSITIONS,
   ScheduleItem,
   ScheduleMember,
   SchedulePosition,
@@ -38,15 +41,49 @@ import {
 
 type ScheduleFormBottomSheetProps = {
   visible: boolean;
+  storeId: string;
   date: string;
+  positions: SchedulePosition[];
   schedule?: ScheduleItem | null;
   onClose: () => void;
-  onCreated?: () => void;
+  onCreated?: (schedule: ScheduleItem) => void;
 };
+
+type StoreMemberResponse = {
+  id?: string;
+  memberId?: string;
+  name: string;
+  role?: MemberRole;
+};
+
+function getApiErrorMessage(error: unknown) {
+  if (isAxiosError(error)) {
+    const responseData = error.response?.data;
+
+    if (typeof responseData === 'string') {
+      return responseData;
+    }
+
+    if (
+      responseData &&
+      typeof responseData === 'object' &&
+      'message' in responseData &&
+      typeof responseData.message === 'string'
+    ) {
+      return responseData.message;
+    }
+
+    return error.message;
+  }
+
+  return error instanceof Error ? error.message : '근무 등록에 실패했어요';
+}
 
 export default function ScheduleFormBottomSheet({
   visible,
+  storeId,
   date,
+  positions,
   schedule,
   onClose,
   onCreated,
@@ -65,6 +102,12 @@ export default function ScheduleFormBottomSheet({
   const [saveConfirmVisible, setSaveConfirmVisible] = useState(false);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
   const [missingRequiredVisible, setMissingRequiredVisible] = useState(false);
+  const [saveFailedVisible, setSaveFailedVisible] = useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] = useState(
+    '근무 등록에 실패했어요',
+  );
+  const [saving, setSaving] = useState(false);
+  const [members, setMembers] = useState<ScheduleMember[]>(MOCK_MEMBERS);
   const memberName =
     schedule?.memberName ?? selectedMember?.name ?? '지정안됨';
   const positionName =
@@ -102,10 +145,49 @@ export default function ScheduleFormBottomSheet({
     setSaveConfirmVisible(true);
   };
 
-  const handleCreateSchedule = () => {
-    setSaveConfirmVisible(false);
-    onCreated?.();
-    onClose();
+  const handleCreateSchedule = async () => {
+    if (!selectedMember || saving) {
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const positionId = selectedPosition?.id ?? null;
+      const payload = {
+        memberId: selectedMember.id,
+        positionId,
+        date: displayDate,
+        startTime,
+        endTime,
+        memo: memo.trim() ? memo.trim() : null,
+      };
+
+      const { data } = await createSchedule(storeId, payload);
+      const createdId =
+        data?.scheduleId ?? data?.id ?? `schedule-${Date.now()}`;
+
+      setSaveConfirmVisible(false);
+      onCreated?.({
+        id: createdId,
+        date: displayDate,
+        memberId: selectedMember.id,
+        memberName: selectedMember.name,
+        positionId,
+        positionName: positionId ? selectedPosition?.name ?? null : null,
+        positionColor: positionId ? selectedPosition?.color ?? null : null,
+        startTime,
+        endTime,
+        memo,
+      });
+      onClose();
+    } catch (error) {
+      setSaveConfirmVisible(false);
+      setSaveErrorMessage(getApiErrorMessage(error));
+      setSaveFailedVisible(true);
+    } finally {
+      setSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -116,7 +198,7 @@ export default function ScheduleFormBottomSheet({
     const nextMember =
       MOCK_MEMBERS.find((member) => member.id === schedule?.memberId) ?? null;
     const nextPosition =
-      MOCK_POSITIONS.find((position) => position.id === schedule?.positionId) ??
+      positions.find((position) => position.id === schedule?.positionId) ??
       null;
 
     setSelectedMember(nextMember);
@@ -126,6 +208,42 @@ export default function ScheduleFormBottomSheet({
     setSelectedDate(schedule?.date ?? date);
     setMemo(schedule?.memo ?? '');
   }, [date, schedule, visible]);
+
+  useEffect(() => {
+    if (!visible || !storeId) {
+      return;
+    }
+
+    const fetchMembers = async () => {
+      try {
+        const { data } = await getMembers(storeId);
+        const nextMembers = (data as StoreMemberResponse[]).reduce<
+          ScheduleMember[]
+        >((acc, member) => {
+          const id = member.memberId ?? member.id;
+
+          if (!id) {
+            return acc;
+          }
+
+          return [
+            ...acc,
+            {
+              id,
+              name: member.name,
+              roleName: member.role ? getMemberRoleLabel(member.role) : '',
+            },
+          ];
+        }, []);
+
+        setMembers(nextMembers.length > 0 ? nextMembers : MOCK_MEMBERS);
+      } catch {
+        setMembers(MOCK_MEMBERS);
+      }
+    };
+
+    fetchMembers();
+  }, [storeId, visible]);
 
   return (
     <BottomSheet
@@ -259,6 +377,7 @@ export default function ScheduleFormBottomSheet({
 
       <MemberPickerBottomSheet
         visible={memberPickerVisible}
+        members={members}
         selectedMemberId={selectedMember?.id ?? null}
         onClose={() => setMemberPickerVisible(false)}
         onSelect={(member) => {
@@ -268,6 +387,7 @@ export default function ScheduleFormBottomSheet({
       />
       <PositionPickerBottomSheet
         visible={positionPickerVisible}
+        positions={positions}
         selectedPositionId={selectedPosition?.id ?? null}
         onClose={() => setPositionPickerVisible(false)}
         onSelect={(position) => {
@@ -311,7 +431,7 @@ export default function ScheduleFormBottomSheet({
           <BaseModal.Button
             onPress={handleCreateSchedule}
           >
-            추가하기
+            {saving ? '추가중' : '추가하기'}
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -350,6 +470,23 @@ export default function ScheduleFormBottomSheet({
           <BaseModal.Button
             fullWidth
             onPress={() => setMissingRequiredVisible(false)}
+          >
+            확인
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+      <BaseModal
+        visible={saveFailedVisible}
+        onClose={() => setSaveFailedVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>저장에 실패했어요</BaseModal.Title>
+          <BaseModal.Text>{saveErrorMessage}</BaseModal.Text>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            fullWidth
+            onPress={() => setSaveFailedVisible(false)}
           >
             확인
           </BaseModal.Button>
@@ -394,17 +531,19 @@ function InfoRow({
 
 function PositionPickerBottomSheet({
   visible,
+  positions,
   selectedPositionId,
   onClose,
   onSelect,
 }: {
   visible: boolean;
+  positions: SchedulePosition[];
   selectedPositionId: string | null;
   onClose: () => void;
   onSelect: (position: SchedulePosition | null) => void;
 }) {
-  const positions = [
-    ...MOCK_POSITIONS,
+  const selectablePositions = [
+    ...positions,
     {
       id: 'none',
       name: '지정안함',
@@ -418,7 +557,7 @@ function PositionPickerBottomSheet({
         포지션 선택
       </NText>
       <View style={styles.memberList}>
-        {positions.map((position) => {
+        {selectablePositions.map((position) => {
           const isNone = position.id === 'none';
           const selected = isNone
             ? selectedPositionId === null
@@ -456,11 +595,13 @@ function PositionPickerBottomSheet({
 
 function MemberPickerBottomSheet({
   visible,
+  members,
   selectedMemberId,
   onClose,
   onSelect,
 }: {
   visible: boolean;
+  members: ScheduleMember[];
   selectedMemberId: string | null;
   onClose: () => void;
   onSelect: (member: ScheduleMember) => void;
@@ -471,7 +612,7 @@ function MemberPickerBottomSheet({
         근무자
       </NText>
       <View style={styles.memberList}>
-        {MOCK_MEMBERS.map((member) => {
+        {members.map((member) => {
           const selected = member.id === selectedMemberId;
 
           return (

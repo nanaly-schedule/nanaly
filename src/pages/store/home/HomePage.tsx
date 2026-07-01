@@ -22,13 +22,26 @@ type TypeSchedules = {
   id: string;
 };
 
+function normalizeStoreId(value?: string | string[]) {
+  const nextValue = Array.isArray(value) ? value[0] : value;
+
+  if (!nextValue || nextValue === 'undefined' || nextValue === 'null') {
+    return undefined;
+  }
+
+  return nextValue;
+}
+
 export default function HomePage() {
   const currentStoreRole = useUser((state) => state.currentStoreRole);
+  const currentStoreId = useUser((state) => state.currentStoreId);
   const isOwner = currentStoreRole !== MemberRole.STAFF;
-  const { storeId, displayStoreName } = useLocalSearchParams<{
-    storeId: string;
+  const params = useLocalSearchParams<{
+    storeId?: string | string[];
     displayStoreName: string;
   }>();
+  const storeId = normalizeStoreId(params.storeId) ?? currentStoreId ?? '';
+  const { displayStoreName } = params;
   const [headerInfo, setHeaderInfo] = useState<TypeHeaderInfo | null>(null);
   //todo: 스케줄 구현 후 데이터 삭제
   const [schedule, setSchedule] = useState<TypeSchedules[]>([]);
@@ -75,12 +88,20 @@ export default function HomePage() {
         <NoticeWidget 
         notices={notices}
         onPressNotice={(noticeId) => {
+          if (!storeId) {
+            return;
+          }
+
           router.push({
             pathname: '/(notice)/[storeId]/notice-detail',
             params: { storeId, noticeId },
           });
         }}
         onPressHeader={() => {
+          if (!storeId) {
+            return;
+          }
+
           router.push({ 
             pathname: `/(notice)/[storeId]/notice`,
             params: { storeId, displayStoreName }

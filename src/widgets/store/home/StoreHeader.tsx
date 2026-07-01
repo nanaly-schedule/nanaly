@@ -12,6 +12,7 @@ import {
 } from '@/src/init/styles/tokens';
 import AlarmIcon from '@/src/shared/assets/AlarmIcon';
 import NText from '@/src/shared/ui/NText';
+import useUser from '@/src/features/user/lib/useUser';
 
 interface StoreHeaderProps {
   storeName: string;
@@ -25,7 +26,17 @@ export default function StoreHeader({
   isActiveOwner,
 }: StoreHeaderProps) {
   const route = useRouter();
-  const { storeId } = useLocalSearchParams<{ storeId: string }>();
+  const { storeId: routeStoreId } = useLocalSearchParams<{
+    storeId?: string | string[];
+  }>();
+  const currentStoreId = useUser((state) => state.currentStoreId);
+  const rawStoreId = Array.isArray(routeStoreId)
+    ? routeStoreId[0]
+    : routeStoreId;
+  const storeId =
+    rawStoreId && rawStoreId !== 'undefined' && rawStoreId !== 'null'
+      ? rawStoreId
+      : currentStoreId;
   const displayStoreName =
     storeName.length > 10 ? `${storeName.slice(0, 10)}...` : storeName;
 
@@ -37,17 +48,24 @@ export default function StoreHeader({
       {isOwner && (
         <Pressable
           style={[styles.default, isActiveOwner && styles.active]}
-          onPress={() =>
-            isActiveOwner
-              ? route.push({
-                  pathname: `/[storeId]/home`,
-                  params: { storeId, displayStoreName, isOwner: 'true' },
-                })
-              : route.push({
-                  pathname: `/[storeId]/home/admin`,
-                  params: { storeId, displayStoreName, isOwner: 'true' },
-                })
-          }
+          onPress={() => {
+            if (!storeId) {
+              return;
+            }
+
+            if (isActiveOwner) {
+              route.push({
+                pathname: `/[storeId]/home`,
+                params: { storeId, displayStoreName, isOwner: 'true' },
+              });
+              return;
+            }
+
+            route.push({
+              pathname: `/[storeId]/home/admin`,
+              params: { storeId, displayStoreName, isOwner: 'true' },
+            });
+          }}
         >
           <NText
             variant="m12"

@@ -1,8 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
+import {
+  createPosition,
+  deletePosition,
+  getPositions,
+} from '@/src/features/schedule/api/position';
+import useUser from '@/src/features/user/lib/useUser';
 import {
   buttonColorCta,
   buttonColorUnavailable,
@@ -14,15 +21,32 @@ import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
-import { MOCK_POSITIONS, SchedulePosition } from '@/src/widgets/schedule/mock';
+import { SchedulePosition } from '@/src/widgets/schedule/mock';
+import {
+  mapPositionResponse,
+  mapPositionResponses,
+} from '@/src/widgets/schedule/positionMapper';
 
 const COLORS = ['#60A5FA', '#F6983B', '#46D81D', '#8B7CF6', '#14B8A6'];
 const MAX_POSITION_COUNT = 5;
 
+function normalizeStoreId(value?: string | string[]) {
+  const nextValue = Array.isArray(value) ? value[0] : value;
+
+  if (!nextValue || nextValue === 'undefined' || nextValue === 'null') {
+    return undefined;
+  }
+
+  return nextValue;
+}
+
 export default function PositionManagePage() {
+  const params = useLocalSearchParams<{ storeId?: string | string[] }>();
+  const routeStoreId = normalizeStoreId(params.storeId);
+  const currentStoreId = useUser((state) => state.currentStoreId);
+  const storeId = routeStoreId ?? currentStoreId ?? '';
   const access = useCurrentStoreAccess();
-  const [positions, setPositions] =
-    useState<SchedulePosition[]>(MOCK_POSITIONS.slice(0, 4));
+  const [positions, setPositions] = useState<SchedulePosition[]>([]);
   const [createVisible, setCreateVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<SchedulePosition | null>(
     null,
@@ -30,7 +54,30 @@ export default function PositionManagePage() {
   const [name, setName] = useState('');
   const [color, setColor] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const canCreate = positions.length < MAX_POSITION_COUNT;
+
+  useEffect(() => {
+    if (!storeId) {
+      return;
+    }
+
+    const fetchPositions = async () => {
+      try {
+        const { data } = await getPositions(storeId);
+
+        setPositions(mapPositionResponses(data));
+      } catch {
+        setPositions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPositions();
+  }, [storeId]);
 
   if (!access.loaded) {
     return <View />;
@@ -42,7 +89,12 @@ export default function PositionManagePage() {
     );
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
+    if (!storeId) {
+      setErrorMessage('매장 정보를 찾을 수 없어요');
+      return;
+    }
+
     const trimmedName = name.trim();
 
     if (!trimmedName) {
@@ -60,18 +112,51 @@ export default function PositionManagePage() {
       return;
     }
 
-    setPositions((prev) => [
-      ...prev,
-      {
-        id: `position-${Date.now()}`,
+    setSaving(true);
+
+    try {
+      const { data } = await createPosition(storeId, {
         name: trimmedName,
         color,
-      },
-    ]);
-    setName('');
-    setColor(null);
-    setErrorMessage('');
-    setCreateVisible(false);
+      });
+      const createdPosition =
+        mapPositionResponse(data) ??
+        ({
+          id: data?.positionId ?? data?.id ?? `position-${Date.now()}`,
+          name: trimmedName,
+          color,
+        } satisfies SchedulePosition);
+
+      setPositions((prev) => [...prev, createdPosition]);
+      setName('');
+      setColor(null);
+      setErrorMessage('');
+      setCreateVisible(false);
+    } catch {
+      setErrorMessage('포지션 생성에 실패했어요');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!storeId || !deleteTarget) {
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      await deletePosition(storeId, deleteTarget.id);
+      setPositions((prev) =>
+        prev.filter((position) => position.id !== deleteTarget.id),
+      );
+      setDeleteTarget(null);
+    } catch {
+      setErrorMessage('포지션 삭제에 실패했어요');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -81,7 +166,13 @@ export default function PositionManagePage() {
           포지션 목록
         </NText>
 
-        {positions.length === 0 ? (
+        {loading ? (
+          <View style={styles.empty}>
+            <NText variant="r14" style={styles.emptyText}>
+              포지션을 불러오는 중이에요
+            </NText>
+          </View>
+        ) : positions.length === 0 ? (
           <View style={styles.empty}>
             <NText variant="r14" style={styles.emptyText}>
               등록된 포지션이 없어요
@@ -100,7 +191,12 @@ export default function PositionManagePage() {
                 <NText variant="r14" style={styles.positionName}>
                   {position.name}
                 </NText>
-                <Pressable onPress={() => setDeleteTarget(position)}>
+                <Pressable
+                  onPress={() => {
+                    setErrorMessage('');
+                    setDeleteTarget(position);
+                  }}
+                >
                   <Ionicons
                     name="trash-outline"
                     size={18}
@@ -118,7 +214,10 @@ export default function PositionManagePage() {
             styles.createButton,
             !canCreate && styles.disabledCreateButton,
           ]}
-          onPress={() => setCreateVisible(true)}
+          onPress={() => {
+            setErrorMessage('');
+            setCreateVisible(true);
+          }}
         >
           <NText variant="m16" style={styles.createButtonText}>
             포지션 생성하기
@@ -160,7 +259,7 @@ export default function PositionManagePage() {
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button onPress={handleCreate}>
-            생성하기
+            {saving ? '생성중' : '생성하기'}
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -173,6 +272,11 @@ export default function PositionManagePage() {
           <BaseModal.Title>
             {deleteTarget?.name} 포지션을 삭제할까요?
           </BaseModal.Title>
+          {errorMessage && (
+            <NText variant="r12" style={styles.error}>
+              {errorMessage}
+            </NText>
+          )}
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -182,14 +286,9 @@ export default function PositionManagePage() {
             취소
           </BaseModal.Button>
           <BaseModal.Button
-            onPress={() => {
-              setPositions((prev) =>
-                prev.filter((position) => position.id !== deleteTarget?.id),
-              );
-              setDeleteTarget(null);
-            }}
+            onPress={handleDelete}
           >
-            삭제하기
+            {deleting ? '삭제중' : '삭제하기'}
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
