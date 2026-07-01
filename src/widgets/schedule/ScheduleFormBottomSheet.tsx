@@ -1,0 +1,797 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
+
+import DateWheelColumn from '@/src/features/auth/ui/DateWheelColumn';
+import {
+  backgroundColorWhite,
+  buttonColorCta,
+  radiusRadius12,
+  spacingSpacing20,
+  typoColorPrimary,
+  typoColorSub2,
+} from '@/src/init/styles/tokens';
+import {
+  BirthDateValue,
+  createNumberRange,
+  formatBirthDate,
+  getDaysInMonth,
+  parseBirthDate,
+} from '@/src/shared/lib/date';
+import BaseModal from '@/src/shared/ui/BaseModal';
+import BottomSheet from '@/src/shared/ui/BottomSheet';
+import NText from '@/src/shared/ui/NText';
+
+import {
+  MOCK_MEMBERS,
+  MOCK_POSITIONS,
+  ScheduleItem,
+  ScheduleMember,
+  SchedulePosition,
+} from './mock';
+
+type ScheduleFormBottomSheetProps = {
+  visible: boolean;
+  date: string;
+  schedule?: ScheduleItem | null;
+  onClose: () => void;
+  onCreated?: () => void;
+};
+
+export default function ScheduleFormBottomSheet({
+  visible,
+  date,
+  schedule,
+  onClose,
+  onCreated,
+}: ScheduleFormBottomSheetProps) {
+  const isCreateMode = !schedule;
+  const [selectedMember, setSelectedMember] =
+    useState<ScheduleMember | null>(null);
+  const [selectedPosition, setSelectedPosition] =
+    useState<SchedulePosition | null>(null);
+  const [memberPickerVisible, setMemberPickerVisible] = useState(false);
+  const [positionPickerVisible, setPositionPickerVisible] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [timePickerTarget, setTimePickerTarget] = useState<
+    'start' | 'end' | null
+  >(null);
+  const [saveConfirmVisible, setSaveConfirmVisible] = useState(false);
+  const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
+  const [missingRequiredVisible, setMissingRequiredVisible] = useState(false);
+  const memberName =
+    schedule?.memberName ?? selectedMember?.name ?? '지정안됨';
+  const positionName =
+    schedule?.positionName ?? selectedPosition?.name ?? '지정안됨';
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [selectedDate, setSelectedDate] = useState(date);
+  const [memo, setMemo] = useState('');
+  const displayDate = schedule?.date ?? selectedDate;
+  const hasChanges =
+    !!selectedMember ||
+    !!selectedPosition ||
+    selectedDate !== date ||
+    !!startTime ||
+    !!endTime ||
+    !!memo;
+  const hasRequiredValues =
+    !!selectedMember && !!displayDate && !!startTime && !!endTime;
+
+  const handleClose = () => {
+    if (isCreateMode && hasChanges) {
+      setExitConfirmVisible(true);
+      return;
+    }
+
+    onClose();
+  };
+
+  const handleSave = () => {
+    if (!hasRequiredValues) {
+      setMissingRequiredVisible(true);
+      return;
+    }
+
+    setSaveConfirmVisible(true);
+  };
+
+  const handleCreateSchedule = () => {
+    setSaveConfirmVisible(false);
+    onCreated?.();
+    onClose();
+  };
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    const nextMember =
+      MOCK_MEMBERS.find((member) => member.id === schedule?.memberId) ?? null;
+    const nextPosition =
+      MOCK_POSITIONS.find((position) => position.id === schedule?.positionId) ??
+      null;
+
+    setSelectedMember(nextMember);
+    setSelectedPosition(nextPosition);
+    setStartTime(schedule?.startTime ?? '');
+    setEndTime(schedule?.endTime ?? '');
+    setSelectedDate(schedule?.date ?? date);
+    setMemo(schedule?.memo ?? '');
+  }, [date, schedule, visible]);
+
+  return (
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      showHandle={false}
+      style={styles.sheet}
+    >
+      <View style={styles.header}>
+        <Pressable style={styles.headerButton} onPress={handleClose}>
+          <Ionicons name="chevron-back" size={20} color={typoColorPrimary} />
+        </Pressable>
+        <NText variant="b16" style={styles.title}>
+          {isCreateMode ? '근무 등록' : '근무 정보'}
+        </NText>
+        {isCreateMode ? (
+          <Pressable style={styles.headerButton} onPress={handleSave}>
+            <Ionicons name="checkmark" size={24} color={typoColorPrimary} />
+          </Pressable>
+        ) : (
+          <Pressable style={styles.headerButton}>
+            <Ionicons
+              name="ellipsis-vertical"
+              size={18}
+              color={typoColorPrimary}
+            />
+          </Pressable>
+        )}
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.content}
+      >
+        <NText variant="r12" style={styles.sectionTitle}>
+          근무자 정보
+        </NText>
+
+        <View style={styles.infoCard}>
+          <InfoRow
+            label="근무자"
+            value={memberName}
+            onPress={
+              isCreateMode ? () => setMemberPickerVisible(true) : undefined
+            }
+          />
+          <InfoRow
+            label="포지션"
+            value={positionName}
+            onPress={
+              isCreateMode ? () => setPositionPickerVisible(true) : undefined
+            }
+          />
+        </View>
+
+        <View style={styles.section}>
+          <NText variant="r12" style={styles.sectionTitle}>
+            날짜
+          </NText>
+          <TextInput
+            value={formatDate(displayDate)}
+            placeholder="YYYY.MM.DD"
+            placeholderTextColor={typoColorSub2}
+            editable={false}
+            onPressIn={() => {
+              if (isCreateMode) {
+                setDatePickerVisible(true);
+              }
+            }}
+            style={styles.input}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <NText variant="r12" style={styles.sectionTitle}>
+            시간
+          </NText>
+          <View style={styles.timeRow}>
+            <View style={styles.timeColumn}>
+              <NText variant="r12" style={styles.timeLabel}>
+                시작
+              </NText>
+              <TextInput
+                value={startTime}
+                placeholder="00:00"
+                placeholderTextColor={typoColorSub2}
+                editable={false}
+                onPressIn={() => {
+                  if (isCreateMode) {
+                    setTimePickerTarget('start');
+                  }
+                }}
+                style={styles.input}
+              />
+            </View>
+            <View style={styles.timeColumn}>
+              <NText variant="r12" style={styles.timeLabel}>
+                종료
+              </NText>
+              <TextInput
+                value={endTime}
+                placeholder="00:00"
+                placeholderTextColor={typoColorSub2}
+                editable={false}
+                onPressIn={() => {
+                  if (isCreateMode) {
+                    setTimePickerTarget('end');
+                  }
+                }}
+                style={styles.input}
+              />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <NText variant="r12" style={styles.sectionTitle}>
+            메모
+          </NText>
+          <TextInput
+            value={memo}
+            multiline
+            placeholder="전달사항 및 특이사항을 입력해주세요"
+            placeholderTextColor={typoColorSub2}
+            onChangeText={setMemo}
+            style={[styles.input, styles.memoInput]}
+          />
+        </View>
+      </ScrollView>
+
+      <MemberPickerBottomSheet
+        visible={memberPickerVisible}
+        selectedMemberId={selectedMember?.id ?? null}
+        onClose={() => setMemberPickerVisible(false)}
+        onSelect={(member) => {
+          setSelectedMember(member);
+          setMemberPickerVisible(false);
+        }}
+      />
+      <PositionPickerBottomSheet
+        visible={positionPickerVisible}
+        selectedPositionId={selectedPosition?.id ?? null}
+        onClose={() => setPositionPickerVisible(false)}
+        onSelect={(position) => {
+          setSelectedPosition(position);
+          setPositionPickerVisible(false);
+        }}
+      />
+      <ScheduleDatePickerBottomSheet
+        visible={datePickerVisible}
+        value={parseBirthDate(displayDate)}
+        onClose={() => setDatePickerVisible(false)}
+        onChange={(nextDate) => setSelectedDate(formatBirthDate(nextDate))}
+      />
+      <ScheduleTimePickerBottomSheet
+        visible={!!timePickerTarget}
+        value={timePickerTarget === 'end' ? endTime : startTime}
+        onClose={() => setTimePickerTarget(null)}
+        onChange={(nextTime) => {
+          if (timePickerTarget === 'end') {
+            setEndTime(nextTime);
+            return;
+          }
+
+          setStartTime(nextTime);
+        }}
+      />
+      <BaseModal
+        visible={saveConfirmVisible}
+        onClose={() => setSaveConfirmVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>근무를 추가할까요?</BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            variant="secondary"
+            onPress={() => setSaveConfirmVisible(false)}
+          >
+            취소
+          </BaseModal.Button>
+          <BaseModal.Button
+            onPress={handleCreateSchedule}
+          >
+            추가하기
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+      <BaseModal
+        visible={exitConfirmVisible}
+        onClose={() => setExitConfirmVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>저장하지 않고 나갈까요?</BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            variant="secondary"
+            onPress={() => setExitConfirmVisible(false)}
+          >
+            취소
+          </BaseModal.Button>
+          <BaseModal.Button
+            onPress={() => {
+              setExitConfirmVisible(false);
+              onClose();
+            }}
+          >
+            마무리
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+      <BaseModal
+        visible={missingRequiredVisible}
+        onClose={() => setMissingRequiredVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>입력되지 않은 항목이 있어요</BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            fullWidth
+            onPress={() => setMissingRequiredVisible(false)}
+          >
+            확인
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+    </BottomSheet>
+  );
+}
+
+function formatDate(date: string) {
+  return date.split('-').join('.');
+}
+
+function InfoRow({
+  label,
+  value,
+  onPress,
+}: {
+  label: string;
+  value: string;
+  onPress?: () => void;
+}) {
+  const RowComponent = onPress ? Pressable : View;
+
+  return (
+    <RowComponent style={styles.infoRow} onPress={onPress}>
+      <NText variant="r14" style={styles.infoLabel}>
+        {label}
+      </NText>
+      <NText
+        variant="r14"
+        style={[
+          styles.infoValue,
+          value === '지정안됨' && styles.placeholderValue,
+        ]}
+      >
+        {value}
+      </NText>
+    </RowComponent>
+  );
+}
+
+function PositionPickerBottomSheet({
+  visible,
+  selectedPositionId,
+  onClose,
+  onSelect,
+}: {
+  visible: boolean;
+  selectedPositionId: string | null;
+  onClose: () => void;
+  onSelect: (position: SchedulePosition | null) => void;
+}) {
+  const positions = [
+    ...MOCK_POSITIONS,
+    {
+      id: 'none',
+      name: '지정안함',
+      color: '#8D8D8D',
+    },
+  ];
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} style={styles.pickerSheet}>
+      <NText variant="b16" style={styles.pickerTitle}>
+        포지션 선택
+      </NText>
+      <View style={styles.memberList}>
+        {positions.map((position) => {
+          const isNone = position.id === 'none';
+          const selected = isNone
+            ? selectedPositionId === null
+            : position.id === selectedPositionId;
+
+          return (
+            <Pressable
+              key={position.id}
+              style={styles.memberRow}
+              onPress={() => onSelect(isNone ? null : position)}
+            >
+              <View
+                style={[
+                  styles.positionDot,
+                  { backgroundColor: position.color },
+                ]}
+              />
+              <NText variant="b16" style={styles.memberText}>
+                {position.name}
+              </NText>
+              {selected && (
+                <Ionicons
+                  name="checkmark"
+                  size={22}
+                  color={typoColorPrimary}
+                />
+              )}
+            </Pressable>
+          );
+        })}
+      </View>
+    </BottomSheet>
+  );
+}
+
+function MemberPickerBottomSheet({
+  visible,
+  selectedMemberId,
+  onClose,
+  onSelect,
+}: {
+  visible: boolean;
+  selectedMemberId: string | null;
+  onClose: () => void;
+  onSelect: (member: ScheduleMember) => void;
+}) {
+  return (
+    <BottomSheet visible={visible} onClose={onClose} style={styles.pickerSheet}>
+      <NText variant="b16" style={styles.pickerTitle}>
+        근무자
+      </NText>
+      <View style={styles.memberList}>
+        {MOCK_MEMBERS.map((member) => {
+          const selected = member.id === selectedMemberId;
+
+          return (
+            <Pressable
+              key={member.id}
+              style={styles.memberRow}
+              onPress={() => onSelect(member)}
+            >
+              <NText variant="r14" style={styles.memberText}>
+                <NText variant="b16" style={styles.memberName}>
+                  {member.name}
+                </NText>
+                {member.roleName ? ` · ${member.roleName}` : ''}
+              </NText>
+              {selected && (
+                <Ionicons
+                  name="checkmark"
+                  size={22}
+                  color={typoColorPrimary}
+                />
+              )}
+            </Pressable>
+          );
+        })}
+      </View>
+    </BottomSheet>
+  );
+}
+
+function getDefaultDateValue(): BirthDateValue {
+  const now = new Date();
+
+  return {
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    day: now.getDate(),
+  };
+}
+
+function ScheduleDatePickerBottomSheet({
+  visible,
+  value,
+  onClose,
+  onChange,
+}: {
+  visible: boolean;
+  value: BirthDateValue | null;
+  onClose: () => void;
+  onChange: (value: BirthDateValue) => void;
+}) {
+  const [draft, setDraft] = useState<BirthDateValue>(getDefaultDateValue());
+  const years = createNumberRange(1998, 2030);
+  const months = createNumberRange(1, 12);
+  const days = createNumberRange(1, getDaysInMonth(draft.year, draft.month));
+
+  useEffect(() => {
+    if (visible) {
+      setDraft(value ?? getDefaultDateValue());
+    }
+  }, [value, visible]);
+
+  const updateDraft = (nextValue: Partial<BirthDateValue>) => {
+    setDraft((prev) => {
+      const next = { ...prev, ...nextValue };
+      const maxDay = getDaysInMonth(next.year, next.month);
+
+      return {
+        ...next,
+        day: Math.min(next.day, maxDay),
+      };
+    });
+  };
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
+      <View style={styles.wheelRow}>
+        <DateWheelColumn
+          items={years}
+          selectedValue={draft.year}
+          formatLabel={(year) => `${year}년`}
+          onChange={(year) => updateDraft({ year })}
+        />
+        <DateWheelColumn
+          items={months}
+          selectedValue={draft.month}
+          formatLabel={(month) => `${month}월`}
+          onChange={(month) => updateDraft({ month })}
+        />
+        <DateWheelColumn
+          items={days}
+          selectedValue={draft.day}
+          formatLabel={(day) => `${String(day).padStart(2, '0')}일`}
+          onChange={(day) => updateDraft({ day })}
+        />
+      </View>
+      <ConfirmButton
+        onPress={() => {
+          onChange(draft);
+          onClose();
+        }}
+      />
+    </BottomSheet>
+  );
+}
+
+function parseTime(value: string) {
+  const match = value.match(/^(\d{2}):(\d{2})$/);
+
+  if (!match) {
+    return { hour: 0, minute: 0 };
+  }
+
+  return {
+    hour: Number(match[1]),
+    minute: Number(match[2]),
+  };
+}
+
+function ScheduleTimePickerBottomSheet({
+  visible,
+  value,
+  onClose,
+  onChange,
+}: {
+  visible: boolean;
+  value: string;
+  onClose: () => void;
+  onChange: (value: string) => void;
+}) {
+  const [draft, setDraft] = useState(parseTime(value));
+  const hours = createNumberRange(0, 23);
+  const minutes = createNumberRange(0, 59);
+
+  useEffect(() => {
+    if (visible) {
+      setDraft(parseTime(value));
+    }
+  }, [value, visible]);
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
+      <View style={styles.wheelRow}>
+        <DateWheelColumn
+          items={hours}
+          selectedValue={draft.hour}
+          formatLabel={(hour) => `${hour}시`}
+          onChange={(hour) =>
+            setDraft((prev) => ({
+              ...prev,
+              hour,
+            }))
+          }
+        />
+        <DateWheelColumn
+          items={minutes}
+          selectedValue={draft.minute}
+          formatLabel={(minute) => `${String(minute).padStart(2, '0')}분`}
+          onChange={(minute) =>
+            setDraft((prev) => ({
+              ...prev,
+              minute,
+            }))
+          }
+        />
+      </View>
+      <ConfirmButton
+        onPress={() => {
+          onChange(
+            `${String(draft.hour).padStart(2, '0')}:${String(
+              draft.minute,
+            ).padStart(2, '0')}`,
+          );
+          onClose();
+        }}
+      />
+    </BottomSheet>
+  );
+}
+
+function ConfirmButton({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable style={styles.confirmButton} onPress={onPress}>
+      <NText variant="m16" style={styles.confirmText}>
+        확인
+      </NText>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  sheet: {
+    maxHeight: '92%',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 32,
+  },
+  header: {
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: -10,
+    marginBottom: 16,
+  },
+  headerButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    color: typoColorPrimary,
+  },
+  content: {
+    paddingBottom: 20,
+  },
+  sectionTitle: {
+    color: typoColorPrimary,
+    marginBottom: 10,
+  },
+  infoCard: {
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 20,
+  },
+  infoRow: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  infoLabel: {
+    color: typoColorPrimary,
+  },
+  infoValue: {
+    color: typoColorPrimary,
+  },
+  placeholderValue: {
+    color: typoColorSub2,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  input: {
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    color: typoColorPrimary,
+    fontSize: 12,
+  },
+  memoInput: {
+    height: 76,
+    paddingTop: 12,
+    textAlignVertical: 'top',
+  },
+  timeRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  timeColumn: {
+    flex: 1,
+    gap: 8,
+  },
+  timeLabel: {
+    color: typoColorPrimary,
+  },
+  pickerSheet: {
+    minHeight: 520,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  pickerTitle: {
+    color: typoColorPrimary,
+    textAlign: 'center',
+    marginBottom: 36,
+  },
+  memberList: {
+    gap: 14,
+  },
+  memberRow: {
+    minHeight: 70,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+  },
+  memberText: {
+    flex: 1,
+    color: typoColorPrimary,
+  },
+  memberName: {
+    color: typoColorPrimary,
+  },
+  positionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 10,
+  },
+  wheelSheet: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  wheelRow: {
+    flexDirection: 'row',
+    gap: spacingSpacing20,
+    marginBottom: spacingSpacing20,
+  },
+  confirmButton: {
+    height: 46,
+    borderRadius: radiusRadius12,
+    backgroundColor: buttonColorCta,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmText: {
+    color: backgroundColorWhite,
+  },
+});

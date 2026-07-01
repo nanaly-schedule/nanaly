@@ -58,6 +58,10 @@ function BaseModalRoot({
   closeOnBackdropPress = true,
   animationType = 'fade',
 }: BaseModalRootProps) {
+  if (!visible) {
+    return null;
+  }
+
   const handleBackdropPress = () => {
     if (!closeOnBackdropPress) {
       return;

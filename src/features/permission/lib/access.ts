@@ -11,6 +11,7 @@ export type CurrentStoreAccess = {
   canEditStoreInfo: boolean;
   canAccessMemberInfo: boolean;
   canEditMemberInfo: boolean;
+  canEditSchedule: boolean;
   canManageNotice: boolean;
 };
 
@@ -32,6 +33,8 @@ export function getCurrentStoreAccess(input: {
     canEditStoreInfo: isOwner,
     canAccessMemberInfo: isOwner || isManager,
     canEditMemberInfo: isOwner || !!permissions?.canEditMemberInfo,
+    canEditSchedule:
+      isOwner || (isManager && !!permissions?.canEditSchedule),
     canManageNotice: isOwner || !!permissions?.canManageNotice,
   };
 }
@@ -54,6 +57,10 @@ export function canAccessMemberInfo(access: CurrentStoreAccess) {
 
 export function canEditMemberInfo(access: CurrentStoreAccess) {
   return access.canEditMemberInfo;
+}
+
+export function canEditSchedule(access: CurrentStoreAccess) {
+  return access.canEditSchedule;
 }
 
 export function canManageNotice(access: CurrentStoreAccess) {

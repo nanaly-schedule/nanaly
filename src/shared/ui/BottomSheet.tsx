@@ -5,10 +5,12 @@ import {
   Modal,
   Platform,
   Pressable,
+  StyleProp,
   StyleSheet,
   View,
+  ViewProps,
+  ViewStyle,
 } from 'react-native';
-import { ViewProps } from 'react-native-svg/lib/typescript/fabric/utils';
 
 import {
   backgroundColorPrimary,
@@ -19,12 +21,17 @@ import {
 interface BottomSheetProps extends ViewProps {
   visible: boolean;
   onClose: () => void;
+  showHandle?: boolean;
+  handleStyle?: StyleProp<ViewStyle>;
 }
 
 export default function BottomSheet({
   visible,
   children,
   onClose,
+  style,
+  showHandle = true,
+  handleStyle,
 }: BottomSheetProps) {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -46,6 +53,10 @@ export default function BottomSheet({
     };
   }, []);
 
+  if (!visible) {
+    return null;
+  }
+
   return (
     <Modal
       visible={visible}
@@ -62,8 +73,8 @@ export default function BottomSheet({
           ]}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <View style={styles.sheet}>
-            <View style={styles.handle} />
+          <View style={[styles.sheet, style]}>
+            {showHandle && <View style={[styles.handle, handleStyle]} />}
             {children}
           </View>
         </KeyboardAvoidingView>
@@ -96,10 +107,10 @@ const styles = StyleSheet.create({
   },
   handle: {
     alignSelf: 'center',
-    width: 80,
-    height: 8,
+    width: 36,
+    height: 4,
     borderRadius: 9999,
     backgroundColor: '#8D8D8D',
-    marginBottom: 28,
+    marginBottom: 20,
   },
 });
