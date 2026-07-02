@@ -12,8 +12,21 @@ type MyStoreItem = {
   permissions: UserStorePermissions;
 };
 
+function normalizeParam(value?: string | string[]) {
+  const nextValue = Array.isArray(value) ? value[0] : value;
+
+  if (!nextValue || nextValue === 'undefined' || nextValue === 'null') {
+    return undefined;
+  }
+
+  return nextValue;
+}
+
 export default function Layout() {
-  const { storeId } = useLocalSearchParams<{ storeId: string }>();
+  const params = useLocalSearchParams<{
+    storeId?: string | string[];
+  }>();
+  const storeId = normalizeParam(params.storeId);
   const setUser = useUser((state) => state.setUser);
 
   useEffect(() => {
@@ -25,9 +38,12 @@ export default function Layout() {
       try {
         const { data: myStores } = await getMyStore();
         const currentStore = myStores.find(
-          (store: MyStoreItem) => store.storeId === storeId,
+          (store: MyStoreItem) => store.storeId === String(storeId),
         );
 
+        if (!currentStore) {
+          return;
+        }
         console.log('내 매장 목록:', myStores);
         console.log('현재 매장 권한:', currentStore);
 
