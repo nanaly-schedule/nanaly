@@ -44,6 +44,8 @@ export default function Layout() {
         if (!currentStore) {
           return;
         }
+        console.log('내 매장 목록:', myStores);
+        console.log('현재 매장 권한:', currentStore);
 
         setUser({
           currentStoreAccessLoaded: true,
