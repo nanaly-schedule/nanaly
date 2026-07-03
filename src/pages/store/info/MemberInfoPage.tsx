@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EditableMemberRole, MemberRole } from '@/src/entities/member/member';
 import {
-  canAccessMemberInfo,
   canEditMemberInfo,
 } from '@/src/features/permission/lib/access';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
@@ -239,14 +238,6 @@ export default function MemberInfoPage() {
 
   const insets = useSafeAreaInsets();
 
-  if (!canAccessMemberInfo(access)) {
-    return (
-      <AccessDenied
-        title="근무자 정보에 접근할 수 없어요"
-        message="매니저 이상 권한이 있어야 근무자 정보를 볼 수 있어요"
-      />
-    );
-  }
   if (user.role === MemberRole.OWNER) {
     return (
       <AccessDenied

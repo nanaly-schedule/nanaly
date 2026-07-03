@@ -83,6 +83,7 @@ export default function HomePage() {
           isOwner || (!!headerInfo && headerInfo.role !== MemberRole.STAFF)
         }
         isActiveOwner={false}
+        unreadNotificationCount={headerInfo?.unreadNotificationCount ?? 0}
       />
       <CurrentWeekSchedules schedules={schedule} />
         <NoticeWidget 

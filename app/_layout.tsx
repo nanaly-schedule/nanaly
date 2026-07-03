@@ -1,16 +1,25 @@
-import { Stack, useRouter } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 
+import { emitNotificationReceived } from '@/src/features/push/lib/notificationEvents';
+import { preparePushNotificationsAsync } from '@/src/features/push/lib/pushNotification';
 import { getUserProfile } from '@/src/features/user/api/profile';
+import { navigateFromNotification } from '@/src/features/user/lib/notificationNavigation';
 import useUser from '@/src/features/user/lib/useUser';
 
 export default function Layout() {
-  const user = useUser();
   const router = useRouter();
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { setUser, clearUser } = user;
+  const pathname = usePathname();
+  const setUser = useUser((state) => state.setUser);
+  const clearUser = useUser((state) => state.clearUser);
 
+  useEffect(() => {
+    if (pathname.startsWith('/auth')) {
+      return;
+    }
+
+    const fetchUser = async () => {
       try {
         const { data } = await getUserProfile();
         const { name, email, birthDate, isTempPassword } = data;
@@ -24,6 +33,7 @@ export default function Layout() {
           currentStoreRole: null,
           currentStorePermissions: null,
         });
+        await preparePushNotificationsAsync();
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
@@ -33,7 +43,51 @@ export default function Layout() {
     };
 
     fetchUser();
+  }, [clearUser, pathname, router, setUser]);
+
+  useEffect(() => {
+    const notificationSubscription =
+      Notifications.addNotificationReceivedListener((notification) => {
+        const { data } = notification.request.content;
+
+        emitNotificationReceived({
+          notificationId:
+            typeof data.notificationId === 'string' ? data.notificationId : null,
+          storeId: typeof data.storeId === 'string' ? data.storeId : null,
+          targetId: typeof data.targetId === 'string' ? data.targetId : null,
+          type: typeof data.type === 'string' ? data.type : null,
+        });
+      });
+
+    const handleNotificationResponse = async (
+      response: Notifications.NotificationResponse,
+    ) => {
+      const { data } = response.notification.request.content;
+
+      await navigateFromNotification(router, {
+        notificationId:
+          typeof data.notificationId === 'string' ? data.notificationId : null,
+        storeId: typeof data.storeId === 'string' ? data.storeId : null,
+        targetId: typeof data.targetId === 'string' ? data.targetId : null,
+        type: typeof data.type === 'string' ? data.type : null,
+      });
+    };
+
+    const responseSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        void handleNotificationResponse(response);
+      });
+    const lastNotificationResponse =
+      Notifications.getLastNotificationResponse();
+    if (lastNotificationResponse) {
+      void handleNotificationResponse(lastNotificationResponse);
+    }
+
+    return () => {
+      notificationSubscription.remove();
+      responseSubscription.remove();
+    };
   }, [router]);
 
-  return <Stack screenOptions={{ headerShown: __DEV__ }} />;
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

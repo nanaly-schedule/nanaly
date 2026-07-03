@@ -1,8 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
 
-import { canAccessStoreInfo } from '@/src/features/permission/lib/access';
-import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import {
   backgroundColorWhite,
   radiusRadius12,
@@ -16,11 +14,6 @@ import NText from '@/src/shared/ui/NText';
 export default function StoreInfoBtn() {
   const router = useRouter();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
-  const access = useCurrentStoreAccess();
-
-  if (!canAccessStoreInfo(access)) {
-    return null;
-  }
 
   return (
     <Pressable
@@ -28,7 +21,7 @@ export default function StoreInfoBtn() {
       onPress={() => router.push(`/store/${storeId}/info`)}
     >
       <NText variant="r14" style={{ color: typoColorSub1 }}>
-        가게 관리
+        매장 정보
       </NText>
 
       <RightArrowIcon size={10} color={typoColorPrimary} />

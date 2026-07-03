@@ -41,6 +41,14 @@
           }
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./src/shared/assets/logo.png",
+          "color": "#ffffff",
+          "defaultChannel": "default"
+        }
+      ],
       "expo-secure-store",
       [
         "@react-native-google-signin/google-signin",
