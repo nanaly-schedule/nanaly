@@ -4,7 +4,10 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
-import { typoColorPrimary, typoColorSecondary } from '@/src/init/styles/tokens';
+import {
+  typoColorPrimary,
+  typoColorSecondary,
+} from '@/src/init/styles/tokens';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -34,7 +37,7 @@ export default function ScheduleDetailPage() {
         canEditSchedule ? (
           <Ionicons
             name="ellipsis-vertical"
-            size={20}
+            size={24}
             color={typoColorPrimary}
           />
         ) : undefined
@@ -57,7 +60,9 @@ export default function ScheduleDetailPage() {
               });
             }}
           >
-            <NText variant="r14">수정하기</NText>
+            <NText variant="m16" style={styles.menuText}>
+              수정하기
+            </NText>
           </Pressable>
           <Pressable
             style={styles.menuItem}
@@ -66,14 +71,21 @@ export default function ScheduleDetailPage() {
               setDeleteVisible(true);
             }}
           >
-            <NText variant="r14">삭제하기</NText>
+            <NText variant="m16" style={styles.menuText}>
+              삭제하기
+            </NText>
           </Pressable>
         </View>
       )}
 
       <View style={styles.container}>
-        <InfoRow label="근무자" value={schedule.memberName} />
-        <InfoRow label="포지션" value={schedule.positionName ?? '선택 안함'} />
+        <NText variant="b16" style={styles.sectionTitle}>
+          근무자 정보
+        </NText>
+        <View style={styles.infoCard}>
+          <InfoRow label="근무자" value={schedule.memberName} />
+          <InfoRow label="포지션" value={schedule.positionName ?? '선택 안함'} />
+        </View>
         <InfoRow label="날짜" value={schedule.date} />
         <InfoRow
           label="시간"
@@ -126,36 +138,53 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   menu: {
     position: 'absolute',
-    zIndex: 2,
-    top: 48,
+    zIndex: 10,
+    top: 46,
     right: 0,
-    width: 120,
-    borderRadius: 8,
+    width: 150,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
-    paddingVertical: 6,
-    elevation: 8,
+    paddingVertical: 8,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 12,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 12,
   },
   menuItem: {
-    minHeight: 40,
+    height: 68,
     justifyContent: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 18,
+  },
+  menuText: {
+    color: typoColorPrimary,
   },
   container: {
-    paddingTop: 24,
+    paddingTop: 56,
     gap: 16,
   },
+  sectionTitle: {
+    color: typoColorPrimary,
+  },
+  infoCard: {
+    overflow: 'hidden',
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+  },
   row: {
-    gap: 8,
+    minHeight: 64,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
   },
   label: {
-    color: typoColorSecondary,
+    color: typoColorPrimary,
   },
   value: {
-    minHeight: 44,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-    color: typoColorPrimary,
+    color: typoColorSecondary,
   },
 });

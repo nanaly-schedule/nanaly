@@ -76,7 +76,7 @@ export default function ScheduleDateBottomSheet({
                     <NText variant="r14" style={styles.unavailableText}>
                       <Text style={styles.rowName}>{schedule.memberName}</Text>
                       {' '}
-                        · 근무불가 · {schedule.startTime}~{schedule.endTime}
+                      · 근무불가 · {getScheduleTimeLabel(schedule)}
                     </NText>
                     {isConflict && (
                       <NText variant="r12" style={styles.conflictText}>
@@ -90,7 +90,7 @@ export default function ScheduleDateBottomSheet({
                     <Text>
                       {' '}
                       · {schedule.positionName ?? '선택 안함'} ·{' '}
-                      {schedule.startTime}~{schedule.endTime}
+                      {getScheduleTimeLabel(schedule)}
                     </Text>
                   </Text>
                 )}
@@ -123,6 +123,25 @@ export default function ScheduleDateBottomSheet({
   );
 }
 
+function getScheduleTimeLabel(schedule: ScheduleItem) {
+  if (isAllDayUnavailable(schedule)) {
+    return '종일';
+  }
+
+  return `${schedule.startTime}~${schedule.endTime}`;
+}
+
+function isAllDayUnavailable(schedule: ScheduleItem) {
+  const startTime = schedule.startTime.slice(0, 5);
+  const endTime = schedule.endTime.slice(0, 5);
+
+  return (
+    schedule.positionId === 'unavailable' &&
+    startTime === '00:00' &&
+    (endTime === '23:59' || endTime === '24:00')
+  );
+}
+
 const styles = StyleSheet.create({
   sheet: {
     minHeight: 468,
@@ -132,7 +151,7 @@ const styles = StyleSheet.create({
   title: {
     color: typoColorPrimary,
     marginTop: 26,
-    marginBottom: 54,
+    marginBottom: 30,
   },
   list: {
     gap: 18,

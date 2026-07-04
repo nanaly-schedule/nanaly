@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -34,6 +35,7 @@ export default function BottomSheet({
   handleStyle,
 }: BottomSheetProps) {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const sheetProgress = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (Platform.OS !== 'android') {
@@ -53,6 +55,19 @@ export default function BottomSheet({
     };
   }, []);
 
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    sheetProgress.setValue(1);
+    Animated.timing(sheetProgress, {
+      toValue: 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [sheetProgress, visible]);
+
   if (!visible) {
     return null;
   }
@@ -61,7 +76,7 @@ export default function BottomSheet({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
@@ -73,10 +88,26 @@ export default function BottomSheet({
           ]}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <View style={[styles.sheet, style]}>
-            {showHandle && <View style={[styles.handle, handleStyle]} />}
-            {children}
-          </View>
+          <Animated.View
+            style={[
+              styles.animatedSheet,
+              {
+                transform: [
+                  {
+                    translateY: sheetProgress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 640],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <View style={[styles.sheet, style]}>
+              {showHandle && <View style={[styles.handle, handleStyle]} />}
+              {children}
+            </View>
+          </Animated.View>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -89,6 +120,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheetContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  animatedSheet: {
+    width: '100%',
+    maxHeight: '100%',
     justifyContent: 'flex-end',
   },
   backdrop: {

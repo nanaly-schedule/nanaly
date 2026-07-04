@@ -7,16 +7,13 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { MemberRole } from '@/src/entities/member/member';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import {
+  getDailySchedules,
   getMonthlySchedules,
   ScheduleScope,
 } from '@/src/features/schedule/api/schedule';
 import { getPositions } from '@/src/features/schedule/api/position';
 import useUser from '@/src/features/user/lib/useUser';
-import {
-  backgroundColorWhite,
-  buttonColorCta,
-  typoColorPrimary,
-} from '@/src/init/styles/tokens';
+import { buttonColorCta, typoColorPrimary } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import {
@@ -33,6 +30,7 @@ import ScheduleFilterBar, {
 } from '@/src/widgets/schedule/ScheduleFilterBar';
 import ScheduleFormBottomSheet from '@/src/widgets/schedule/ScheduleFormBottomSheet';
 import ScheduleMonthPickerBottomSheet from '@/src/widgets/schedule/ScheduleMonthPickerBottomSheet';
+import ScheduleUnavailableFormBottomSheet from '@/src/widgets/schedule/ScheduleUnavailableFormBottomSheet';
 
 function getTodayString() {
   return new Date().toISOString().slice(0, 10);
@@ -336,6 +334,29 @@ function mapMonthlyScheduleEntry(
   };
 }
 
+function mapScheduleEntries(params: {
+  data: unknown;
+  fallbackDate?: string;
+  markAsMine: boolean;
+  positions: SchedulePosition[];
+}) {
+  const { data, fallbackDate, markAsMine, positions } = params;
+  const entries = extractScheduleEntries(data).map((entry) => ({
+    ...entry,
+    date: entry.date ?? fallbackDate,
+  }));
+  const schedules = entries
+    .map((entry) => mapMonthlyScheduleEntry(entry, markAsMine))
+    .filter((schedule): schedule is ScheduleItem => !!schedule)
+    .map((schedule) => attachPositionIdFromCatalog(schedule, positions));
+
+  return { entries, schedules };
+}
+
+function getUniqueScheduleDates(schedules: ScheduleItem[]) {
+  return Array.from(new Set(schedules.map((schedule) => schedule.date)));
+}
+
 function groupSchedulesByDate(schedules: ScheduleItem[]) {
   return schedules.reduce<Record<string, ScheduleItem[]>>((acc, schedule) => {
     acc[schedule.date] = [...(acc[schedule.date] ?? []), schedule];
@@ -343,8 +364,12 @@ function groupSchedulesByDate(schedules: ScheduleItem[]) {
   }, {});
 }
 
-function isMySchedule(schedule: ScheduleItem) {
-  return !!schedule.isMine || schedule.memberId === 'me';
+function isMySchedule(schedule: ScheduleItem, userName?: string) {
+  return (
+    !!schedule.isMine ||
+    schedule.memberId === 'me' ||
+    (!!userName && schedule.memberName === userName)
+  );
 }
 
 function isUnavailableSchedule(schedule: ScheduleItem) {
@@ -422,6 +447,7 @@ export default function SchedulePage() {
   const params = useLocalSearchParams<{ storeId?: string | string[] }>();
   const routeStoreId = normalizeStoreId(params.storeId);
   const currentStoreId = useUser((state) => state.currentStoreId);
+  const userName = useUser((state) => state.name);
   const storeId = routeStoreId ?? currentStoreId ?? '';
   const isFocused = useIsFocused();
   const access = useCurrentStoreAccess();
@@ -437,11 +463,18 @@ export default function SchedulePage() {
   const [positionId, setPositionId] = useState('all');
   const [monthPickerVisible, setMonthPickerVisible] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
+  const [unavailableFormVisible, setUnavailableFormVisible] = useState(false);
   const [dateDetailVisible, setDateDetailVisible] = useState(false);
   const [selectedSchedule, setSelectedSchedule] =
     useState<ScheduleItem | null>(null);
   const [assignedSchedules, setAssignedSchedules] = useState<ScheduleItem[]>(
     [],
+  );
+  const [dailyAssignedSchedules, setDailyAssignedSchedules] = useState<
+    ScheduleItem[]
+  >([]);
+  const [dailyAssignedDate, setDailyAssignedDate] = useState<string | null>(
+    null,
   );
   const [unavailableSchedules, setUnavailableSchedules] = useState(
     MOCK_UNAVAILABLE_SCHEDULES,
@@ -464,6 +497,12 @@ export default function SchedulePage() {
       setViewType('mine');
     }
   }, [canViewAllUnavailable, workType]);
+
+  useEffect(() => {
+    if (workType !== 'assigned' || viewType !== 'all') {
+      setPositionId('all');
+    }
+  }, [viewType, workType]);
 
   useEffect(() => {
     if (!storeId || !isFocused) {
@@ -521,15 +560,47 @@ export default function SchedulePage() {
               : undefined,
         });
         console.log('[schedule-monthly] response', data);
-        const entries = extractScheduleEntries(data);
-        const schedules = entries
-          .map((entry) => mapMonthlyScheduleEntry(entry, scope === 'mine'))
-          .filter((schedule): schedule is ScheduleItem => !!schedule)
-          .map((schedule) => attachPositionIdFromCatalog(schedule, positions));
+        const { entries, schedules } = mapScheduleEntries({
+          data,
+          markAsMine: false,
+          positions,
+        });
         logUnmappedSchedules(entries);
-        console.log('[schedule-monthly] mapped', schedules);
+        let nextSchedules = schedules;
 
-        setAssignedSchedules(schedules);
+        if (scope === 'mine' && schedules.length > 0) {
+          const dates = getUniqueScheduleDates(schedules);
+          const dailyResults = await Promise.all(
+            dates.map(async (date) => {
+              const response = await getDailySchedules({
+                storeId,
+                date,
+                positionId:
+                  positionId !== 'all' && workType === 'assigned'
+                    ? positionId
+                    : undefined,
+              });
+
+              return mapScheduleEntries({
+                data: response.data,
+                fallbackDate: date,
+                markAsMine: false,
+                positions,
+              }).schedules;
+            }),
+          );
+          const hydratedSchedules = dailyResults
+            .flat()
+            .filter((schedule) => isMySchedule(schedule, userName));
+
+          if (hydratedSchedules.length > 0) {
+            nextSchedules = hydratedSchedules;
+          }
+        }
+
+        console.log('[schedule-monthly] mapped', nextSchedules);
+
+        setAssignedSchedules(nextSchedules);
       } catch (error) {
         console.log('[schedule-monthly] failed', error);
         setAssignedSchedules([]);
@@ -545,6 +616,59 @@ export default function SchedulePage() {
     positions,
     scheduleRefreshKey,
     storeId,
+    userName,
+    viewType,
+    workType,
+  ]);
+
+  useEffect(() => {
+    if (
+      !storeId ||
+      !isFocused ||
+      !access.loaded ||
+      !dateDetailVisible ||
+      workType !== 'assigned'
+    ) {
+      return;
+    }
+
+    const fetchDailySchedules = async () => {
+      try {
+        setDailyAssignedDate(selectedDate);
+        setDailyAssignedSchedules([]);
+        const { data } = await getDailySchedules({
+          storeId,
+          date: selectedDate,
+          positionId:
+            positionId !== 'all' && workType === 'assigned'
+              ? positionId
+              : undefined,
+        });
+        const { schedules } = mapScheduleEntries({
+          data,
+          fallbackDate: selectedDate,
+          markAsMine: false,
+          positions,
+        });
+
+        setDailyAssignedDate(selectedDate);
+        setDailyAssignedSchedules(schedules);
+      } catch {
+        setDailyAssignedDate(null);
+        setDailyAssignedSchedules([]);
+      }
+    };
+
+    fetchDailySchedules();
+  }, [
+    access.loaded,
+    dateDetailVisible,
+    isFocused,
+    positionId,
+    positions,
+    scheduleRefreshKey,
+    selectedDate,
+    storeId,
     viewType,
     workType,
   ]);
@@ -559,7 +683,7 @@ export default function SchedulePage() {
     );
 
     return sourceSchedules.filter((schedule) => {
-      if (viewType === 'mine' && !isMySchedule(schedule)) {
+      if (viewType === 'mine' && !isMySchedule(schedule, userName)) {
         return false;
       }
 
@@ -579,6 +703,7 @@ export default function SchedulePage() {
     positionId,
     positions,
     unavailableSchedules,
+    userName,
     viewType,
     workType,
   ]);
@@ -590,14 +715,14 @@ export default function SchedulePage() {
 
   const canEditScheduleItem = (schedule: ScheduleItem) => {
     if (isUnavailableSchedule(schedule)) {
-      return isMySchedule(schedule);
+      return isMySchedule(schedule, userName);
     }
 
     return canEditSchedule;
   };
 
   const canDeleteUnavailable = (schedule: ScheduleItem) =>
-    isUnavailableSchedule(schedule) && isMySchedule(schedule);
+    isUnavailableSchedule(schedule) && isMySchedule(schedule, userName);
 
   const hasUnavailableConflict = (schedule: ScheduleItem) => {
     if (!isUnavailableSchedule(schedule)) {
@@ -618,13 +743,12 @@ export default function SchedulePage() {
   const handlePressSchedule = (scheduleId: string) => {
     const schedule = filteredSchedules.find((item) => item.id === scheduleId);
 
-    if (!schedule || !canEditScheduleItem(schedule)) {
+    if (!schedule) {
       return;
     }
 
     setSelectedDate(schedule.date);
-    setSelectedSchedule(schedule);
-    setFormVisible(true);
+    setDateDetailVisible(true);
   };
 
   const handlePressDate = (date: string) => {
@@ -632,7 +756,30 @@ export default function SchedulePage() {
     setDateDetailVisible(true);
   };
 
-  const selectedDateSchedules = schedulesByDate[selectedDate] ?? [];
+  const selectedDateBaseSchedules =
+    workType === 'assigned'
+      ? dailyAssignedDate === selectedDate
+        ? dailyAssignedSchedules
+        : []
+      : schedulesByDate[selectedDate] ?? [];
+  const selectedDatePosition = positions.find(
+    (position) => position.id === positionId,
+  );
+  const selectedDateSchedules = selectedDateBaseSchedules.filter((schedule) => {
+    if (viewType === 'mine' && !isMySchedule(schedule, userName)) {
+      return false;
+    }
+
+    if (
+      workType === 'assigned' &&
+      positionId !== 'all' &&
+      !matchesPositionFilter(schedule, selectedDatePosition)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 
   if (!access.loaded) {
     return (
@@ -672,7 +819,7 @@ export default function SchedulePage() {
         onChangePosition={setPositionId}
         canManagePosition={canEditSchedule}
         canSelectAllView={canSelectAllView}
-        showPositionFilter={workType === 'assigned'}
+        showPositionFilter={workType === 'assigned' && viewType === 'all'}
         onPressPositionManage={() =>
           router.push(`/${storeId}/schedule/positions`)
         }
@@ -691,6 +838,11 @@ export default function SchedulePage() {
         <Pressable
           style={styles.floatingButton}
           onPress={() => {
+            if (workType === 'unavailable') {
+              setUnavailableFormVisible(true);
+              return;
+            }
+
             setSelectedSchedule(null);
             setFormVisible(true);
           }}
@@ -725,6 +877,43 @@ export default function SchedulePage() {
           setCurrentMonth(getMonthStart(schedule.date));
           setScheduleRefreshKey((prev) => prev + 1);
         }}
+        onUpdated={(updatedSchedule) => {
+          setAssignedSchedules((prev) =>
+            prev.map((schedule) =>
+              schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
+            ),
+          );
+          setDailyAssignedSchedules((prev) =>
+            prev.map((schedule) =>
+              schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
+            ),
+          );
+          setSelectedSchedule(null);
+          setSelectedDate(updatedSchedule.date);
+          setCurrentMonth(getMonthStart(updatedSchedule.date));
+          setScheduleRefreshKey((prev) => prev + 1);
+        }}
+        onDeleted={(scheduleId) => {
+          setAssignedSchedules((prev) =>
+            prev.filter((schedule) => schedule.id !== scheduleId),
+          );
+          setDailyAssignedSchedules((prev) =>
+            prev.filter((schedule) => schedule.id !== scheduleId),
+          );
+          setSelectedSchedule(null);
+          setScheduleRefreshKey((prev) => prev + 1);
+        }}
+      />
+
+      <ScheduleUnavailableFormBottomSheet
+        visible={unavailableFormVisible}
+        memberName={userName}
+        onClose={() => setUnavailableFormVisible(false)}
+        onCreated={(schedule) => {
+          setUnavailableSchedules((prev) => [...prev, schedule]);
+          setSelectedDate(schedule.date);
+          setCurrentMonth(getMonthStart(schedule.date));
+        }}
       />
 
       <ScheduleDateBottomSheet
@@ -751,7 +940,7 @@ export default function SchedulePage() {
           setUnavailableSchedules((prev) =>
             prev.filter(
               (schedule) =>
-                schedule.id !== scheduleId || !isMySchedule(schedule),
+                schedule.id !== scheduleId || !isMySchedule(schedule, userName),
             ),
           );
         }}
@@ -762,7 +951,7 @@ export default function SchedulePage() {
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: backgroundColorWhite,
+    backgroundColor: '#F1F1F6',
   },
   header: {
     flexDirection: 'row',
