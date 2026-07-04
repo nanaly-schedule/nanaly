@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
-import { canAccessAdminHome } from '@/src/features/permission/lib/access';
-import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
-import { getAdminboardInfos } from '@/src/features/store/api/dashboard';
+import {
+  getAdminboardInfos,
+  getDashboardInfos,
+} from '@/src/features/store/api/dashboard';
+import { getMembers } from '@/src/features/store/api/member';
 import { spacingSpacing8, spacingSpacing12 } from '@/src/init/styles/tokens';
-import AccessDenied from '@/src/shared/ui/AccessDenied';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import StoreHeader from '@/src/widgets/store/home/StoreHeader';
 import StoreInfoBtn from '@/src/widgets/store/home/StoreInfoBtn';
@@ -33,35 +34,46 @@ type TypeSummaryInfo = {
  * 편집 권한: 오너, 매니저
  */
 export default function AdminHomePage() {
-  const { storeId, displayStoreName } = useLocalSearchParams<{
-    storeId: string;
-    displayStoreName: string;
+  const { storeId: routeStoreId, displayStoreName } = useLocalSearchParams<{
+    storeId?: string | string[];
+    displayStoreName?: string;
   }>();
-  const access = useCurrentStoreAccess();
+  const storeId = Array.isArray(routeStoreId) ? routeStoreId[0] : routeStoreId;
 
   const [headerInfo, setHeaderInfo] = useState<TypeHeaderInfo | null>(null);
   const [summaryInfo, setSummaryInfo] = useState<TypeSummaryInfo | null>(null);
 
   useEffect(() => {
-    if (!access.loaded || !canAccessAdminHome(access)) {
+    if (!storeId) {
       return;
     }
 
     const fetch = async () => {
       try {
         const { data } = await getAdminboardInfos(storeId);
-
         const { header, summary } = data;
         setHeaderInfo(header);
         setSummaryInfo(summary);
-      } catch {}
+      } catch {
+        try {
+          const [{ data: dashboard }, { data: members }] = await Promise.all([
+            getDashboardInfos(storeId),
+            getMembers(storeId),
+          ]);
+
+          setHeaderInfo(dashboard.header);
+          setSummaryInfo({
+            todayWorkerCount: 0,
+            totalMemberCount: Array.isArray(members) ? members.length : 0,
+          });
+        } catch {
+          setHeaderInfo(null);
+          setSummaryInfo(null);
+        }
+      }
     };
     fetch();
-  }, [access, storeId]);
-
-  if (!access.loaded) {
-    return <View />;
-  }
+  }, [storeId]);
 
   return (
     <PageLayout showHeader={false}>
@@ -69,6 +81,7 @@ export default function AdminHomePage() {
         storeName={displayStoreName ?? headerInfo?.storeName ?? ''}
         isOwner={headerInfo?.role !== MemberRole.STAFF}
         isActiveOwner
+        unreadNotificationCount={headerInfo?.unreadNotificationCount ?? 0}
       />
       <View style={{ flexDirection: 'row', gap: spacingSpacing12 }}>
         <TodayWorker todayWorker={summaryInfo?.todayWorkerCount ?? 0} />

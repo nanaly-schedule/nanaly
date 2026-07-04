@@ -34,6 +34,13 @@ export default function Layout() {
       return;
     }
 
+    setUser({
+      currentStoreAccessLoaded: false,
+      currentStoreId: storeId,
+      currentStoreRole: null,
+      currentStorePermissions: null,
+    });
+
     const syncCurrentStoreAccess = async () => {
       try {
         const { data: myStores } = await getMyStore();
@@ -42,10 +49,14 @@ export default function Layout() {
         );
 
         if (!currentStore) {
+          setUser({
+            currentStoreAccessLoaded: true,
+            currentStoreId: storeId,
+            currentStoreRole: null,
+            currentStorePermissions: null,
+          });
           return;
         }
-        console.log('내 매장 목록:', myStores);
-        console.log('현재 매장 권한:', currentStore);
 
         setUser({
           currentStoreAccessLoaded: true,
@@ -67,7 +78,7 @@ export default function Layout() {
   }, [setUser, storeId]);
 
   return (
-    <Tabs>
+    <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen name="home" options={{ title: '홈' }} />
       <Tabs.Screen name="schedule" options={{ title: '스케줄' }} />

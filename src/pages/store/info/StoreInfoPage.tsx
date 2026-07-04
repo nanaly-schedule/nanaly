@@ -4,13 +4,11 @@ import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  canAccessStoreInfo,
   canEditStoreInfo,
 } from '@/src/features/permission/lib/access';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import { deleteStore, getStore } from '@/src/features/store/api/store';
 import { spacingSpacing12, typoColorRed } from '@/src/init/styles/tokens';
-import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -80,15 +78,6 @@ export default function StoreInfoPage() {
   };
 
   const insets = useSafeAreaInsets();
-
-  if (!canAccessStoreInfo(access)) {
-    return (
-      <AccessDenied
-        title="매장 정보에 접근할 수 없어요"
-        message="매니저 이상 권한이 있어야 매장 정보를 볼 수 있어요"
-      />
-    );
-  }
 
   return (
     <PageLayout showBackButton showHeader title="매장정보">

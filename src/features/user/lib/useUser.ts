@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { User } from '@/src/entities/user/user';
+import { unregisterCurrentDeviceAsync } from '@/src/features/push/lib/pushNotification';
 
 import { clearTokens } from '../../auth/lib/storage';
 
@@ -35,6 +36,7 @@ const useUser = create<UserStore>((set) => ({
       currentStoreRole: null,
       currentStorePermissions: null,
     });
+    await unregisterCurrentDeviceAsync();
     await clearTokens();
   },
 }));
