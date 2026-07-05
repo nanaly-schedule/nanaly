@@ -9,8 +9,18 @@ import NText from '@/src/shared/ui/NText';
 
 import ScheduleCard from './ScheduleCard';
 
+type Schedule = {
+  scheduleId: string;
+  date: string;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  totalHours: number;
+  status: 'current' | 'upcoming';
+};
+
 interface CurrentWeekSchedulesProps {
-  schedules: { id: string }[];
+  schedules: Schedule[];
 }
 
 export default function CurrentWeekSchedules({
@@ -25,14 +35,14 @@ export default function CurrentWeekSchedules({
         contentContainerStyle={{ flex: 1 }}
         horizontal
         data={schedules}
-        keyExtractor={(item) => `current-week-${item?.id}`}
-        renderItem={({ item, index }) => (
+        keyExtractor={(item) => item.scheduleId}
+        renderItem={({ item }) => (
           <ScheduleCard
-            isCurrent={index === 0}
-            startTime="00:00"
-            endTime="00:00"
-            totalTime="총 0시간 0분"
-            workDate="0000년 00월 00일"
+            isCurrent={item.status === 'current'}
+            startTime={item.startTime}
+            endTime={item.endTime}
+            totalTime={`총 ${item.totalHours}시간`}
+            workDate={item.date}
           />
         )}
         ListEmptyComponent={() => (

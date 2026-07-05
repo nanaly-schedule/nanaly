@@ -11,6 +11,8 @@ export type CreateScheduleRequest = {
   memo?: string | null;
 };
 
+export type UpdateScheduleRequest = CreateScheduleRequest;
+
 export async function getDailySchedules(params: {
   storeId: string;
   date: string;
@@ -50,6 +52,18 @@ export async function createSchedule(
   data: CreateScheduleRequest,
 ) {
   return apiClient.post(`/stores/${storeId}/schedules`, data);
+}
+
+export async function deleteSchedule(storeId: string, scheduleId: string) {
+  return apiClient.delete(`/stores/${storeId}/schedules/${scheduleId}`);
+}
+
+export async function updateSchedule(
+  storeId: string,
+  scheduleId: string,
+  data: UpdateScheduleRequest,
+) {
+  return apiClient.patch(`/stores/${storeId}/schedules/${scheduleId}`, data);
 }
 
 export async function getDailyUnavailable(params: {

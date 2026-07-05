@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 
 import DateWheelColumn from '@/src/features/auth/ui/DateWheelColumn';
-import { createSchedule } from '@/src/features/schedule/api/schedule';
+import {
+  createSchedule,
+  deleteSchedule,
+  updateSchedule,
+} from '@/src/features/schedule/api/schedule';
 import { getMembers } from '@/src/features/store/api/member';
 import { getMemberRoleLabel, MemberRole } from '@/src/entities/member/member';
 import {
@@ -47,6 +51,8 @@ type ScheduleFormBottomSheetProps = {
   schedule?: ScheduleItem | null;
   onClose: () => void;
   onCreated?: (schedule: ScheduleItem) => void;
+  onUpdated?: (schedule: ScheduleItem) => void;
+  onDeleted?: (scheduleId: string) => void;
 };
 
 type StoreMemberResponse = {
@@ -56,7 +62,7 @@ type StoreMemberResponse = {
   role?: MemberRole;
 };
 
-function getApiErrorMessage(error: unknown) {
+function getApiErrorMessage(error: unknown, fallback: string) {
   if (isAxiosError(error)) {
     const responseData = error.response?.data;
 
@@ -76,7 +82,7 @@ function getApiErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return error instanceof Error ? error.message : '근무 등록에 실패했어요';
+  return error instanceof Error ? error.message : fallback;
 }
 
 export default function ScheduleFormBottomSheet({
@@ -87,47 +93,78 @@ export default function ScheduleFormBottomSheet({
   schedule,
   onClose,
   onCreated,
+  onUpdated,
+  onDeleted,
 }: ScheduleFormBottomSheetProps) {
   const isCreateMode = !schedule;
+  const [isEditMode, setIsEditMode] = useState(false);
+  const isFormMode = isCreateMode || isEditMode;
   const [selectedMember, setSelectedMember] =
     useState<ScheduleMember | null>(null);
   const [selectedPosition, setSelectedPosition] =
     useState<SchedulePosition | null>(null);
+  const [positionCleared, setPositionCleared] = useState(false);
   const [memberPickerVisible, setMemberPickerVisible] = useState(false);
   const [positionPickerVisible, setPositionPickerVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerTarget, setTimePickerTarget] = useState<
     'start' | 'end' | null
   >(null);
+  const [menuVisible, setMenuVisible] = useState(false);
   const [saveConfirmVisible, setSaveConfirmVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
   const [missingRequiredVisible, setMissingRequiredVisible] = useState(false);
   const [saveFailedVisible, setSaveFailedVisible] = useState(false);
+  const [failedTitle, setFailedTitle] = useState('저장에 실패했어요');
   const [saveErrorMessage, setSaveErrorMessage] = useState(
     '근무 등록에 실패했어요',
   );
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [members, setMembers] = useState<ScheduleMember[]>(MOCK_MEMBERS);
   const memberName =
-    schedule?.memberName ?? selectedMember?.name ?? '지정안됨';
+    selectedMember?.name ?? schedule?.memberName ?? '지정안됨';
   const positionName =
-    schedule?.positionName ?? selectedPosition?.name ?? '지정안됨';
+    positionCleared
+      ? '지정안됨'
+      : selectedPosition?.name ?? schedule?.positionName ?? '지정안됨';
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [selectedDate, setSelectedDate] = useState(date);
+  const [selectedDate, setSelectedDate] = useState('');
   const [memo, setMemo] = useState('');
-  const displayDate = schedule?.date ?? selectedDate;
+  const displayDate = isFormMode ? selectedDate : schedule?.date ?? selectedDate;
+  const scheduleMember = members.find(
+    (member) =>
+      member.id === schedule?.memberId || member.name === schedule?.memberName,
+  );
+  const selectedMemberId =
+    selectedMember?.id ?? scheduleMember?.id ?? schedule?.memberId ?? null;
+  const selectedPositionId =
+    positionCleared
+      ? null
+      : selectedPosition?.id ?? schedule?.positionId ?? null;
   const hasChanges =
     !!selectedMember ||
     !!selectedPosition ||
-    selectedDate !== date ||
+    !!selectedDate ||
     !!startTime ||
     !!endTime ||
     !!memo;
   const hasRequiredValues =
-    !!selectedMember && !!displayDate && !!startTime && !!endTime;
+    !!selectedMemberId && !!displayDate && !!startTime && !!endTime;
 
   const handleClose = () => {
+    if (menuVisible) {
+      setMenuVisible(false);
+      return;
+    }
+
+    if (isEditMode) {
+      setIsEditMode(false);
+      return;
+    }
+
     if (isCreateMode && hasChanges) {
       setExitConfirmVisible(true);
       return;
@@ -145,6 +182,15 @@ export default function ScheduleFormBottomSheet({
     setSaveConfirmVisible(true);
   };
 
+  const getCurrentSchedulePayload = () => ({
+    memberId: selectedMemberId ?? '',
+    positionId: selectedPositionId,
+    date: displayDate,
+    startTime,
+    endTime,
+    memo: memo.trim() ? memo.trim() : null,
+  });
+
   const handleCreateSchedule = async () => {
     if (!selectedMember || saving) {
       return;
@@ -154,14 +200,7 @@ export default function ScheduleFormBottomSheet({
 
     try {
       const positionId = selectedPosition?.id ?? null;
-      const payload = {
-        memberId: selectedMember.id,
-        positionId,
-        date: displayDate,
-        startTime,
-        endTime,
-        memo: memo.trim() ? memo.trim() : null,
-      };
+      const payload = getCurrentSchedulePayload();
 
       const { data } = await createSchedule(storeId, payload);
       const createdId =
@@ -183,10 +222,72 @@ export default function ScheduleFormBottomSheet({
       onClose();
     } catch (error) {
       setSaveConfirmVisible(false);
-      setSaveErrorMessage(getApiErrorMessage(error));
+      setFailedTitle('저장에 실패했어요');
+      setSaveErrorMessage(getApiErrorMessage(error, '근무 등록에 실패했어요'));
       setSaveFailedVisible(true);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUpdateSchedule = async () => {
+    if (!schedule || !selectedMemberId || saving) {
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const positionId = selectedPositionId;
+      const payload = getCurrentSchedulePayload();
+
+      await updateSchedule(storeId, schedule.id, payload);
+      setSaveConfirmVisible(false);
+      const updatedSchedule: ScheduleItem = {
+        ...schedule,
+        date: displayDate,
+        memberId: selectedMemberId,
+        memberName,
+        positionId,
+        positionName: positionId ? positionName : null,
+        positionColor: positionId ? selectedPosition?.color ?? schedule.positionColor ?? null : null,
+        startTime,
+        endTime,
+        memo,
+      };
+
+      onUpdated?.(updatedSchedule);
+      setIsEditMode(false);
+      onClose();
+    } catch (error) {
+      setSaveConfirmVisible(false);
+      setFailedTitle('수정에 실패했어요');
+      setSaveErrorMessage(getApiErrorMessage(error, '근무 수정에 실패했어요'));
+      setSaveFailedVisible(true);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteSchedule = async () => {
+    if (!schedule || deleting) {
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      await deleteSchedule(storeId, schedule.id);
+      setDeleteConfirmVisible(false);
+      onDeleted?.(schedule.id);
+      onClose();
+    } catch (error) {
+      setDeleteConfirmVisible(false);
+      setFailedTitle('삭제에 실패했어요');
+      setSaveErrorMessage(getApiErrorMessage(error, '근무 삭제에 실패했어요'));
+      setSaveFailedVisible(true);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -195,19 +296,20 @@ export default function ScheduleFormBottomSheet({
       return;
     }
 
-    const nextMember =
-      MOCK_MEMBERS.find((member) => member.id === schedule?.memberId) ?? null;
     const nextPosition =
       positions.find((position) => position.id === schedule?.positionId) ??
       null;
 
-    setSelectedMember(nextMember);
+    setSelectedMember(null);
     setSelectedPosition(nextPosition);
+    setPositionCleared(false);
     setStartTime(schedule?.startTime ?? '');
     setEndTime(schedule?.endTime ?? '');
-    setSelectedDate(schedule?.date ?? date);
+    setSelectedDate(schedule?.date ?? '');
     setMemo(schedule?.memo ?? '');
-  }, [date, schedule, visible]);
+    setMenuVisible(false);
+    setIsEditMode(false);
+  }, [date, positions, schedule, visible]);
 
   useEffect(() => {
     if (!visible || !storeId) {
@@ -257,22 +359,52 @@ export default function ScheduleFormBottomSheet({
           <Ionicons name="chevron-back" size={20} color={typoColorPrimary} />
         </Pressable>
         <NText variant="b16" style={styles.title}>
-          {isCreateMode ? '근무 등록' : '근무 정보'}
+          {isCreateMode ? '근무 등록' : isEditMode ? '근무 수정' : '근무 정보'}
         </NText>
-        {isCreateMode ? (
+        {isFormMode ? (
           <Pressable style={styles.headerButton} onPress={handleSave}>
             <Ionicons name="checkmark" size={24} color={typoColorPrimary} />
           </Pressable>
         ) : (
-          <Pressable style={styles.headerButton}>
+          <Pressable
+            style={styles.headerButton}
+            onPress={() => setMenuVisible((visible) => !visible)}
+          >
             <Ionicons
               name="ellipsis-vertical"
-              size={18}
+              size={24}
               color={typoColorPrimary}
             />
           </Pressable>
         )}
       </View>
+
+      {menuVisible && !isCreateMode && (
+        <View style={styles.menu}>
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => {
+              setMenuVisible(false);
+              setIsEditMode(true);
+            }}
+          >
+            <NText variant="m16" style={styles.menuText}>
+              수정하기
+            </NText>
+          </Pressable>
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => {
+              setMenuVisible(false);
+              setDeleteConfirmVisible(true);
+            }}
+          >
+            <NText variant="m16" style={styles.menuText}>
+              삭제하기
+            </NText>
+          </Pressable>
+        </View>
+      )}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -288,14 +420,14 @@ export default function ScheduleFormBottomSheet({
             label="근무자"
             value={memberName}
             onPress={
-              isCreateMode ? () => setMemberPickerVisible(true) : undefined
+              isFormMode ? () => setMemberPickerVisible(true) : undefined
             }
           />
           <InfoRow
             label="포지션"
             value={positionName}
             onPress={
-              isCreateMode ? () => setPositionPickerVisible(true) : undefined
+              isFormMode ? () => setPositionPickerVisible(true) : undefined
             }
           />
         </View>
@@ -310,7 +442,7 @@ export default function ScheduleFormBottomSheet({
             placeholderTextColor={typoColorSub2}
             editable={false}
             onPressIn={() => {
-              if (isCreateMode) {
+              if (isFormMode) {
                 setDatePickerVisible(true);
               }
             }}
@@ -333,7 +465,7 @@ export default function ScheduleFormBottomSheet({
                 placeholderTextColor={typoColorSub2}
                 editable={false}
                 onPressIn={() => {
-                  if (isCreateMode) {
+                  if (isFormMode) {
                     setTimePickerTarget('start');
                   }
                 }}
@@ -350,7 +482,7 @@ export default function ScheduleFormBottomSheet({
                 placeholderTextColor={typoColorSub2}
                 editable={false}
                 onPressIn={() => {
-                  if (isCreateMode) {
+                  if (isFormMode) {
                     setTimePickerTarget('end');
                   }
                 }}
@@ -370,6 +502,7 @@ export default function ScheduleFormBottomSheet({
             placeholder="전달사항 및 특이사항을 입력해주세요"
             placeholderTextColor={typoColorSub2}
             onChangeText={setMemo}
+            editable={isFormMode}
             style={[styles.input, styles.memoInput]}
           />
         </View>
@@ -378,7 +511,7 @@ export default function ScheduleFormBottomSheet({
       <MemberPickerBottomSheet
         visible={memberPickerVisible}
         members={members}
-        selectedMemberId={selectedMember?.id ?? null}
+        selectedMemberId={selectedMemberId}
         onClose={() => setMemberPickerVisible(false)}
         onSelect={(member) => {
           setSelectedMember(member);
@@ -388,10 +521,11 @@ export default function ScheduleFormBottomSheet({
       <PositionPickerBottomSheet
         visible={positionPickerVisible}
         positions={positions}
-        selectedPositionId={selectedPosition?.id ?? null}
+        selectedPositionId={selectedPositionId}
         onClose={() => setPositionPickerVisible(false)}
         onSelect={(position) => {
           setSelectedPosition(position);
+          setPositionCleared(position === null);
           setPositionPickerVisible(false);
         }}
       />
@@ -419,7 +553,9 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setSaveConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>근무를 추가할까요?</BaseModal.Title>
+          <BaseModal.Title>
+            {isCreateMode ? '근무를 추가할까요?' : '근무를 수정할까요?'}
+          </BaseModal.Title>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -429,9 +565,9 @@ export default function ScheduleFormBottomSheet({
             취소
           </BaseModal.Button>
           <BaseModal.Button
-            onPress={handleCreateSchedule}
+            onPress={isCreateMode ? handleCreateSchedule : handleUpdateSchedule}
           >
-            {saving ? '추가중' : '추가하기'}
+            {saving ? (isCreateMode ? '추가중' : '수정중') : isCreateMode ? '추가하기' : '수정하기'}
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -480,7 +616,7 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setSaveFailedVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>저장에 실패했어요</BaseModal.Title>
+          <BaseModal.Title>{failedTitle}</BaseModal.Title>
           <BaseModal.Text>{saveErrorMessage}</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
@@ -489,6 +625,25 @@ export default function ScheduleFormBottomSheet({
             onPress={() => setSaveFailedVisible(false)}
           >
             확인
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+      <BaseModal
+        visible={deleteConfirmVisible}
+        onClose={() => setDeleteConfirmVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>근무를 삭제할까요?</BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            variant="secondary"
+            onPress={() => setDeleteConfirmVisible(false)}
+          >
+            취소
+          </BaseModal.Button>
+          <BaseModal.Button onPress={handleDeleteSchedule}>
+            {deleting ? '삭제중' : '삭제하기'}
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -824,6 +979,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
+    color: typoColorPrimary,
+  },
+  menu: {
+    position: 'absolute',
+    zIndex: 20,
+    top: 58,
+    right: 16,
+    width: 140,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 8,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 12,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 12,
+  },
+  menuItem: {
+    height: 40,
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+  },
+  menuText: {
     color: typoColorPrimary,
   },
   content: {

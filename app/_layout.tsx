@@ -28,10 +28,6 @@ export default function Layout() {
           name,
           email,
           birthDate,
-          currentStoreAccessLoaded: false,
-          currentStoreId: null,
-          currentStoreRole: null,
-          currentStorePermissions: null,
         });
         await preparePushNotificationsAsync();
 

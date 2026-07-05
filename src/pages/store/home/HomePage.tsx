@@ -18,8 +18,14 @@ type TypeHeaderInfo = {
   unreadNotificationCount: number;
 };
 
-type TypeSchedules = {
-  id: string;
+type Schedule = {
+  scheduleId: string;
+  date: string;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  totalHours: number;
+  status: 'current' | 'upcoming';
 };
 
 function normalizeStoreId(value?: string | string[]) {
@@ -43,8 +49,7 @@ export default function HomePage() {
   const storeId = normalizeStoreId(params.storeId) ?? currentStoreId ?? '';
   const { displayStoreName } = params;
   const [headerInfo, setHeaderInfo] = useState<TypeHeaderInfo | null>(null);
-  //todo: 스케줄 구현 후 데이터 삭제
-  const [schedule, setSchedule] = useState<TypeSchedules[]>([]);
+  const [schedule, setSchedule] = useState<Schedule[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
 
   useFocusEffect(
@@ -60,13 +65,22 @@ export default function HomePage() {
             getNotices(storeId),
           ]);
           const { header, schedules } = dashboard;
+          const nextSchedules = [
+            ...(schedules?.current
+              ? [{ ...schedules.current, status: 'current' as const }]
+              : []),
+            ...(schedules?.upcoming ?? []).map((item: Omit<Schedule, 'status'>) => ({
+              ...item,
+              status: 'upcoming' as const,
+            })),
+          ];
+
+          console.log('[home-dashboard] schedules', schedules);
+          console.log('[home-dashboard] mapped schedules', nextSchedules);
 
           setHeaderInfo(header);
           setNotices((noticeList as Notice[]).slice(0, 3));
-          setSchedule([
-            ...(schedules?.current ? [schedules.current] : []),
-            ...schedules.upcoming,
-          ]);
+          setSchedule(nextSchedules);
         } catch {
           // todo: 403 -> not found redirect
         }

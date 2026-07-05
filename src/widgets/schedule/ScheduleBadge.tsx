@@ -16,7 +16,7 @@ export default function ScheduleBadge({
   const positionName = schedule.positionName ?? '선택 안함';
   const compactText =
     compactLabel === 'time'
-      ? `${schedule.startTime.slice(0, 2)}-${schedule.endTime.slice(0, 2)}`
+      ? getCompactTimeLabel(schedule)
       : schedule.memberName;
 
   return (
@@ -30,6 +30,25 @@ export default function ScheduleBadge({
     >
       {compact ? compactText : `${schedule.memberName} · ${positionName}`}
     </Text>
+  );
+}
+
+function getCompactTimeLabel(schedule: ScheduleItem) {
+  if (isAllDayUnavailable(schedule)) {
+    return '종일';
+  }
+
+  return `${schedule.startTime.slice(0, 2)}-${schedule.endTime.slice(0, 2)}`;
+}
+
+function isAllDayUnavailable(schedule: ScheduleItem) {
+  const startTime = schedule.startTime.slice(0, 5);
+  const endTime = schedule.endTime.slice(0, 5);
+
+  return (
+    schedule.positionId === 'unavailable' &&
+    startTime === '00:00' &&
+    (endTime === '23:59' || endTime === '24:00')
   );
 }
 

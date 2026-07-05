@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { basicColorBluegrey100 } from '@/src/init/styles/tokens';
+import { backgroundColorPrimary } from '@/src/init/styles/tokens';
 
 import { ScheduleItem } from './mock';
 import ScheduleBadge from './ScheduleBadge';
@@ -54,8 +54,7 @@ export default function ScheduleCalendarDay({
     <Pressable
       style={[
         styles.container,
-        isToday && styles.today,
-        selected && !isToday && styles.selected,
+        selected && styles.selected,
       ]}
       onPress={() => onPressDate(date.dateString)}
     >
@@ -64,7 +63,7 @@ export default function ScheduleCalendarDay({
           styles.day,
           isSunday && styles.sundayDay,
           state === 'disabled' && styles.disabledDay,
-          selected && styles.selectedDay,
+          isToday && styles.todayDay,
         ]}
       >
         {date.day}
@@ -96,11 +95,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 5,
   },
-  today: {
-    backgroundColor: basicColorBluegrey100,
-  },
   selected: {
-    backgroundColor: basicColorBluegrey100,
+    backgroundColor: backgroundColorPrimary,
   },
   day: {
     color: '#333333',
@@ -113,9 +109,8 @@ const styles = StyleSheet.create({
   disabledDay: {
     color: '#A5A5A5',
   },
-  selectedDay: {
+  todayDay: {
     color: '#3B82F6',
-    fontWeight: '700',
   },
   badges: {
     width: 46,

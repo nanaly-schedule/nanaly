@@ -1,0 +1,524 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
+
+import DateWheelColumn from '@/src/features/auth/ui/DateWheelColumn';
+import {
+  backgroundColorWhite,
+  buttonColorCta,
+  radiusRadius12,
+  spacingSpacing20,
+  typoColorPrimary,
+  typoColorSub2,
+} from '@/src/init/styles/tokens';
+import {
+  BirthDateValue,
+  createNumberRange,
+  formatBirthDate,
+  getDaysInMonth,
+  parseBirthDate,
+} from '@/src/shared/lib/date';
+import BaseModal from '@/src/shared/ui/BaseModal';
+import BottomSheet from '@/src/shared/ui/BottomSheet';
+import NText from '@/src/shared/ui/NText';
+
+import { ScheduleItem } from './mock';
+
+type ScheduleUnavailableFormBottomSheetProps = {
+  visible: boolean;
+  memberName: string;
+  onClose: () => void;
+  onCreated?: (schedule: ScheduleItem) => void;
+};
+
+export default function ScheduleUnavailableFormBottomSheet({
+  visible,
+  memberName,
+  onClose,
+  onCreated,
+}: ScheduleUnavailableFormBottomSheetProps) {
+  const [date, setDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [allDay, setAllDay] = useState(false);
+  const [memo, setMemo] = useState('');
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [timePickerTarget, setTimePickerTarget] = useState<
+    'start' | 'end' | null
+  >(null);
+  const [missingRequiredVisible, setMissingRequiredVisible] = useState(false);
+  const [saveConfirmVisible, setSaveConfirmVisible] = useState(false);
+  const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
+  const hasChanges = !!date || !!startTime || !!endTime || allDay || !!memo;
+  const hasRequiredValues = !!date && (allDay || (!!startTime && !!endTime));
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    setDate('');
+    setStartTime('');
+    setEndTime('');
+    setAllDay(false);
+    setMemo('');
+  }, [visible]);
+
+  const handleClose = () => {
+    if (hasChanges) {
+      setExitConfirmVisible(true);
+      return;
+    }
+
+    onClose();
+  };
+
+  const handleSave = () => {
+    if (!hasRequiredValues) {
+      setMissingRequiredVisible(true);
+      return;
+    }
+
+    setSaveConfirmVisible(true);
+  };
+
+  const handleCreate = () => {
+    setSaveConfirmVisible(false);
+    onCreated?.({
+      id: `unavailable-${Date.now()}`,
+      date,
+      memberId: 'me',
+      memberName: memberName || '나',
+      positionId: 'unavailable',
+      positionName: '근무불가',
+      positionColor: '#FF6B6B',
+      startTime: allDay ? '00:00' : startTime,
+      endTime: allDay ? '23:59' : endTime,
+      memo,
+      isMine: true,
+    });
+    onClose();
+  };
+
+  return (
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      showHandle={false}
+      style={styles.sheet}
+    >
+      <View style={styles.header}>
+        <Pressable style={styles.headerButton} onPress={handleClose}>
+          <Ionicons name="chevron-back" size={20} color={typoColorPrimary} />
+        </Pressable>
+        <NText variant="b16" style={styles.title}>
+          근무 불가
+        </NText>
+        <Pressable style={styles.headerButton} onPress={handleSave}>
+          <Ionicons name="checkmark" size={24} color={typoColorPrimary} />
+        </Pressable>
+      </View>
+
+      <View style={styles.content}>
+        <View style={styles.section}>
+          <NText variant="r12" style={styles.sectionTitle}>
+            날짜
+          </NText>
+          <TextInput
+            value={formatDate(date)}
+            placeholder="YYYY.MM.DD"
+            placeholderTextColor={typoColorSub2}
+            editable={false}
+            onPressIn={() => setDatePickerVisible(true)}
+            style={styles.input}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <NText variant="r12" style={styles.sectionTitle}>
+            시간
+          </NText>
+          <View style={styles.allDayRow}>
+            <NText variant="r12" style={styles.timeLabel}>
+              종일
+            </NText>
+            <Switch
+              value={allDay}
+              onValueChange={setAllDay}
+              trackColor={{ false: '#E5E5EA', true: buttonColorCta }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor="#E5E5EA"
+            />
+          </View>
+          <View style={styles.timeRow}>
+            <View style={styles.timeColumn}>
+              <NText variant="r12" style={styles.timeLabel}>
+                시작
+              </NText>
+              <TextInput
+                value={startTime}
+                placeholder="00:00"
+                placeholderTextColor={typoColorSub2}
+                editable={false}
+                onPressIn={() => {
+                  if (!allDay) {
+                    setTimePickerTarget('start');
+                  }
+                }}
+                style={[styles.input, allDay && styles.disabledInput]}
+              />
+            </View>
+            <View style={styles.timeColumn}>
+              <NText variant="r12" style={styles.timeLabel}>
+                종료
+              </NText>
+              <TextInput
+                value={endTime}
+                placeholder="00:00"
+                placeholderTextColor={typoColorSub2}
+                editable={false}
+                onPressIn={() => {
+                  if (!allDay) {
+                    setTimePickerTarget('end');
+                  }
+                }}
+                style={[styles.input, allDay && styles.disabledInput]}
+              />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <NText variant="r12" style={styles.sectionTitle}>
+            사유
+          </NText>
+          <TextInput
+            value={memo}
+            multiline
+            placeholder="사유를 입력해 주세요"
+            placeholderTextColor={typoColorSub2}
+            onChangeText={setMemo}
+            style={[styles.input, styles.memoInput]}
+          />
+        </View>
+      </View>
+
+      <ScheduleUnavailableDatePickerBottomSheet
+        visible={datePickerVisible}
+        value={parseBirthDate(date)}
+        onClose={() => setDatePickerVisible(false)}
+        onChange={(nextDate) => {
+          setDate(formatBirthDate(nextDate));
+          setDatePickerVisible(false);
+        }}
+      />
+      <ScheduleUnavailableTimePickerBottomSheet
+        visible={!!timePickerTarget}
+        value={timePickerTarget === 'end' ? endTime : startTime}
+        onClose={() => setTimePickerTarget(null)}
+        onChange={(nextTime) => {
+          if (timePickerTarget === 'end') {
+            setEndTime(nextTime);
+          } else {
+            setStartTime(nextTime);
+          }
+          setTimePickerTarget(null);
+        }}
+      />
+
+      <BaseModal
+        visible={saveConfirmVisible}
+        onClose={() => setSaveConfirmVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>근무불가를 추가할까요?</BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            variant="secondary"
+            onPress={() => setSaveConfirmVisible(false)}
+          >
+            취소
+          </BaseModal.Button>
+          <BaseModal.Button onPress={handleCreate}>추가하기</BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+
+      <BaseModal
+        visible={exitConfirmVisible}
+        onClose={() => setExitConfirmVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>저장하지 않고 나갈까요?</BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            variant="secondary"
+            onPress={() => setExitConfirmVisible(false)}
+          >
+            취소
+          </BaseModal.Button>
+          <BaseModal.Button
+            onPress={() => {
+              setExitConfirmVisible(false);
+              onClose();
+            }}
+          >
+            마무리
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+
+      <BaseModal
+        visible={missingRequiredVisible}
+        onClose={() => setMissingRequiredVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>입력되지 않은 항목이 있어요</BaseModal.Title>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            fullWidth
+            onPress={() => setMissingRequiredVisible(false)}
+          >
+            확인
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+    </BottomSheet>
+  );
+}
+
+function formatDate(date: string) {
+  return date.split('-').join('.');
+}
+
+function getDefaultDateValue(): BirthDateValue {
+  const now = new Date();
+
+  return {
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    day: now.getDate(),
+  };
+}
+
+function ScheduleUnavailableDatePickerBottomSheet({
+  visible,
+  value,
+  onClose,
+  onChange,
+}: {
+  visible: boolean;
+  value: BirthDateValue | null;
+  onClose: () => void;
+  onChange: (value: BirthDateValue) => void;
+}) {
+  const [draft, setDraft] = useState<BirthDateValue>(getDefaultDateValue());
+  const years = createNumberRange(1998, 2030);
+  const months = createNumberRange(1, 12);
+  const days = createNumberRange(1, getDaysInMonth(draft.year, draft.month));
+
+  useEffect(() => {
+    if (visible) {
+      setDraft(value ?? getDefaultDateValue());
+    }
+  }, [value, visible]);
+
+  const updateDraft = (nextValue: Partial<BirthDateValue>) => {
+    setDraft((prev) => {
+      const next = { ...prev, ...nextValue };
+      const maxDay = getDaysInMonth(next.year, next.month);
+
+      return {
+        ...next,
+        day: Math.min(next.day, maxDay),
+      };
+    });
+  };
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
+      <View style={styles.wheelRow}>
+        <DateWheelColumn
+          items={years}
+          selectedValue={draft.year}
+          formatLabel={(year) => `${year}년`}
+          onChange={(year) => updateDraft({ year })}
+        />
+        <DateWheelColumn
+          items={months}
+          selectedValue={draft.month}
+          formatLabel={(month) => `${month}월`}
+          onChange={(month) => updateDraft({ month })}
+        />
+        <DateWheelColumn
+          items={days}
+          selectedValue={draft.day}
+          formatLabel={(day) => `${String(day).padStart(2, '0')}일`}
+          onChange={(day) => updateDraft({ day })}
+        />
+      </View>
+      <ConfirmButton onPress={() => onChange(draft)} />
+    </BottomSheet>
+  );
+}
+
+function ScheduleUnavailableTimePickerBottomSheet({
+  visible,
+  value,
+  onClose,
+  onChange,
+}: {
+  visible: boolean;
+  value: string;
+  onClose: () => void;
+  onChange: (value: string) => void;
+}) {
+  const [draft, setDraft] = useState({ hour: 0, minute: 0 });
+  const hours = createNumberRange(0, 23);
+  const minutes = createNumberRange(0, 59);
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    const [hour, minute] = value
+      ? value.split(':').map(Number)
+      : [0, 0];
+
+    setDraft({
+      hour: Number.isFinite(hour) ? hour : 0,
+      minute: Number.isFinite(minute) ? minute : 0,
+    });
+  }, [value, visible]);
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
+      <View style={styles.wheelRow}>
+        <DateWheelColumn
+          items={hours}
+          selectedValue={draft.hour}
+          formatLabel={(hour) => `${String(hour).padStart(2, '0')}시`}
+          onChange={(hour) => setDraft((prev) => ({ ...prev, hour }))}
+        />
+        <DateWheelColumn
+          items={minutes}
+          selectedValue={draft.minute}
+          formatLabel={(minute) => `${String(minute).padStart(2, '0')}분`}
+          onChange={(minute) => setDraft((prev) => ({ ...prev, minute }))}
+        />
+      </View>
+      <ConfirmButton
+        onPress={() =>
+          onChange(
+            `${String(draft.hour).padStart(2, '0')}:${String(
+              draft.minute,
+            ).padStart(2, '0')}`,
+          )
+        }
+      />
+    </BottomSheet>
+  );
+}
+
+function ConfirmButton({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable style={styles.confirmButton} onPress={onPress}>
+      <NText variant="m16" style={styles.confirmText}>
+        확인
+      </NText>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  sheet: {
+    maxHeight: '92%',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 32,
+  },
+  header: {
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: -10,
+    marginBottom: 16,
+  },
+  headerButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    color: typoColorPrimary,
+  },
+  content: {
+    paddingBottom: 20,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    color: typoColorPrimary,
+    marginBottom: 10,
+  },
+  input: {
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    color: typoColorPrimary,
+    fontSize: 12,
+  },
+  disabledInput: {
+    backgroundColor: '#E6E6E6',
+    color: typoColorSub2,
+  },
+  memoInput: {
+    height: 76,
+    paddingTop: 12,
+    textAlignVertical: 'top',
+  },
+  allDayRow: {
+    minHeight: 34,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  timeRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  timeColumn: {
+    flex: 1,
+    gap: 8,
+  },
+  timeLabel: {
+    color: typoColorPrimary,
+  },
+  wheelSheet: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  wheelRow: {
+    flexDirection: 'row',
+    gap: spacingSpacing20,
+    marginBottom: spacingSpacing20,
+  },
+  confirmButton: {
+    height: 46,
+    borderRadius: radiusRadius12,
+    backgroundColor: buttonColorCta,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmText: {
+    color: backgroundColorWhite,
+  },
+});
