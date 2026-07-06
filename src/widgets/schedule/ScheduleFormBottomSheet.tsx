@@ -954,7 +954,7 @@ function ConfirmButton({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   sheet: {
-    maxHeight: '92%',
+    minHeight: 720,
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 32,
