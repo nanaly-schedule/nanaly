@@ -49,8 +49,12 @@ function buildNotificationTarget(
       }
 
       return {
-        pathname: '/[storeId]/schedule/[scheduleId]',
-        params: { storeId, scheduleId: targetId },
+        pathname: '/[storeId]/schedule',
+        params: {
+          storeId,
+          openScheduleId: targetId,
+          openScheduleModal: 'true',
+        },
       };
     default:
       return null;

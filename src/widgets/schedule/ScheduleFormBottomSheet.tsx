@@ -551,7 +551,10 @@ export default function ScheduleFormBottomSheet({
           setStartTime(nextTime);
           const nextEndTime = toTimeString(toTimeMinutes(nextTime) + 60);
 
-          if (!endTime || toTimeMinutes(endTime) < toTimeMinutes(nextTime) + 60) {
+          if (
+            !endTime ||
+            toTimeMinutes(endTime) < toTimeMinutes(nextTime) + 60
+          ) {
             setEndTime(nextEndTime);
           }
         }}
@@ -937,10 +940,8 @@ function ScheduleTimePickerBottomSheet({
   );
   const normalizedHour = Math.floor(clampedTotalMinutes / 60);
   const normalizedMinute = clampedTotalMinutes % 60;
-  const minuteStart =
-    normalizedHour === minHour ? resolvedMinMinutes % 60 : 0;
-  const minuteEnd =
-    normalizedHour === maxHour ? resolvedMaxMinutes % 60 : 59;
+  const minuteStart = normalizedHour === minHour ? resolvedMinMinutes % 60 : 0;
+  const minuteEnd = normalizedHour === maxHour ? resolvedMaxMinutes % 60 : 59;
   const minutes = createNumberRange(minuteStart, minuteEnd);
 
   useEffect(() => {

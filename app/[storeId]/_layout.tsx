@@ -81,7 +81,18 @@ export default function Layout() {
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen name="home" options={{ title: '홈' }} />
-      <Tabs.Screen name="schedule" options={{ title: '스케줄' }} />
+      <Tabs.Screen
+        name="schedule"
+        options={{
+          title: '스케줄',
+          href: storeId
+            ? {
+                pathname: '/[storeId]/schedule',
+                params: { storeId },
+              }
+            : null,
+        }}
+      />
       <Tabs.Screen name="my" options={{ title: '마이' }} />
     </Tabs>
   );

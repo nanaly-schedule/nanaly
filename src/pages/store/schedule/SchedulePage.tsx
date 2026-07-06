@@ -1,17 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
+import { getPositions } from '@/src/features/schedule/api/position';
 import {
   getDailySchedules,
   getMonthlySchedules,
   ScheduleScope,
 } from '@/src/features/schedule/api/schedule';
-import { getPositions } from '@/src/features/schedule/api/position';
 import useUser from '@/src/features/user/lib/useUser';
 import { buttonColorCta, typoColorPrimary } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
@@ -444,8 +444,15 @@ function normalizeStoreId(value?: string | string[]) {
 }
 
 export default function SchedulePage() {
-  const params = useLocalSearchParams<{ storeId?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    storeId?: string | string[];
+    openScheduleId?: string | string[];
+    openScheduleModal?: string | string[];
+  }>();
   const routeStoreId = normalizeStoreId(params.storeId);
+  const notificationScheduleId = normalizeStoreId(params.openScheduleId);
+  const shouldOpenNotificationScheduleModal =
+    normalizeStoreId(params.openScheduleModal) === 'true';
   const currentStoreId = useUser((state) => state.currentStoreId);
   const userName = useUser((state) => state.name);
   const storeId = routeStoreId ?? currentStoreId ?? '';
@@ -481,6 +488,8 @@ export default function SchedulePage() {
   );
   const [positions, setPositions] = useState<SchedulePosition[]>([]);
   const [scheduleRefreshKey, setScheduleRefreshKey] = useState(0);
+  const [assignedSchedulesLoaded, setAssignedSchedulesLoaded] = useState(false);
+  const handledNotificationScheduleIdRef = useRef<string | null>(null);
   const canSelectAllView =
     workType === 'assigned' || canViewAllUnavailable;
 
@@ -536,6 +545,8 @@ export default function SchedulePage() {
     }
 
     const fetchMonthlySchedules = async () => {
+      setAssignedSchedulesLoaded(false);
+
       try {
         const { year, month } = parseMonth(currentMonth);
         const scope: ScheduleScope = viewType;
@@ -604,6 +615,8 @@ export default function SchedulePage() {
       } catch (error) {
         console.log('[schedule-monthly] failed', error);
         setAssignedSchedules([]);
+      } finally {
+        setAssignedSchedulesLoaded(true);
       }
     };
 
@@ -619,6 +632,47 @@ export default function SchedulePage() {
     userName,
     viewType,
     workType,
+  ]);
+
+  useEffect(() => {
+    if (!notificationScheduleId || !shouldOpenNotificationScheduleModal) {
+      handledNotificationScheduleIdRef.current = null;
+      return;
+    }
+
+    if (handledNotificationScheduleIdRef.current === notificationScheduleId) {
+      return;
+    }
+
+    if (
+      !storeId ||
+      !isFocused ||
+      !assignedSchedulesLoaded
+    ) {
+      return;
+    }
+
+    const targetSchedule = assignedSchedules.find(
+      (schedule) => schedule.id === notificationScheduleId,
+    );
+    handledNotificationScheduleIdRef.current = notificationScheduleId;
+
+    if (!targetSchedule) {
+      return;
+    }
+
+    setCurrentMonth(getMonthStart(targetSchedule.date));
+    setSelectedDate(targetSchedule.date);
+    setSelectedSchedule(targetSchedule);
+    setDateDetailVisible(false);
+    setFormVisible(true);
+  }, [
+    assignedSchedules,
+    assignedSchedulesLoaded,
+    isFocused,
+    notificationScheduleId,
+    shouldOpenNotificationScheduleModal,
+    storeId,
   ]);
 
   useEffect(() => {
