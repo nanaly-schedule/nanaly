@@ -535,6 +535,12 @@ export default function ScheduleFormBottomSheet({
       <ScheduleTimePickerBottomSheet
         visible={!!timePickerTarget}
         value={timePickerTarget === 'end' ? endTime : startTime}
+        minMinutes={
+          timePickerTarget === 'end' && startTime
+            ? Math.min(toTimeMinutes(startTime) + 60, 23 * 60 + 59)
+            : 0
+        }
+        maxMinutes={timePickerTarget === 'start' ? 22 * 60 + 59 : 23 * 60 + 59}
         onClose={() => setTimePickerTarget(null)}
         onChange={(nextTime) => {
           if (timePickerTarget === 'end') {
@@ -543,6 +549,11 @@ export default function ScheduleFormBottomSheet({
           }
 
           setStartTime(nextTime);
+          const nextEndTime = toTimeString(toTimeMinutes(nextTime) + 60);
+
+          if (!endTime || toTimeMinutes(endTime) < toTimeMinutes(nextTime) + 60) {
+            setEndTime(nextEndTime);
+          }
         }}
       />
       <BaseModal
@@ -656,6 +667,23 @@ export default function ScheduleFormBottomSheet({
 
 function formatDate(date: string) {
   return date.split('-').join('.');
+}
+
+function formatTime(hour: number, minute: number) {
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function toTimeMinutes(value: string) {
+  const { hour, minute } = parseTime(value);
+  return hour * 60 + minute;
+}
+
+function toTimeString(totalMinutes: number) {
+  const clampedMinutes = Math.min(Math.max(totalMinutes, 0), 23 * 60 + 59);
+  const hour = Math.floor(clampedMinutes / 60);
+  const minute = clampedMinutes % 60;
+
+  return formatTime(hour, minute);
 }
 
 function InfoRow({
@@ -884,30 +912,67 @@ function parseTime(value: string) {
 function ScheduleTimePickerBottomSheet({
   visible,
   value,
+  minMinutes,
+  maxMinutes,
   onClose,
   onChange,
 }: {
   visible: boolean;
   value: string;
+  minMinutes?: number;
+  maxMinutes?: number;
   onClose: () => void;
   onChange: (value: string) => void;
 }) {
   const [draft, setDraft] = useState(parseTime(value));
-  const hours = createNumberRange(0, 23);
-  const minutes = createNumberRange(0, 59);
+  const resolvedMinMinutes = minMinutes ?? 0;
+  const resolvedMaxMinutes = maxMinutes ?? 23 * 60 + 59;
+  const minHour = Math.floor(resolvedMinMinutes / 60);
+  const maxHour = Math.floor(resolvedMaxMinutes / 60);
+  const hours = createNumberRange(minHour, maxHour);
+  const selectedTotalMinutes = draft.hour * 60 + draft.minute;
+  const clampedTotalMinutes = Math.min(
+    Math.max(selectedTotalMinutes, resolvedMinMinutes),
+    resolvedMaxMinutes,
+  );
+  const normalizedHour = Math.floor(clampedTotalMinutes / 60);
+  const normalizedMinute = clampedTotalMinutes % 60;
+  const minuteStart =
+    normalizedHour === minHour ? resolvedMinMinutes % 60 : 0;
+  const minuteEnd =
+    normalizedHour === maxHour ? resolvedMaxMinutes % 60 : 59;
+  const minutes = createNumberRange(minuteStart, minuteEnd);
 
   useEffect(() => {
     if (visible) {
-      setDraft(parseTime(value));
+      const totalMinutes = toTimeMinutes(value);
+      const nextMinutes = Math.min(
+        Math.max(totalMinutes, resolvedMinMinutes),
+        resolvedMaxMinutes,
+      );
+
+      setDraft({
+        hour: Math.floor(nextMinutes / 60),
+        minute: nextMinutes % 60,
+      });
     }
-  }, [value, visible]);
+  }, [resolvedMaxMinutes, resolvedMinMinutes, value, visible]);
+
+  useEffect(() => {
+    if (draft.hour !== normalizedHour || draft.minute !== normalizedMinute) {
+      setDraft({
+        hour: normalizedHour,
+        minute: normalizedMinute,
+      });
+    }
+  }, [draft.hour, draft.minute, normalizedHour, normalizedMinute]);
 
   return (
     <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
       <View style={styles.wheelRow}>
         <DateWheelColumn
           items={hours}
-          selectedValue={draft.hour}
+          selectedValue={normalizedHour}
           formatLabel={(hour) => `${hour}시`}
           onChange={(hour) =>
             setDraft((prev) => ({
@@ -918,7 +983,7 @@ function ScheduleTimePickerBottomSheet({
         />
         <DateWheelColumn
           items={minutes}
-          selectedValue={draft.minute}
+          selectedValue={normalizedMinute}
           formatLabel={(minute) => `${String(minute).padStart(2, '0')}분`}
           onChange={(minute) =>
             setDraft((prev) => ({
@@ -930,11 +995,7 @@ function ScheduleTimePickerBottomSheet({
       </View>
       <ConfirmButton
         onPress={() => {
-          onChange(
-            `${String(draft.hour).padStart(2, '0')}:${String(
-              draft.minute,
-            ).padStart(2, '0')}`,
-          );
+          onChange(formatTime(normalizedHour, normalizedMinute));
           onClose();
         }}
       />
