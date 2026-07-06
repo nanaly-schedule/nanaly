@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { isAxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import {
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import { getMemberRoleLabel, MemberRole } from '@/src/entities/member/member';
 import DateWheelColumn from '@/src/features/auth/ui/DateWheelColumn';
 import {
   createSchedule,
@@ -16,7 +18,6 @@ import {
   updateSchedule,
 } from '@/src/features/schedule/api/schedule';
 import { getMembers } from '@/src/features/store/api/member';
-import { getMemberRoleLabel, MemberRole } from '@/src/entities/member/member';
 import {
   backgroundColorWhite,
   buttonColorCta,
@@ -36,6 +37,7 @@ import BaseModal from '@/src/shared/ui/BaseModal';
 import BottomSheet from '@/src/shared/ui/BottomSheet';
 import NText from '@/src/shared/ui/NText';
 
+import TitleButton from '../store/TitleButton';
 import {
   MOCK_MEMBERS,
   ScheduleItem,
@@ -99,8 +101,9 @@ export default function ScheduleFormBottomSheet({
   const isCreateMode = !schedule;
   const [isEditMode, setIsEditMode] = useState(false);
   const isFormMode = isCreateMode || isEditMode;
-  const [selectedMember, setSelectedMember] =
-    useState<ScheduleMember | null>(null);
+  const [selectedMember, setSelectedMember] = useState<ScheduleMember | null>(
+    null,
+  );
   const [selectedPosition, setSelectedPosition] =
     useState<SchedulePosition | null>(null);
   const [positionCleared, setPositionCleared] = useState(false);
@@ -117,33 +120,31 @@ export default function ScheduleFormBottomSheet({
   const [missingRequiredVisible, setMissingRequiredVisible] = useState(false);
   const [saveFailedVisible, setSaveFailedVisible] = useState(false);
   const [failedTitle, setFailedTitle] = useState('저장에 실패했어요');
-  const [saveErrorMessage, setSaveErrorMessage] = useState(
-    '근무 등록에 실패했어요',
-  );
+  const [saveErrorMessage, setSaveErrorMessage] =
+    useState('근무 등록에 실패했어요');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [members, setMembers] = useState<ScheduleMember[]>(MOCK_MEMBERS);
-  const memberName =
-    selectedMember?.name ?? schedule?.memberName ?? '지정안됨';
-  const positionName =
-    positionCleared
-      ? '지정안됨'
-      : selectedPosition?.name ?? schedule?.positionName ?? '지정안됨';
+  const memberName = selectedMember?.name ?? schedule?.memberName ?? '지정안됨';
+  const positionName = positionCleared
+    ? '지정안됨'
+    : (selectedPosition?.name ?? schedule?.positionName ?? '지정안됨');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [memo, setMemo] = useState('');
-  const displayDate = isFormMode ? selectedDate : schedule?.date ?? selectedDate;
+  const displayDate = isFormMode
+    ? selectedDate
+    : (schedule?.date ?? selectedDate);
   const scheduleMember = members.find(
     (member) =>
       member.id === schedule?.memberId || member.name === schedule?.memberName,
   );
   const selectedMemberId =
     selectedMember?.id ?? scheduleMember?.id ?? schedule?.memberId ?? null;
-  const selectedPositionId =
-    positionCleared
-      ? null
-      : selectedPosition?.id ?? schedule?.positionId ?? null;
+  const selectedPositionId = positionCleared
+    ? null
+    : (selectedPosition?.id ?? schedule?.positionId ?? null);
   const hasChanges =
     !!selectedMember ||
     !!selectedPosition ||
@@ -213,8 +214,8 @@ export default function ScheduleFormBottomSheet({
         memberId: selectedMember.id,
         memberName: selectedMember.name,
         positionId,
-        positionName: positionId ? selectedPosition?.name ?? null : null,
-        positionColor: positionId ? selectedPosition?.color ?? null : null,
+        positionName: positionId ? (selectedPosition?.name ?? null) : null,
+        positionColor: positionId ? (selectedPosition?.color ?? null) : null,
         startTime,
         endTime,
         memo,
@@ -250,7 +251,9 @@ export default function ScheduleFormBottomSheet({
         memberName,
         positionId,
         positionName: positionId ? positionName : null,
-        positionColor: positionId ? selectedPosition?.color ?? schedule.positionColor ?? null : null,
+        positionColor: positionId
+          ? (selectedPosition?.color ?? schedule.positionColor ?? null)
+          : null,
         startTime,
         endTime,
         memo,
@@ -368,7 +371,7 @@ export default function ScheduleFormBottomSheet({
         ) : (
           <Pressable
             style={styles.headerButton}
-            onPress={() => setMenuVisible((visible) => !visible)}
+            onPress={() => setMenuVisible((v) => !v)}
           >
             <Ionicons
               name="ellipsis-vertical"
@@ -436,17 +439,15 @@ export default function ScheduleFormBottomSheet({
           <NText variant="r12" style={styles.sectionTitle}>
             날짜
           </NText>
-          <TextInput
-            value={formatDate(displayDate)}
-            placeholder="YYYY.MM.DD"
-            placeholderTextColor={typoColorSub2}
-            editable={false}
-            onPressIn={() => {
+          <TitleButton
+            title={displayDate ? formatDate(displayDate) : 'YYYY.MM.DD'}
+            isPlaceholder={!displayDate}
+            showIcon={false}
+            onPress={() => {
               if (isFormMode) {
                 setDatePickerVisible(true);
               }
             }}
-            style={styles.input}
           />
         </View>
 
@@ -459,34 +460,30 @@ export default function ScheduleFormBottomSheet({
               <NText variant="r12" style={styles.timeLabel}>
                 시작
               </NText>
-              <TextInput
-                value={startTime}
-                placeholder="00:00"
-                placeholderTextColor={typoColorSub2}
-                editable={false}
-                onPressIn={() => {
+              <TitleButton
+                title={startTime ? startTime : '00:00'}
+                isPlaceholder={!startTime}
+                showIcon={false}
+                onPress={() => {
                   if (isFormMode) {
                     setTimePickerTarget('start');
                   }
                 }}
-                style={styles.input}
               />
             </View>
             <View style={styles.timeColumn}>
               <NText variant="r12" style={styles.timeLabel}>
                 종료
               </NText>
-              <TextInput
-                value={endTime}
-                placeholder="00:00"
-                placeholderTextColor={typoColorSub2}
-                editable={false}
-                onPressIn={() => {
+              <TitleButton
+                title={endTime ? endTime : '00:00'}
+                isPlaceholder={!endTime}
+                showIcon={false}
+                onPress={() => {
                   if (isFormMode) {
                     setTimePickerTarget('end');
                   }
                 }}
-                style={styles.input}
               />
             </View>
           </View>
@@ -567,7 +564,13 @@ export default function ScheduleFormBottomSheet({
           <BaseModal.Button
             onPress={isCreateMode ? handleCreateSchedule : handleUpdateSchedule}
           >
-            {saving ? (isCreateMode ? '추가중' : '수정중') : isCreateMode ? '추가하기' : '수정하기'}
+            {saving
+              ? isCreateMode
+                ? '추가중'
+                : '수정중'
+              : isCreateMode
+                ? '추가하기'
+                : '수정하기'}
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -734,11 +737,7 @@ function PositionPickerBottomSheet({
                 {position.name}
               </NText>
               {selected && (
-                <Ionicons
-                  name="checkmark"
-                  size={22}
-                  color={typoColorPrimary}
-                />
+                <Ionicons name="checkmark" size={22} color={typoColorPrimary} />
               )}
             </Pressable>
           );
@@ -783,11 +782,7 @@ function MemberPickerBottomSheet({
                 {member.roleName ? ` · ${member.roleName}` : ''}
               </NText>
               {selected && (
-                <Ionicons
-                  name="checkmark"
-                  size={22}
-                  color={typoColorPrimary}
-                />
+                <Ionicons name="checkmark" size={22} color={typoColorPrimary} />
               )}
             </Pressable>
           );
