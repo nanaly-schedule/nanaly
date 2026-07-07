@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import {
+  getNotificationSettings,
+  setNotificationSettings,
+} from '@/src/features/user/api/notification';
 import {
   backgroundColorWhite,
   radiusRadius12,
@@ -21,6 +25,71 @@ export default function AlarmSettingPage() {
 
   const isChildToggleDisabled = !isAlarmEnabled;
 
+  useEffect(() => {
+    const fetchNotificationSettings = async () => {
+      try {
+        const { data } = await getNotificationSettings();
+        setIsAlarmEnabled(data.pushEnabled);
+        setIsNoticeEnabled(data.noticePushEnabled);
+        setIsScheduleChangeEnabled(data.scheduleChangePushEnabled);
+        setIsWorkReminderEnabled(data.scheduleReminderPushEnabled);
+      } catch {}
+    };
+
+    fetchNotificationSettings();
+  }, []);
+
+  const updateNotificationSettings = async (nextSettings: {
+    pushEnabled: boolean;
+    noticePushEnabled: boolean;
+    scheduleChangePushEnabled: boolean;
+    scheduleReminderPushEnabled: boolean;
+  }) => {
+    try {
+      await setNotificationSettings(nextSettings);
+    } catch {}
+  };
+
+  const handleChangeAlarmEnabled = (value: boolean) => {
+    setIsAlarmEnabled(value);
+    updateNotificationSettings({
+      pushEnabled: value,
+      noticePushEnabled: isNoticeEnabled,
+      scheduleChangePushEnabled: isScheduleChangeEnabled,
+      scheduleReminderPushEnabled: isWorkReminderEnabled,
+    });
+  };
+
+  const handleChangeNoticeEnabled = (value: boolean) => {
+    setIsNoticeEnabled(value);
+    updateNotificationSettings({
+      pushEnabled: isAlarmEnabled,
+      noticePushEnabled: value,
+      scheduleChangePushEnabled: isScheduleChangeEnabled,
+      scheduleReminderPushEnabled: isWorkReminderEnabled,
+    });
+  };
+
+  const handleChangeScheduleChangeEnabled = (value: boolean) => {
+    setIsScheduleChangeEnabled(value);
+    updateNotificationSettings({
+      pushEnabled: isAlarmEnabled,
+      noticePushEnabled: isNoticeEnabled,
+      scheduleChangePushEnabled: value,
+      scheduleReminderPushEnabled: isWorkReminderEnabled,
+    });
+  };
+
+  const handleChangeWorkReminderEnabled = (value: boolean) => {
+    setIsWorkReminderEnabled(value);
+    updateNotificationSettings({
+      pushEnabled: isAlarmEnabled,
+      noticePushEnabled: isNoticeEnabled,
+      scheduleChangePushEnabled: isScheduleChangeEnabled,
+      scheduleReminderPushEnabled: value,
+    });
+  };
+
   return (
     <PageLayout title="알림 설정">
       <View style={[styles.card, { marginTop: spacingSpaicng14 }]}>
@@ -28,7 +97,10 @@ export default function AlarmSettingPage() {
           <NText variant="m14" style={styles.label}>
             알림
           </NText>
-          <Toggle value={isAlarmEnabled} onValueChange={setIsAlarmEnabled} />
+          <Toggle
+            value={isAlarmEnabled}
+            onValueChange={handleChangeAlarmEnabled}
+          />
         </View>
       </View>
       <View style={[styles.card, { marginTop: spacingSpacing30 }]}>
@@ -40,7 +112,7 @@ export default function AlarmSettingPage() {
             <Toggle
               value={!isChildToggleDisabled && isNoticeEnabled}
               disabled={isChildToggleDisabled}
-              onValueChange={setIsNoticeEnabled}
+              onValueChange={handleChangeNoticeEnabled}
             />
           </View>
         </View>
@@ -52,7 +124,7 @@ export default function AlarmSettingPage() {
             <Toggle
               value={!isChildToggleDisabled && isScheduleChangeEnabled}
               disabled={isChildToggleDisabled}
-              onValueChange={setIsScheduleChangeEnabled}
+              onValueChange={handleChangeScheduleChangeEnabled}
             />
           </View>
         </View>
@@ -64,7 +136,7 @@ export default function AlarmSettingPage() {
             <Toggle
               value={!isChildToggleDisabled && isWorkReminderEnabled}
               disabled={isChildToggleDisabled}
-              onValueChange={setIsWorkReminderEnabled}
+              onValueChange={handleChangeWorkReminderEnabled}
             />
           </View>
         </View>

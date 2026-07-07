@@ -10,3 +10,17 @@ export default interface NotificationResponse {
   isRead: boolean;
   createdAt: string; //'2026-07-02T11:04:52.930Z';
 }
+
+export interface NotificationSettingsResponse {
+  pushEnabled: boolean;
+  noticePushEnabled: boolean;
+  scheduleChangePushEnabled: boolean;
+  scheduleReminderPushEnabled: boolean;
+}
+
+export interface NotificationSettingsRequest {
+  pushEnabled: boolean;
+  noticePushEnabled: boolean;
+  scheduleChangePushEnabled: boolean;
+  scheduleReminderPushEnabled: boolean;
+}
