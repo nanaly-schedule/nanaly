@@ -42,9 +42,12 @@ export default function BottomSheet({
       return;
     }
 
-    const showSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
-      setKeyboardHeight(event.endCoordinates.height);
-    });
+    const showSubscription = Keyboard.addListener(
+      'keyboardDidShow',
+      (event) => {
+        setKeyboardHeight(event.endCoordinates.height);
+      },
+    );
     const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
       setKeyboardHeight(0);
     });
@@ -76,7 +79,7 @@ export default function BottomSheet({
     <Modal
       visible={visible}
       transparent
-      animationType="none"
+      animationType="slide"
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
@@ -86,7 +89,7 @@ export default function BottomSheet({
             styles.sheetContainer,
             Platform.OS === 'android' && { paddingBottom: keyboardHeight },
           ]}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <Animated.View
             style={[

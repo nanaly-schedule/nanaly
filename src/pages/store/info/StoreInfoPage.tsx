@@ -8,6 +8,7 @@ import {
 } from '@/src/features/permission/lib/access';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import { deleteStore, getStore } from '@/src/features/store/api/store';
+import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
 import { spacingSpacing12, typoColorRed } from '@/src/init/styles/tokens';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
@@ -48,7 +49,7 @@ export default function StoreInfoPage() {
   const handleDeleteStore = async () => {
     try {
       await deleteStore(storeId);
-      router.replace('/');
+      await replaceToInitialRoute(router);
     } catch {
     } finally {
       setDeleteModalStep('none');

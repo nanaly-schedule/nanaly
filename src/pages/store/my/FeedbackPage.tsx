@@ -9,12 +9,18 @@ import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 
 export default function FeedbackPage() {
+  const [title, setTitle] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
 
   const handleChangeFeedback = (t: string) => {
     setFeedback(t);
+  };
+
+  const handleChangeTitle = (t: string) => {
+    setTitle(t);
   };
 
   const handlePressBack = () => {
@@ -28,15 +34,20 @@ export default function FeedbackPage() {
 
   const handlePressSubmit = async () => {
     const trimmedFeedback = feedback.trim();
-
+    if (isLoading) {
+      return;
+    }
     if (!trimmedFeedback) {
       return;
     }
 
     try {
-      await sendFeedback(trimmedFeedback);
-      setFeedback('');
+      setIsLoading(true);
+      await sendFeedback({ title, content: trimmedFeedback });
+      setFeedback((prev) => '');
+      setTitle((prev) => '');
       setIsSuccessModalVisible(true);
+      setIsLoading(false);
     } catch (error) {
       console.error('의견 전송 실패', error);
     }
@@ -54,6 +65,17 @@ export default function FeedbackPage() {
         onPressCheckIcon={handlePressSubmit}
         onPressBack={handlePressBack}
       >
+        <Input
+          variant=""
+          value={title}
+          onChangeText={handleChangeTitle}
+          multiline
+          placeholder="제목을 작성해주세요"
+          style={{
+            textAlignVertical: 'top',
+            marginTop: spacingSpaicng14,
+          }}
+        />
         <Input
           variant=""
           value={feedback}

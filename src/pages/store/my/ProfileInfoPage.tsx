@@ -55,7 +55,7 @@ export default function ProfileInfoPage() {
       const { clearUser } = user;
       await clearUser();
 
-      router.replace('/');
+      router.replace('/auth');
     } catch {
     } finally {
       setIsDeleteAccountModalVisible(false);

@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Stack, usePathname, useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect, useState } from 'react';
 
 import { emitNotificationReceived } from '@/src/features/push/lib/notificationEvents';
 import { preparePushNotificationsAsync } from '@/src/features/push/lib/pushNotification';
@@ -8,14 +9,18 @@ import { getUserProfile } from '@/src/features/user/api/profile';
 import { navigateFromNotification } from '@/src/features/user/lib/notificationNavigation';
 import useUser from '@/src/features/user/lib/useUser';
 
+void SplashScreen.preventAutoHideAsync();
+
 export default function Layout() {
   const router = useRouter();
   const pathname = usePathname();
   const setUser = useUser((state) => state.setUser);
   const clearUser = useUser((state) => state.clearUser);
+  const isAuthRoute = pathname.startsWith('/auth');
 
   useEffect(() => {
-    if (pathname.startsWith('/auth')) {
+    if (isAuthRoute) {
+      void SplashScreen.hideAsync();
       return;
     }
 
@@ -35,11 +40,13 @@ export default function Layout() {
       } catch (_) {
         await clearUser();
         router.replace('/auth');
+      } finally {
+        void SplashScreen.hideAsync();
       }
     };
 
     fetchUser();
-  }, [clearUser, pathname, router, setUser]);
+  }, [isAuthRoute, router]);
 
   useEffect(() => {
     const notificationSubscription =
@@ -48,7 +55,9 @@ export default function Layout() {
 
         emitNotificationReceived({
           notificationId:
-            typeof data.notificationId === 'string' ? data.notificationId : null,
+            typeof data.notificationId === 'string'
+              ? data.notificationId
+              : null,
           storeId: typeof data.storeId === 'string' ? data.storeId : null,
           targetId: typeof data.targetId === 'string' ? data.targetId : null,
           type: typeof data.type === 'string' ? data.type : null,
