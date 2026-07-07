@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react';
 
 import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
-import { getNotices } from '@/src/features/notice/api/notice';
 import { getDashboardInfos } from '@/src/features/store/api/dashboard';
 import useUser from '@/src/features/user/lib/useUser';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -27,6 +26,10 @@ type Schedule = {
   totalHours: number;
   status: 'current' | 'upcoming';
 };
+
+function getDashboardNotices(dashboard: { notices?: Notice[]; noticeList?: Notice[] }) {
+  return dashboard.notices ?? dashboard.noticeList ?? [];
+}
 
 function normalizeStoreId(value?: string | string[]) {
   const nextValue = Array.isArray(value) ? value[0] : value;
@@ -60,10 +63,7 @@ export default function HomePage() {
 
       const fetchDashboard = async () => {
         try {
-          const [{ data: dashboard }, { data: noticeList }] = await Promise.all([
-            getDashboardInfos(storeId),
-            getNotices(storeId),
-          ]);
+          const { data: dashboard } = await getDashboardInfos(storeId);
           const { header, schedules } = dashboard;
           const nextSchedules = [
             ...(schedules?.current
@@ -75,11 +75,8 @@ export default function HomePage() {
             })),
           ];
 
-          console.log('[home-dashboard] schedules', schedules);
-          console.log('[home-dashboard] mapped schedules', nextSchedules);
-
           setHeaderInfo(header);
-          setNotices((noticeList as Notice[]).slice(0, 3));
+          setNotices(getDashboardNotices(dashboard).slice(0, 3));
           setSchedule(nextSchedules);
         } catch {
           // todo: 403 -> not found redirect
