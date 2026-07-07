@@ -32,6 +32,7 @@ export default function NoticeCard({
 }: NoticeCardProps) {
     const isList = variant === 'list';
     const createdAt = formatNoticeDate(notice.createdAt);
+    const preview = notice.content?.trim() || '내용이 표시됩니다';
 
     return (
         <Pressable
@@ -67,7 +68,7 @@ export default function NoticeCard({
                     numberOfLines={2}
                     style={styles.content}
                 >
-                    {notice.content?.trim() || '내용이 표시됩니다'}
+                    {preview}
                 </Text>
                 {isList && createdAt && (
                     <Text style={styles.date}>{createdAt}</Text>

@@ -42,7 +42,7 @@ export default function CurrentWeekSchedules({
             startTime={item.startTime}
             endTime={item.endTime}
             totalTime={`총 ${item.totalHours}시간`}
-            workDate={item.date}
+            workDate={formatWorkDate(item.date, item.dayOfWeek)}
           />
         )}
         ListEmptyComponent={() => (
@@ -55,6 +55,19 @@ export default function CurrentWeekSchedules({
       />
     </View>
   );
+}
+
+function formatWorkDate(date: string, dayOfWeek: string) {
+  const match = date.match(/^\d{4}[-.](\d{1,2})[-.](\d{1,2})/);
+
+  if (!match) {
+    return date;
+  }
+
+  const [, month, day] = match;
+  const weekday = dayOfWeek.endsWith('요일') ? dayOfWeek : `${dayOfWeek}요일`;
+
+  return `${Number(month)}월 ${Number(day)}일 ${weekday}`;
 }
 
 const styles = StyleSheet.create({

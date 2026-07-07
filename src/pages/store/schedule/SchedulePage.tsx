@@ -206,20 +206,6 @@ function getMappedFieldReport(item: unknown, inheritedDate?: string | null) {
   };
 }
 
-function logUnmappedSchedules(entries: ScheduleEntry[]) {
-  const reports = entries
-    .map((entry) => getMappedFieldReport(entry.item, entry.date))
-    .filter(
-      (report) =>
-        !report.date ||
-        !report.memberName,
-    );
-
-  if (reports.length > 0) {
-    console.log('[schedule-monthly] unmapped', reports);
-  }
-}
-
 function normalizeDate(value?: string | null) {
   if (!value) {
     return null;
@@ -560,23 +546,12 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
-        console.log('[schedule-monthly] request', {
-          storeId,
-          year,
-          month,
-          scope,
-          positionId:
-            positionId !== 'all' && workType === 'assigned'
-              ? positionId
-              : undefined,
-        });
-        console.log('[schedule-monthly] response', data);
         const { entries, schedules } = mapScheduleEntries({
           data,
           markAsMine: false,
           positions,
         });
-        logUnmappedSchedules(entries);
+        void entries;
         let nextSchedules = schedules;
 
         if (scope === 'mine' && schedules.length > 0) {
@@ -609,11 +584,8 @@ export default function SchedulePage() {
           }
         }
 
-        console.log('[schedule-monthly] mapped', nextSchedules);
-
         setAssignedSchedules(nextSchedules);
-      } catch (error) {
-        console.log('[schedule-monthly] failed', error);
+      } catch {
         setAssignedSchedules([]);
       } finally {
         setAssignedSchedulesLoaded(true);

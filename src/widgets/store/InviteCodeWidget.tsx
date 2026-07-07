@@ -32,8 +32,7 @@ export default function InviteCodeWidget() {
         message: inviteLink,
         url: inviteLink,
       });
-    } catch (error) {
-      console.log(error);
+    } catch {
     } finally {
       setIsSubmitting(false);
     }

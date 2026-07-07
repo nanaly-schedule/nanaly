@@ -27,8 +27,7 @@ const fetch = async () => {
       birthDate,
       provider: socialAccounts[0]?.provider,
     };
-  } catch (error) {
-    console.log(error);
+  } catch {
   }
 };
 export default function AuthInfoPage() {

@@ -192,6 +192,7 @@ export default function PositionManagePage() {
                   {position.name}
                 </NText>
                 <Pressable
+                  disabled={deleting}
                   onPress={() => {
                     setErrorMessage('');
                     setDeleteTarget(position);
@@ -266,7 +267,12 @@ export default function PositionManagePage() {
 
       <BaseModal
         visible={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => {
+          if (!deleting) {
+            setDeleteTarget(null);
+          }
+        }}
+        closeOnBackdropPress={!deleting}
       >
         <BaseModal.Content>
           <BaseModal.Title>
@@ -281,11 +287,13 @@ export default function PositionManagePage() {
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
+            disabled={deleting}
             onPress={() => setDeleteTarget(null)}
           >
             취소
           </BaseModal.Button>
           <BaseModal.Button
+            disabled={deleting}
             onPress={handleDelete}
           >
             {deleting ? '삭제중' : '삭제하기'}
