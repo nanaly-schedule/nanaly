@@ -26,8 +26,7 @@ const fetch = async () => {
       birthDate,
       provider: socialAccounts[0]?.provider,
     };
-  } catch (error) {
-    console.log(error);
+  } catch {
   }
 };
 export default function AuthInfoPage() {
@@ -65,8 +64,7 @@ export default function AuthInfoPage() {
       });
       setIsSubmittingSignUp(true);
       router.replace('/');
-    } catch (error) {
-      console.log(error);
+    } catch {
       setIsSubmittingSignUp(false);
     } finally {
       setIsSubmittingSignUp(false);
