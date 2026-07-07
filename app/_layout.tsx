@@ -17,11 +17,9 @@ export default function Layout() {
   const setUser = useUser((state) => state.setUser);
   const clearUser = useUser((state) => state.clearUser);
   const isAuthRoute = pathname.startsWith('/auth');
-  const [isBootstrapLoading, setIsBootstrapLoading] = useState(!isAuthRoute);
 
   useEffect(() => {
     if (isAuthRoute) {
-      setIsBootstrapLoading(false);
       void SplashScreen.hideAsync();
       return;
     }
@@ -43,14 +41,12 @@ export default function Layout() {
         await clearUser();
         router.replace('/auth');
       } finally {
-        setIsBootstrapLoading(false);
         void SplashScreen.hideAsync();
       }
     };
 
-    setIsBootstrapLoading(true);
     fetchUser();
-  }, [clearUser, isAuthRoute, router, setUser]);
+  }, [isAuthRoute, router]);
 
   useEffect(() => {
     const notificationSubscription =
@@ -97,10 +93,6 @@ export default function Layout() {
       responseSubscription.remove();
     };
   }, [router]);
-
-  if (isBootstrapLoading) {
-    return null;
-  }
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }

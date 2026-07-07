@@ -10,6 +10,7 @@ import {
   saveAccessToken,
   saveRefreshToken,
 } from '@/src/features/auth/lib/storage';
+import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
 import { basicColorGrey800 } from '@/src/init/styles/tokens';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import Main from '@/src/shared/ui/Main';
@@ -92,7 +93,7 @@ export default function SignInPage() {
       await saveAccessToken(accessToken);
       await saveRefreshToken(refreshToken);
 
-      router.replace('/');
+      await replaceToInitialRoute(router);
     } catch (error) {
       const statusCode = isAxiosError(error)
         ? error.response?.status
@@ -150,9 +151,12 @@ export default function SignInPage() {
 
       await saveAccessToken(savedAccessToken);
       await saveRefreshToken(refreshToken);
-      router.replace(
-        shouldRedirectToAuthInfo(tokenPayload) ? '/auth/info' : '/',
-      );
+      if (shouldRedirectToAuthInfo(tokenPayload)) {
+        router.replace('/auth/info');
+        return;
+      }
+
+      await replaceToInitialRoute(router);
     } catch (error) {
       const errorMessage = isAxiosError(error)
         ? typeof error.response?.data === 'string'
@@ -203,9 +207,12 @@ export default function SignInPage() {
 
       await saveAccessToken(savedAccessToken);
       await saveRefreshToken(refreshToken);
-      router.replace(
-        shouldRedirectToAuthInfo(tokenPayload) ? '/auth/info' : '/',
-      );
+      if (shouldRedirectToAuthInfo(tokenPayload)) {
+        router.replace('/auth/info');
+        return;
+      }
+
+      await replaceToInitialRoute(router);
     } catch (error: any) {
       const errorMessage = isAxiosError(error)
         ? typeof error.response?.data === 'string'

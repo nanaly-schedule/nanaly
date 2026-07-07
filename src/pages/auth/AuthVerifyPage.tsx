@@ -5,6 +5,7 @@ import { Alert } from 'react-native';
 
 import { signUp } from '@/src/features/auth/api/sign';
 import { sendCode, verifyCode } from '@/src/features/auth/api/verify';
+import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
 import ExistingEmailModal from '@/src/features/auth/ui/ExistingEmailModal';
 import VerificationCodeResendModal from '@/src/features/auth/ui/VerificationCodeResendModal';
@@ -69,7 +70,7 @@ export default function AuthVerifyPage() {
         ).padStart(2, '0')}`,
       });
 
-      router.replace('/');
+      await replaceToInitialRoute(router);
     } catch (error) {
       const status = isAxiosError(error) ? error.response?.status : undefined;
       const errorMessage = isAxiosError(error)
