@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
+import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
 import {
   getUserProfile,
   updateUserProfile,
@@ -63,8 +64,9 @@ export default function AuthInfoPage() {
         birthDate: birthDate ? formatBirthDate(birthDate) : '',
       });
       setIsSubmittingSignUp(true);
-      router.replace('/');
-    } catch {
+      await replaceToInitialRoute(router);
+    } catch (error) {
+      console.log(error);
       setIsSubmittingSignUp(false);
     } finally {
       setIsSubmittingSignUp(false);
