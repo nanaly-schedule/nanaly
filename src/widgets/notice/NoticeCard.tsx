@@ -25,6 +25,67 @@ function formatNoticeDate(createdAt?: string) {
   return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]})`;
 }
 
+function getBooleanLikeValue(value?: boolean | string | number) {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return value === 1;
+  }
+
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const normalizedValue = value.toLowerCase();
+
+  if (
+    ['true', '1', 'public', 'open', 'visible', '공개'].includes(
+      normalizedValue,
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    ['false', '0', 'private', 'closed', 'hidden', '비공개'].includes(
+      normalizedValue,
+    )
+  ) {
+    return false;
+  }
+
+  return null;
+}
+
+function getNoticeIsPublic(notice: Notice) {
+  const isPublic = getBooleanLikeValue(notice.isPublic ?? notice.public);
+
+  if (isPublic !== null) {
+    return isPublic;
+  }
+
+  const isPrivate = getBooleanLikeValue(notice.isPrivate ?? notice.private);
+
+  if (isPrivate !== null) {
+    return !isPrivate;
+  }
+
+  const visibility = [
+    notice.visibility,
+    notice.type,
+    notice.scope,
+    notice.noticeType,
+  ].find((value) => typeof value === 'string');
+
+  if (!visibility) {
+    return true;
+  }
+
+  return getBooleanLikeValue(visibility) ?? true;
+}
+
 export default function NoticeCard({
   notice,
   onPress,
@@ -33,6 +94,7 @@ export default function NoticeCard({
     const isList = variant === 'list';
     const createdAt = formatNoticeDate(notice.createdAt);
     const preview = notice.content?.trim() || '내용이 표시됩니다';
+    const isPublic = getNoticeIsPublic(notice);
 
     return (
         <Pressable
@@ -45,7 +107,7 @@ export default function NoticeCard({
                 styles.icon,
                 isList && styles.listIcon,
                 {
-                    backgroundColor: notice.isPublic
+                    backgroundColor: isPublic
                         ? '#86BEFF'
                         : '#D9D9D9',
                 },
