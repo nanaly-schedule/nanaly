@@ -74,9 +74,10 @@ export default function HomePage() {
               status: 'upcoming' as const,
             })),
           ];
+          const dashboardNotices = getDashboardNotices(dashboard).slice(0, 5);
 
           setHeaderInfo(header);
-          setNotices(getDashboardNotices(dashboard).slice(0, 3));
+          setNotices(dashboardNotices);
           setSchedule(nextSchedules);
         } catch {
           // todo: 403 -> not found redirect

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { isAxiosError } from 'axios';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -38,6 +39,31 @@ function normalizeStoreId(value?: string | string[]) {
   }
 
   return nextValue;
+}
+
+function getPositionCreateErrorMessage(error: unknown) {
+  if (!isAxiosError(error)) {
+    return '포지션 생성에 실패했어요';
+  }
+
+  const responseData = error.response?.data;
+  const message =
+    typeof responseData === 'string'
+      ? responseData
+      : typeof responseData?.message === 'string'
+        ? responseData.message
+        : '';
+  const normalizedMessage = message.toLowerCase();
+
+  if (
+    normalizedMessage.includes('color') ||
+    normalizedMessage.includes('colour') ||
+    message.includes('색상')
+  ) {
+    return '이미 등록된 컬러예요';
+  }
+
+  return '포지션 생성에 실패했어요';
 }
 
 export default function PositionManagePage() {
@@ -112,6 +138,15 @@ export default function PositionManagePage() {
       return;
     }
 
+    if (
+      positions.some(
+        (position) => position.color.toLowerCase() === color.toLowerCase(),
+      )
+    ) {
+      setErrorMessage('이미 등록된 컬러예요');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -132,8 +167,8 @@ export default function PositionManagePage() {
       setColor(null);
       setErrorMessage('');
       setCreateVisible(false);
-    } catch {
-      setErrorMessage('포지션 생성에 실패했어요');
+    } catch (error) {
+      setErrorMessage(getPositionCreateErrorMessage(error));
     } finally {
       setSaving(false);
     }
