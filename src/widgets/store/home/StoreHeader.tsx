@@ -57,6 +57,7 @@ export default function StoreHeader({
   const [storeListVisible, setStoreListVisible] = useState(false);
   const [stores, setStores] = useState<MyStoreItem[]>([]);
   const [storesLoading, setStoresLoading] = useState(false);
+  const canJoinStore = !isOwner;
 
   const handlePressStoreName = async () => {
     const nextVisible = !storeListVisible;
@@ -97,6 +98,11 @@ export default function StoreHeader({
     });
   };
 
+  const handlePressAddStore = () => {
+    setStoreListVisible(false);
+    route.push('/store/join');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.storeSelector}>
@@ -110,34 +116,46 @@ export default function StoreHeader({
         </Pressable>
         {storeListVisible && (
           <View style={styles.storeDropdown}>
-            {storesLoading ? (
-              <View style={styles.storeOption}>
-                <NText variant="r14" style={styles.storeOptionText}>
-                  불러오는 중...
-                </NText>
-              </View>
-            ) : stores.length === 0 ? (
-              <View style={styles.storeOption}>
-                <NText variant="r14" style={styles.storeOptionText}>
-                  매장이 없어요
-                </NText>
-              </View>
-            ) : (
-              stores.map((store) => (
-                <Pressable
-                  key={store.storeId}
-                  style={styles.storeOption}
-                  onPress={() => handleSelectStore(store)}
-                >
-                  <NText
-                    variant="r14"
-                    numberOfLines={1}
-                    style={styles.storeOptionText}
-                  >
-                    {store.storeName}
+            <View>
+              {storesLoading ? (
+                <View style={styles.storeOption}>
+                  <NText variant="r14" style={styles.storeOptionText}>
+                    불러오는 중...
                   </NText>
-                </Pressable>
-              ))
+                </View>
+              ) : stores.length === 0 ? (
+                <View style={styles.storeOption}>
+                  <NText variant="r14" style={styles.storeOptionText}>
+                    매장이 없어요
+                  </NText>
+                </View>
+              ) : (
+                stores.map((store) => (
+                  <Pressable
+                    key={store.storeId}
+                    style={styles.storeOption}
+                    onPress={() => handleSelectStore(store)}
+                  >
+                    <NText
+                      variant="r14"
+                      numberOfLines={1}
+                      style={styles.storeOptionText}
+                    >
+                      {store.storeName}
+                    </NText>
+                  </Pressable>
+                ))
+              )}
+            </View>
+            {canJoinStore && (
+              <Pressable
+                style={[styles.storeOption, styles.addStoreOption]}
+                onPress={handlePressAddStore}
+              >
+                <NText variant="r14" style={styles.addStoreOptionText}>
+                  매장 추가
+                </NText>
+              </Pressable>
             )}
           </View>
         )}
@@ -236,6 +254,13 @@ const styles = StyleSheet.create({
   },
   storeOptionText: {
     color: typoColorPrimary,
+  },
+  addStoreOption: {
+    borderTopWidth: 1,
+    borderTopColor: backgroundColorPrimary,
+  },
+  addStoreOptionText: {
+    color: brandColorPrimary,
   },
   default: {
     borderRadius: 9999,

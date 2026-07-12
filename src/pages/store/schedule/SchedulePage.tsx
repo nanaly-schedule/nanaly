@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
@@ -430,6 +430,7 @@ function normalizeStoreId(value?: string | string[]) {
 }
 
 export default function SchedulePage() {
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const params = useLocalSearchParams<{
     storeId?: string | string[];
     openScheduleId?: string | string[];
@@ -786,7 +787,7 @@ export default function SchedulePage() {
     workType === 'assigned'
       ? dailyAssignedDate === selectedDate
         ? dailyAssignedSchedules
-        : []
+        : (schedulesByDate[selectedDate] ?? [])
       : schedulesByDate[selectedDate] ?? [];
   const selectedDatePosition = positions.find(
     (position) => position.id === positionId,
@@ -822,6 +823,18 @@ export default function SchedulePage() {
     );
   }
 
+  const isTabletLayout = windowWidth >= 768;
+  const horizontalCalendarPadding = isTabletLayout ? 56 : 0;
+  const calendarDayWidth = isTabletLayout
+    ? Math.max(
+        49,
+        Math.floor((windowWidth - 32 - horizontalCalendarPadding * 2) / 7),
+      )
+    : 49;
+  const calendarDayHeight = isTabletLayout
+    ? Math.max(100, Math.floor((windowHeight - 230) / 6))
+    : 100;
+
   return (
     <PageLayout
       showHeader={false}
@@ -851,14 +864,26 @@ export default function SchedulePage() {
         }
       />
 
-      <ScheduleCalendar
-        currentMonth={currentMonth}
-        selectedDate={selectedDate}
-        schedulesByDate={schedulesByDate}
-        compactLabel={viewType === 'mine' ? 'time' : 'member'}
-        onPressDate={handlePressDate}
-        onPressSchedule={handlePressSchedule}
-      />
+      <View
+        style={[
+          styles.calendarContainer,
+          isTabletLayout && {
+            paddingHorizontal: horizontalCalendarPadding,
+          },
+        ]}
+      >
+        <ScheduleCalendar
+          currentMonth={currentMonth}
+          selectedDate={selectedDate}
+          schedulesByDate={schedulesByDate}
+          compactLabel={viewType === 'mine' ? 'time' : 'member'}
+          dayWidth={calendarDayWidth}
+          dayHeight={calendarDayHeight}
+          tablet={isTabletLayout}
+          onPressDate={handlePressDate}
+          onPressSchedule={handlePressSchedule}
+        />
+      </View>
 
       {canCreateCurrentWorkType && (
         <Pressable
@@ -988,6 +1013,9 @@ const styles = StyleSheet.create({
   },
   monthTitle: {
     color: typoColorPrimary,
+  },
+  calendarContainer: {
+    flex: 1,
   },
   floatingButton: {
     position: 'absolute',

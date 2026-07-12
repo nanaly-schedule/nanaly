@@ -232,13 +232,15 @@ export default function MemberInfoPage() {
     !!user.birthDate &&
     currentUser.name === user.name &&
     currentUser.birthDate === user.birthDate;
+  const isOwnerTarget = user.role === MemberRole.OWNER;
   const canEditTargetMember =
     canEditMemberInfo(access) &&
+    !isOwnerTarget &&
     !(access.role === MemberRole.MANAGER && isEditingSelf);
 
   const insets = useSafeAreaInsets();
 
-  if (user.role === MemberRole.OWNER) {
+  if (isOwnerTarget && !isEditingSelf) {
     return (
       <AccessDenied
         title="오너 정보에 접근할 수 없어요"
@@ -265,7 +267,7 @@ export default function MemberInfoPage() {
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
-            paddingBottom: spacingSpacing30 * 2 + insets.bottom,
+            paddingBottom: spacingSpacing30 * 4 + insets.bottom,
           }}
         >
           <MemberInfoWidget

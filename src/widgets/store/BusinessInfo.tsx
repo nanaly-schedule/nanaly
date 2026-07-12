@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
 import { spacingSpacing20 } from '@/src/init/styles/tokens';
@@ -38,6 +38,14 @@ export default function BusinessInfo({
     onChangeStartDate(formatBirthDate(value));
   };
 
+  const handlePressOpenDate = () => {
+    if (!editable) {
+      return;
+    }
+
+    setIsOpenDatePickerOpen(true);
+  };
+
   return (
     <View style={styles.container}>
       <View>
@@ -62,17 +70,18 @@ export default function BusinessInfo({
       </View>
       <View>
         <InputLabel label="개업일" />
-        <Pressable
-          disabled={!editable}
-          onPress={() => setIsOpenDatePickerOpen(true)}
-        >
-          <Input
-            placeholder="개업일을 선택해 주세요"
-            value={openDate ? formatBirthDate(openDate) : ''}
-            variant=""
-            editable={false}
-          />
-        </Pressable>
+        <Input
+          placeholder="개업일을 선택해 주세요"
+          value={openDate ? formatBirthDate(openDate) : ''}
+          variant=""
+          editable={editable}
+          caretHidden
+          contextMenuHidden
+          showSoftInputOnFocus={false}
+          onFocus={handlePressOpenDate}
+          onPressIn={handlePressOpenDate}
+          onChangeText={() => {}}
+        />
       </View>
       <BirthDatePickerBottomSheet
         visible={isOpenDatePickerOpen}

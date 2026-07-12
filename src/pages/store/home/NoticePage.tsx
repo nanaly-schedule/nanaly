@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
@@ -92,7 +92,11 @@ export default function NoticePage() {
         />
       )}
 
-      <View style={styles.list}>
+      <ScrollView
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      >
         {loading && <NText variant="r14">불러오는 중...</NText>}
 
         {!loading && notices.map((notice) => (
@@ -108,7 +112,7 @@ export default function NoticePage() {
             }}
           />
         ))}
-      </View>
+      </ScrollView>
 
       {canManageNotice && (
         <Pressable
@@ -133,7 +137,11 @@ export default function NoticePage() {
 
 const styles = StyleSheet.create({
   list: {
+    flex: 1,
     marginTop: 4,
+  },
+  listContent: {
+    paddingBottom: 96,
   },
 
   floatingButton: {

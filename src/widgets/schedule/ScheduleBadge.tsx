@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from 'react-native';
+import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
 
 import { ScheduleItem } from './mock';
 
@@ -6,12 +6,14 @@ type ScheduleBadgeProps = {
   schedule: ScheduleItem;
   compact?: boolean;
   compactLabel?: 'member' | 'time';
+  compactStyle?: StyleProp<TextStyle>;
 };
 
 export default function ScheduleBadge({
   schedule,
   compact = false,
   compactLabel = 'member',
+  compactStyle,
 }: ScheduleBadgeProps) {
   const positionName = schedule.positionName ?? '선택 안함';
   const compactText =
@@ -25,6 +27,7 @@ export default function ScheduleBadge({
       style={[
         styles.badge,
         compact && styles.compact,
+        compact && compactStyle,
         { backgroundColor: schedule.positionColor ?? '#8D8D8D' },
       ]}
     >

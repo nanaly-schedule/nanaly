@@ -9,6 +9,10 @@ type ScheduleCalendarProps = {
   selectedDate: string;
   schedulesByDate: Record<string, ScheduleItem[]>;
   compactLabel?: 'member' | 'time';
+  dayWidth?: number;
+  dayHeight?: number;
+  tablet?: boolean;
+  dayHorizontalGap?: number;
   onPressDate: (dateString: string) => void;
   onPressSchedule: (scheduleId: string) => void;
 };
@@ -18,6 +22,10 @@ export default function ScheduleCalendar({
   selectedDate,
   schedulesByDate,
   compactLabel = 'member',
+  dayWidth,
+  dayHeight,
+  tablet = false,
+  dayHorizontalGap = 0,
   onPressDate,
   onPressSchedule,
 }: ScheduleCalendarProps) {
@@ -48,6 +56,9 @@ export default function ScheduleCalendar({
             selected={date?.dateString === selectedDate}
             schedules={date ? schedulesByDate[date.dateString] ?? [] : []}
             compactLabel={compactLabel}
+            dayWidth={dayWidth}
+            dayHeight={dayHeight}
+            tablet={tablet}
             onPressDate={onPressDate}
             onPressSchedule={onPressSchedule}
           />
@@ -68,7 +79,8 @@ export default function ScheduleCalendar({
               marginTop: 0,
               marginBottom: 0,
               flexDirection: 'row',
-              justifyContent: 'space-around',
+              justifyContent: 'center',
+              columnGap: dayHorizontalGap,
               backgroundColor: 'transparent',
             },
           },

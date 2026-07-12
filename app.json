@@ -4,6 +4,7 @@
     "slug": "nanaly",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./src/shared/assets/app_icon.png",
     "scheme": "nanaly",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -11,24 +12,41 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.nanaly.app",
       "usesAppleSignIn": true,
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+      "associatedDomains": [
+        "applinks:www.nanaly-schedule.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#4E80EE",
         "foregroundImage": "./src/shared/assets/logo.png",
         "backgroundImage": "./src/shared/assets/logo.png",
         "monochromeImage": "./src/shared/assets/logo.png"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "www.nanaly-schedule.com",
+              "pathPrefix": "/invite"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.nanaly.app"
     },
     "web": {
       "output": "static",
-      "favicon": "./src/shared/assets/logo.png"
+      "favicon": "./src/shared/assets/app_icon.png"
     },
     "plugins": [
       "expo-router",
@@ -38,9 +56,9 @@
           "image": "./src/shared/assets/logo_splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#3B82F6",
+          "backgroundColor": "#4E80EE",
           "dark": {
-            "backgroundColor": "#3B82F6"
+            "backgroundColor": "#4E80EE"
           }
         }
       ],
@@ -56,7 +74,7 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.627677607110-t2n97mo1p1pvpsmh3dq8339eug6st3e6"
+          "iosUrlScheme": "com.googleusercontent.apps.627677607110-eohio7frcvnav6ajk4s2mfjem9oaah4k"
         }
       ],
       "expo-apple-authentication",

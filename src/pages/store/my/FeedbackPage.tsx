@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { StyleSheet } from 'react-native';
 
 import { sendFeedback } from '@/src/features/user/api/feedback';
 import { brandColorPrimary, spacingSpaicng14 } from '@/src/init/styles/tokens';
@@ -71,10 +72,7 @@ export default function FeedbackPage() {
           onChangeText={handleChangeTitle}
           multiline
           placeholder="제목을 작성해주세요"
-          style={{
-            textAlignVertical: 'top',
-            marginTop: spacingSpaicng14,
-          }}
+          style={styles.titleInput}
         />
         <Input
           variant=""
@@ -137,3 +135,15 @@ export default function FeedbackPage() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  titleInput: {
+    fontFamily: 'Pretendard',
+    fontWeight: '700',
+    fontSize: 16,
+    lineHeight: 22,
+    letterSpacing: 0,
+    textAlignVertical: 'top',
+    marginTop: spacingSpaicng14,
+  },
+});
