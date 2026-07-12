@@ -24,8 +24,8 @@ interface InviteLinkBottomSheetProps {
     inviteLink: string,
   ) => void | string | null | Promise<void | string | null>;
 }
-//https://nanaly.app/invite/123123
-const INVITE_LINK_PATTERN = /^https:\/\/nanaly\.com\/invite\/.+$/;
+const INVITE_LINK_PATTERN =
+  /^https:\/\/www\.nanaly-schedule\.com\/invite\/.+$/;
 
 export default function InviteLinkBottomSheet({
   visible,
