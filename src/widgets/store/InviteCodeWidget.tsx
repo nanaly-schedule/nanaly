@@ -30,7 +30,6 @@ export default function InviteCodeWidget() {
       const { inviteLink } = data;
       await Share.share({
         message: inviteLink,
-        url: inviteLink,
       });
     } catch {
     } finally {
