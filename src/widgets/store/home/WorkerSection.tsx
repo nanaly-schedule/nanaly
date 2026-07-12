@@ -7,6 +7,8 @@ import { getMemberRoleLabel, MemberRole } from '@/src/entities/member/member';
 import { getMembers } from '@/src/features/store/api/member';
 import {
   backgroundColorWhite,
+  basicColorGrey100,
+  basicColorGrey200,
   radiusRadius8,
   spacingSpacing8,
   spacingSpacing12,
@@ -38,6 +40,7 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
 
   const [workers, setWorkers] = useState<TypeMember[]>([]);
+  const [isLoadingWorkers, setIsLoadingWorkers] = useState(false);
 
   const [worker, setWorker] = useState('');
   const [debouncedWorker, setDebouncedWorker] = useState('');
@@ -47,11 +50,14 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
     }
 
     const fetchMembers = async () => {
+      setIsLoadingWorkers(true);
       try {
         const { data } = await getMembers(storeId, debouncedWorker);
         setWorkers(data);
       } catch {
         setWorkers([]);
+      } finally {
+        setIsLoadingWorkers(false);
       }
     };
 
@@ -94,39 +100,60 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
         style={{ flex: 1, marginBottom: spacingSpacing12 }}
         contentContainerStyle={styles.workersContainer}
       >
-        {workers.map((item) => {
-          const memberId = item?.memberId ?? item.id;
+        {isLoadingWorkers ? (
+          <WorkerListSkeleton />
+        ) : (
+          workers.map((item) => {
+            const memberId = item?.memberId ?? item.id;
 
-          if (!memberId) {
-            return null;
-          }
+            if (!memberId) {
+              return null;
+            }
 
-          return (
-            <Pressable
-              key={`workers-${memberId}`}
-              style={[styles.row, styles.workerContainer]}
-              onPress={() =>
-                route.push({
-                  pathname: '/member/[storeId]/[memberId]',
-                  params: {
-                    storeId,
-                    memberId,
-                  },
-                })
-              }
-            >
-              <NText variant="sb14">{item.name}</NText>
-              <NText variant="r14">·</NText>
-              <NText variant="r14">{getMemberRoleLabel(item.role)}</NText>
-              <View style={{ margin: 'auto' }} />
-              <NText variant="r14">{item.joinDate}</NText>
-              {item.leaveDate && <NText variant="r14">-</NText>}
-              {item.leaveDate && <NText variant="r14">{item.leaveDate}</NText>}
-            </Pressable>
-          );
-        })}
+            return (
+              <Pressable
+                key={`workers-${memberId}`}
+                style={[styles.row, styles.workerContainer]}
+                onPress={() =>
+                  route.push({
+                    pathname: '/member/[storeId]/[memberId]',
+                    params: {
+                      storeId,
+                      memberId,
+                    },
+                  })
+                }
+              >
+                <NText variant="sb14">{item.name}</NText>
+                <NText variant="r14">·</NText>
+                <NText variant="r14">{getMemberRoleLabel(item.role)}</NText>
+                <View style={{ margin: 'auto' }} />
+                <NText variant="r14">{item.joinDate}</NText>
+                {item.leaveDate && <NText variant="r14">-</NText>}
+                {item.leaveDate && (
+                  <NText variant="r14">{item.leaveDate}</NText>
+                )}
+              </Pressable>
+            );
+          })
+        )}
       </ScrollView>
     </View>
+  );
+}
+
+function WorkerListSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <View key={`worker-skeleton-${index}`} style={styles.workerContainer}>
+          <View style={styles.skeletonName} />
+          <View style={styles.skeletonRole} />
+          <View style={{ margin: 'auto' }} />
+          <View style={styles.skeletonDate} />
+        </View>
+      ))}
+    </>
   );
 }
 
@@ -165,6 +192,26 @@ const styles = StyleSheet.create({
   },
   workerContainer: {
     height: 52,
+    flexDirection: 'row',
+    gap: 4,
     alignItems: 'center',
+  },
+  skeletonName: {
+    width: 54,
+    height: 16,
+    borderRadius: radiusRadius8,
+    backgroundColor: basicColorGrey200,
+  },
+  skeletonRole: {
+    width: 40,
+    height: 16,
+    borderRadius: radiusRadius8,
+    backgroundColor: basicColorGrey100,
+  },
+  skeletonDate: {
+    width: 74,
+    height: 16,
+    borderRadius: radiusRadius8,
+    backgroundColor: basicColorGrey100,
   },
 });
