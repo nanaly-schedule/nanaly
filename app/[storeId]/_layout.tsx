@@ -1,10 +1,42 @@
 import { Tabs, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
+import { Image, ImageSourcePropType } from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
 import { UserStorePermissions } from '@/src/entities/user/user';
 import { getMyStore } from '@/src/features/store/api/store';
 import useUser from '@/src/features/user/lib/useUser';
+
+const TAB_ICONS = {
+  home: {
+    on: require('@/src/shared/assets/home_on.png'),
+    off: require('@/src/shared/assets/home_off.png'),
+  },
+  schedule: {
+    on: require('@/src/shared/assets/schedule_on.png'),
+    off: require('@/src/shared/assets/schedule_off.png'),
+  },
+  my: {
+    on: require('@/src/shared/assets/my_on.png'),
+    off: require('@/src/shared/assets/my_off.png'),
+  },
+} satisfies Record<string, { on: ImageSourcePropType; off: ImageSourcePropType }>;
+
+function TabIcon({
+  focused,
+  icon,
+}: {
+  focused: boolean;
+  icon: { on: ImageSourcePropType; off: ImageSourcePropType };
+}) {
+  return (
+    <Image
+      source={focused ? icon.on : icon.off}
+      style={{ width: 24, height: 24 }}
+      resizeMode="contain"
+    />
+  );
+}
 
 type MyStoreItem = {
   storeId: string;
@@ -78,13 +110,30 @@ export default function Layout() {
   }, [setUser, storeId]);
 
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#000000',
+        tabBarInactiveTintColor: '#000000',
+      }}
+    >
       <Tabs.Screen name="index" options={{ href: null }} />
-      <Tabs.Screen name="home" options={{ title: '홈' }} />
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: '홈',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={TAB_ICONS.home} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="schedule"
         options={{
           title: '스케줄',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={TAB_ICONS.schedule} />
+          ),
           href: storeId
             ? {
                 pathname: '/[storeId]/schedule',
@@ -93,7 +142,15 @@ export default function Layout() {
             : null,
         }}
       />
-      <Tabs.Screen name="my" options={{ title: '마이' }} />
+      <Tabs.Screen
+        name="my"
+        options={{
+          title: '마이',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={TAB_ICONS.my} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

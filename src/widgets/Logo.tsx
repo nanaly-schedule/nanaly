@@ -1,30 +1,29 @@
-import { StyleSheet, View } from 'react-native';
-import { basicColorGrey800, spacingSpacing8 } from '../init/styles/tokens';
-import AppIcon from '../shared/assets/AppIcon';
-import NText from '../shared/ui/NText';
+import { Image, StyleSheet, View } from 'react-native';
 
 interface LogoProps {
   color: string;
 }
 
-export default function Logo({ color }: LogoProps) {
+export default function Logo({ color: _color }: LogoProps) {
   return (
     <View style={styles.logo}>
-      <AppIcon size={72} color={color} />
-      <NText variant="h1" style={{ color: color, marginTop: 2 }}>
-        나날이
-      </NText>
-      <NText variant="m14" style={{ color: color }}>
-        우리 가게 스케줄 관리
-      </NText>
+      <Image
+        source={require('@/src/shared/assets/logo_splash.png')}
+        style={styles.logoImage}
+        resizeMode="contain"
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   logo: {
-    gap: spacingSpacing8,
     marginHorizontal: 'auto',
     alignItems: 'center',
+  },
+  logoImage: {
+    width: 180,
+    height: 180,
+    tintColor: '#000000',
   },
 });
