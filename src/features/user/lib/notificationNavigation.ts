@@ -14,6 +14,14 @@ function getStringValue(value: unknown): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null;
 }
 
+const scheduleReminderNotificationTypes = new Set<string>([
+  NotificationType.ScheduleCreated,
+  NotificationType.ScheduleUpdated,
+  NotificationType.ShiftReminder,
+  NotificationType.ShiftStartReminder,
+  'schedule_reminder',
+]);
+
 function buildNotificationTarget(
   payload: NotificationNavigationPayload,
 ): Href | null {
@@ -40,24 +48,26 @@ function buildNotificationTarget(
         pathname: '/[storeId]/schedule',
         params: { storeId },
       };
-    case NotificationType.ScheduleCreated:
-    case NotificationType.ScheduleUpdated:
-    case NotificationType.ShiftReminder:
-    case NotificationType.ShiftStartReminder:
-      if (!targetId) {
+    default:
+      if (!scheduleReminderNotificationTypes.has(type)) {
         return null;
+      }
+
+      if (targetId) {
+        return {
+          pathname: '/[storeId]/schedule',
+          params: {
+            storeId,
+            openScheduleId: targetId,
+            openScheduleModal: 'true',
+          },
+        };
       }
 
       return {
         pathname: '/[storeId]/schedule',
-        params: {
-          storeId,
-          openScheduleId: targetId,
-          openScheduleModal: 'true',
-        },
+        params: { storeId },
       };
-    default:
-      return null;
   }
 }
 
