@@ -1,6 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -8,6 +14,7 @@ import {
   buttonColorCta,
   radiusRadius8,
   spacingSpacing12,
+  spacingSpacing16,
   spacingSpaicng14,
 } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
@@ -17,16 +24,28 @@ import SectionHeader from '@/src/widgets/store/SectionHeader';
 
 export default function JoinStorePage() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
   const [isInviteLinkBottomSheetVisible, setIsInviteLinkBottomSheetVisible] =
     useState(false);
   const insets = useSafeAreaInsets();
+  const inviteImageWidth = Math.max(width - spacingSpacing16 * 2, 343);
   return (
     <PageLayout title="매장 참여하기">
       <SectionHeader
         title="초대링크로 매장에 참여해 보세요"
         content="관리자에게 받은 초대링크를 열거나 입력하면 바로 참여할 수 있어요"
       />
-      <Image source={require('../../shared/assets/join.png')} />
+      <Image
+        source={require('../../shared/assets/invite.png')}
+        style={[
+          styles.inviteImage,
+          {
+            width: inviteImageWidth,
+            height: inviteImageWidth * (282 / 343),
+          },
+        ]}
+        resizeMode="contain"
+      />
       <Pressable
         style={[
           styles.verifyBtn,
@@ -61,6 +80,9 @@ export default function JoinStorePage() {
 }
 
 const styles = StyleSheet.create({
+  inviteImage: {
+    alignSelf: 'center',
+  },
   verifyBtn: {
     marginTop: 'auto',
     backgroundColor: buttonColorCta,
