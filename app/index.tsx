@@ -26,7 +26,7 @@ export default function Home() {
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
-        router.replace('/store');
+        router.replace('/auth');
       }
     };
 
