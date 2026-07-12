@@ -16,6 +16,9 @@ type ScheduleCalendarDayProps = {
   schedules: ScheduleItem[];
   selected?: boolean;
   compactLabel?: 'member' | 'time';
+  dayWidth?: number;
+  dayHeight?: number;
+  tablet?: boolean;
   onPressDate: (dateString: string) => void;
   onPressSchedule: (scheduleId: string) => void;
 };
@@ -40,49 +43,81 @@ export default function ScheduleCalendarDay({
   schedules,
   selected,
   compactLabel = 'member',
+  dayWidth = 49,
+  dayHeight = 100,
+  tablet = false,
   onPressDate,
   onPressSchedule,
 }: ScheduleCalendarDayProps) {
   if (!date) {
-    return <View style={styles.container} />;
+    return (
+      <View style={[styles.container, { width: dayWidth, height: dayHeight }]} />
+    );
   }
 
   const isSunday = getDayOfWeek(date.dateString) === 0;
   const isToday = date.dateString === getLocalDateString(new Date());
+  const scale = tablet ? Math.max(1, dayWidth / 49) : 1;
+  const badgeWidth = tablet ? 94 : 46;
+  const badgeHeight = tablet ? 32 : 18;
+  const badgesGap = tablet ? 8 : 2;
+  const badgesTop = tablet ? Math.max(10, 5 * scale) : 5;
 
   return (
     <Pressable
-      style={[
-        styles.container,
-        selected && styles.selected,
-      ]}
+      style={[styles.container, { width: dayWidth, height: dayHeight }]}
       onPress={() => onPressDate(date.dateString)}
     >
-      <Text
+      <View
         style={[
-          styles.day,
-          isSunday && styles.sundayDay,
-          state === 'disabled' && styles.disabledDay,
-          isToday && styles.todayDay,
+          styles.dateContent,
+          {
+            width: dayWidth,
+            height: dayHeight,
+          },
+          selected && styles.selected,
         ]}
       >
-        {date.day}
-      </Text>
+        <Text
+          style={[
+            styles.day,
+            isSunday && styles.sundayDay,
+            state === 'disabled' && styles.disabledDay,
+            isToday && styles.todayDay,
+          ]}
+        >
+          {date.day}
+        </Text>
 
-      <View style={styles.badges}>
-        {schedules.slice(0, 3).map((schedule) => (
-          <Pressable
-            key={schedule.id}
-            onPress={() => onPressSchedule(schedule.id)}
-          >
-            <ScheduleBadge
-              schedule={schedule}
-              compact
-              compactLabel={compactLabel}
-            />
-          </Pressable>
-        ))}
-        {schedules.length > 3 && <Text style={styles.moreText}>...</Text>}
+        <View
+          style={[
+            styles.badges,
+            {
+              width: badgeWidth,
+              gap: badgesGap,
+              marginTop: badgesTop,
+            },
+          ]}
+        >
+          {schedules.slice(0, 3).map((schedule) => (
+            <Pressable
+              key={schedule.id}
+              onPress={() => onPressSchedule(schedule.id)}
+            >
+              <ScheduleBadge
+                schedule={schedule}
+                compact
+                compactLabel={compactLabel}
+                compactStyle={{
+                  width: badgeWidth,
+                  height: badgeHeight,
+                  lineHeight: badgeHeight,
+                }}
+              />
+            </Pressable>
+          ))}
+          {schedules.length > 3 && <Text style={styles.moreText}>...</Text>}
+        </View>
       </View>
     </Pressable>
   );
@@ -90,8 +125,9 @@ export default function ScheduleCalendarDay({
 
 const styles = StyleSheet.create({
   container: {
-    width: 49,
-    height: 100,
+    alignItems: 'center',
+  },
+  dateContent: {
     alignItems: 'center',
     paddingTop: 5,
   },
@@ -113,10 +149,7 @@ const styles = StyleSheet.create({
     color: '#3B82F6',
   },
   badges: {
-    width: 46,
     alignItems: 'center',
-    gap: 2,
-    marginTop: 5,
   },
   moreText: {
     color: '#A5A5A5',
