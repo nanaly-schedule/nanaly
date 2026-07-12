@@ -25,6 +25,7 @@ export default function Layout() {
     }
 
     const fetchUser = async () => {
+      let shouldHideSplash = true;
       try {
         const { data } = await getUserProfile();
         const { name, email, birthDate, isTempPassword } = data;
@@ -38,10 +39,13 @@ export default function Layout() {
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
+        shouldHideSplash = false;
         await clearUser();
         router.replace('/auth');
       } finally {
-        void SplashScreen.hideAsync();
+        if (shouldHideSplash) {
+          void SplashScreen.hideAsync();
+        }
       }
     };
 

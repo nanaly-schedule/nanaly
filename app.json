@@ -4,7 +4,7 @@
     "slug": "nanaly",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/shared/assets/logo.png",
+    "icon": "./src/shared/assets/app_icon.png",
     "scheme": "nanaly",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -26,7 +26,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./src/shared/assets/logo.png"
+      "favicon": "./src/shared/assets/app_icon.png"
     },
     "plugins": [
       "expo-router",
@@ -54,7 +54,7 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.627677607110-t2n97mo1p1pvpsmh3dq8339eug6st3e6"
+          "iosUrlScheme": "com.googleusercontent.apps.627677607110-eohio7frcvnav6ajk4s2mfjem9oaah4k"
         }
       ],
       "expo-apple-authentication"
