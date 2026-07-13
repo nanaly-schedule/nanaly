@@ -84,12 +84,14 @@ export default function NoticePage() {
   }
 
   return (
-    <PageLayout title="공지">
+    <PageLayout title="공지사항">
       {canViewPrivateNotice && (
-        <NoticeTabs
-          value={tab}
-          onChange={setTab}
-        />
+        <View style={styles.tabsWrapper}>
+          <NoticeTabs
+            value={tab}
+            onChange={setTab}
+          />
+        </View>
       )}
 
       <ScrollView
@@ -136,6 +138,9 @@ export default function NoticePage() {
 }
 
 const styles = StyleSheet.create({
+  tabsWrapper: {
+    marginTop: 16,
+  },
   list: {
     flex: 1,
     marginTop: 4,
