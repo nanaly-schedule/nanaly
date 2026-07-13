@@ -338,7 +338,12 @@ function ScheduleUnavailableDatePickerBottomSheet({
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      showBackdrop={false}
+      style={styles.wheelSheet}
+    >
       <View style={styles.wheelRow}>
         <DateWheelColumn
           items={years}
@@ -395,7 +400,12 @@ function ScheduleUnavailableTimePickerBottomSheet({
   }, [value, visible]);
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      showBackdrop={false}
+      style={styles.wheelSheet}
+    >
       <View style={styles.wheelRow}>
         <DateWheelColumn
           items={hours}

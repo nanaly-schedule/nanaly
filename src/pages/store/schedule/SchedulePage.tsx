@@ -476,17 +476,26 @@ export default function SchedulePage() {
   const [positions, setPositions] = useState<SchedulePosition[]>([]);
   const [scheduleRefreshKey, setScheduleRefreshKey] = useState(0);
   const [assignedSchedulesLoaded, setAssignedSchedulesLoaded] = useState(false);
+  const [viewTypeReady, setViewTypeReady] = useState(false);
+  const [accessDefaultViewType, setAccessDefaultViewType] =
+    useState<ScheduleViewType | null>(null);
   const handledNotificationScheduleIdRef = useRef<string | null>(null);
+  const monthlySchedulesRequestIdRef = useRef(0);
   const canSelectAllView =
     workType === 'assigned' || canViewAllUnavailable;
+  const nextAccessDefaultViewType = canViewAllUnavailable ? 'all' : 'mine';
 
   useEffect(() => {
     if (!access.loaded) {
+      setViewTypeReady(false);
+      setAccessDefaultViewType(null);
       return;
     }
 
-    setViewType(canViewAllUnavailable ? 'all' : 'mine');
-  }, [access.loaded, canViewAllUnavailable]);
+    setViewType(nextAccessDefaultViewType);
+    setAccessDefaultViewType(nextAccessDefaultViewType);
+    setViewTypeReady(true);
+  }, [access.loaded, nextAccessDefaultViewType]);
 
   useEffect(() => {
     if (workType === 'unavailable' && !canViewAllUnavailable) {
@@ -527,11 +536,21 @@ export default function SchedulePage() {
   }, [isFocused, storeId]);
 
   useEffect(() => {
-    if (!storeId || !isFocused || !access.loaded || workType !== 'assigned') {
+    if (
+      !storeId ||
+      !isFocused ||
+      !access.loaded ||
+      !viewTypeReady ||
+      accessDefaultViewType !== nextAccessDefaultViewType ||
+      workType !== 'assigned'
+    ) {
       return;
     }
 
     const fetchMonthlySchedules = async () => {
+      const requestId = monthlySchedulesRequestIdRef.current + 1;
+      monthlySchedulesRequestIdRef.current = requestId;
+
       setAssignedSchedulesLoaded(false);
 
       try {
@@ -585,25 +604,34 @@ export default function SchedulePage() {
           }
         }
 
-        setAssignedSchedules(nextSchedules);
+        if (monthlySchedulesRequestIdRef.current === requestId) {
+          setAssignedSchedules(nextSchedules);
+        }
       } catch {
-        setAssignedSchedules([]);
+        if (monthlySchedulesRequestIdRef.current === requestId) {
+          setAssignedSchedules([]);
+        }
       } finally {
-        setAssignedSchedulesLoaded(true);
+        if (monthlySchedulesRequestIdRef.current === requestId) {
+          setAssignedSchedulesLoaded(true);
+        }
       }
     };
 
     fetchMonthlySchedules();
   }, [
     access.loaded,
+    accessDefaultViewType,
     currentMonth,
     isFocused,
+    nextAccessDefaultViewType,
     positionId,
     positions,
     scheduleRefreshKey,
     storeId,
     userName,
     viewType,
+    viewTypeReady,
     workType,
   ]);
 
@@ -628,12 +656,12 @@ export default function SchedulePage() {
     const targetSchedule = assignedSchedules.find(
       (schedule) => schedule.id === notificationScheduleId,
     );
-    handledNotificationScheduleIdRef.current = notificationScheduleId;
 
     if (!targetSchedule) {
       return;
     }
 
+    handledNotificationScheduleIdRef.current = notificationScheduleId;
     setCurrentMonth(getMonthStart(targetSchedule.date));
     setSelectedDate(targetSchedule.date);
     setSelectedSchedule(targetSchedule);

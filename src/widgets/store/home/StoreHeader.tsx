@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -23,6 +24,7 @@ interface StoreHeaderProps {
   storeName: string;
   isOwner: boolean;
   isActiveOwner: boolean;
+  canAddStore?: boolean;
   unreadNotificationCount?: number;
 }
 
@@ -37,6 +39,7 @@ export default function StoreHeader({
   storeName,
   isOwner,
   isActiveOwner,
+  canAddStore = false,
   unreadNotificationCount = 0,
 }: StoreHeaderProps) {
   const route = useRouter();
@@ -57,7 +60,6 @@ export default function StoreHeader({
   const [storeListVisible, setStoreListVisible] = useState(false);
   const [stores, setStores] = useState<MyStoreItem[]>([]);
   const [storesLoading, setStoresLoading] = useState(false);
-  const canJoinStore = !isOwner;
 
   const handlePressStoreName = async () => {
     const nextVisible = !storeListVisible;
@@ -110,9 +112,12 @@ export default function StoreHeader({
           <NText variant="h2" style={styles.storeName}>
             {displayStoreName}
           </NText>
-          <NText variant="m12" style={styles.chevron}>
-            ▾
-          </NText>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={typoColorPrimary}
+            style={styles.chevron}
+          />
         </Pressable>
         {storeListVisible && (
           <View style={styles.storeDropdown}>
@@ -147,7 +152,7 @@ export default function StoreHeader({
                 ))
               )}
             </View>
-            {canJoinStore && (
+            {canAddStore && (
               <Pressable
                 style={[styles.storeOption, styles.addStoreOption]}
                 onPress={handlePressAddStore}
@@ -227,7 +232,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   chevron: {
-    color: typoColorPrimary,
+    transform: [{ rotate: '90deg' }],
   },
   storeDropdown: {
     position: 'absolute',
