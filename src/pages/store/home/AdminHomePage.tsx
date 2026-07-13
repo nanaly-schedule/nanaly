@@ -81,6 +81,7 @@ export default function AdminHomePage() {
         storeName={displayStoreName ?? headerInfo?.storeName ?? ''}
         isOwner={headerInfo?.role !== MemberRole.STAFF}
         isActiveOwner
+        canAddStore={headerInfo?.role !== MemberRole.OWNER}
         unreadNotificationCount={headerInfo?.unreadNotificationCount ?? 0}
       />
       <View style={{ flexDirection: 'row', gap: spacingSpacing12 }}>

@@ -24,6 +24,7 @@ interface StoreHeaderProps {
   storeName: string;
   isOwner: boolean;
   isActiveOwner: boolean;
+  canAddStore?: boolean;
   unreadNotificationCount?: number;
 }
 
@@ -38,6 +39,7 @@ export default function StoreHeader({
   storeName,
   isOwner,
   isActiveOwner,
+  canAddStore = false,
   unreadNotificationCount = 0,
 }: StoreHeaderProps) {
   const route = useRouter();
@@ -58,7 +60,6 @@ export default function StoreHeader({
   const [storeListVisible, setStoreListVisible] = useState(false);
   const [stores, setStores] = useState<MyStoreItem[]>([]);
   const [storesLoading, setStoresLoading] = useState(false);
-  const canJoinStore = !isOwner;
 
   const handlePressStoreName = async () => {
     const nextVisible = !storeListVisible;
@@ -151,7 +152,7 @@ export default function StoreHeader({
                 ))
               )}
             </View>
-            {canJoinStore && (
+            {canAddStore && (
               <Pressable
                 style={[styles.storeOption, styles.addStoreOption]}
                 onPress={handlePressAddStore}

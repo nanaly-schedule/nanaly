@@ -164,6 +164,11 @@ export default function HomePage() {
           (!!headerInfo && headerInfo.role !== MemberRole.STAFF)
         }
         isActiveOwner={false}
+        canAddStore={
+          currentStoreRole
+            ? currentStoreRole !== MemberRole.OWNER
+            : headerInfo?.role !== MemberRole.OWNER
+        }
         unreadNotificationCount={headerInfo?.unreadNotificationCount ?? 0}
       />
       <CurrentWeekSchedules schedules={schedule} />
