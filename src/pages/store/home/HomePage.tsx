@@ -4,7 +4,9 @@ import { useCallback, useState } from 'react';
 
 import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
+import { UserStorePermissions } from '@/src/entities/user/user';
 import { getDashboardInfos } from '@/src/features/store/api/dashboard';
+import { getMyStore } from '@/src/features/store/api/store';
 import useUser from '@/src/features/user/lib/useUser';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import NoticeWidget from '@/src/widgets/notice/NoticeWidget';
@@ -27,8 +29,29 @@ type Schedule = {
   status: 'current' | 'upcoming';
 };
 
+type MyStoreAccessItem = {
+  storeId: string;
+  role: MemberRole;
+  permissions?: UserStorePermissions | null;
+};
+
 function getDashboardNotices(dashboard: { notices?: Notice[]; noticeList?: Notice[] }) {
   return dashboard.notices ?? dashboard.noticeList ?? [];
+}
+
+function isSamePermissions(
+  left: UserStorePermissions | null,
+  right: UserStorePermissions | null,
+) {
+  if (!left || !right) {
+    return left === right;
+  }
+
+  return (
+    left.canManageNotice === right.canManageNotice &&
+    left.canEditSchedule === right.canEditSchedule &&
+    left.canEditMemberInfo === right.canEditMemberInfo
+  );
 }
 
 function normalizeStoreId(value?: string | string[]) {
@@ -44,7 +67,9 @@ function normalizeStoreId(value?: string | string[]) {
 export default function HomePage() {
   const currentStoreRole = useUser((state) => state.currentStoreRole);
   const currentStoreId = useUser((state) => state.currentStoreId);
-  const isOwner = currentStoreRole !== MemberRole.STAFF;
+  const canAccessAdminMode =
+    currentStoreRole === MemberRole.OWNER ||
+    currentStoreRole === MemberRole.MANAGER;
   const params = useLocalSearchParams<{
     storeId?: string | string[];
     displayStoreName: string;
@@ -55,6 +80,48 @@ export default function HomePage() {
   const [schedule, setSchedule] = useState<Schedule[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
 
+  const syncCurrentStoreAccess = useCallback(
+    async () => {
+      try {
+        const { data } = await getMyStore();
+        const currentStore = (Array.isArray(data) ? data : []).find(
+          (store: MyStoreAccessItem) => store.storeId === storeId,
+        );
+
+        if (!currentStore) {
+          return;
+        }
+
+        const nextPermissions = currentStore.permissions ?? null;
+        const {
+          currentStoreId: savedStoreId,
+          currentStoreRole: savedStoreRole,
+          currentStorePermissions: savedStorePermissions,
+          setUser,
+        } = useUser.getState();
+
+        if (
+          savedStoreId !== currentStore.storeId ||
+          savedStoreRole !== currentStore.role ||
+          !isSamePermissions(
+            savedStorePermissions,
+            nextPermissions,
+          )
+        ) {
+          setUser({
+            currentStoreAccessLoaded: true,
+            currentStoreId: currentStore.storeId,
+            currentStoreRole: currentStore.role,
+            currentStorePermissions: nextPermissions,
+          });
+        }
+      } catch {
+        // 권한 동기화 실패 시 기존 전역 권한을 유지하고 다음 홈 포커스에서 다시 시도합니다.
+      }
+    },
+    [storeId],
+  );
+
   useFocusEffect(
     useCallback(() => {
       if (!storeId) {
@@ -63,6 +130,7 @@ export default function HomePage() {
 
       const fetchDashboard = async () => {
         try {
+          void syncCurrentStoreAccess();
           const { data: dashboard } = await getDashboardInfos(storeId);
           const { header, schedules } = dashboard;
           const nextSchedules = [
@@ -85,14 +153,15 @@ export default function HomePage() {
       };
 
       fetchDashboard();
-    }, [storeId]),
+    }, [storeId, syncCurrentStoreAccess]),
   );
   return (
     <PageLayout showHeader={false}>
       <StoreHeader
         storeName={displayStoreName ?? headerInfo?.storeName ?? ''}
         isOwner={
-          isOwner || (!!headerInfo && headerInfo.role !== MemberRole.STAFF)
+          canAccessAdminMode ||
+          (!!headerInfo && headerInfo.role !== MemberRole.STAFF)
         }
         isActiveOwner={false}
         unreadNotificationCount={headerInfo?.unreadNotificationCount ?? 0}
