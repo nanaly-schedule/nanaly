@@ -23,6 +23,7 @@ interface BottomSheetProps extends ViewProps {
   visible: boolean;
   onClose: () => void;
   showHandle?: boolean;
+  showBackdrop?: boolean;
   handleStyle?: StyleProp<ViewStyle>;
 }
 
@@ -32,6 +33,7 @@ export default function BottomSheet({
   onClose,
   style,
   showHandle = true,
+  showBackdrop = true,
   handleStyle,
 }: BottomSheetProps) {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -79,11 +81,14 @@ export default function BottomSheet({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
+        <Pressable
+          style={[styles.backdrop, !showBackdrop && styles.transparentBackdrop]}
+          onPress={onClose}
+        />
         <KeyboardAvoidingView
           style={[
             styles.sheetContainer,
@@ -135,6 +140,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: dimOverlayDefault,
     opacity: 0.2,
+  },
+  transparentBackdrop: {
+    backgroundColor: 'transparent',
+    opacity: 1,
   },
   sheet: {
     minHeight: 360,

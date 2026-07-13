@@ -741,7 +741,12 @@ function PositionPickerBottomSheet({
   ];
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} style={styles.pickerSheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      showBackdrop={false}
+      style={styles.pickerSheet}
+    >
       <NText variant="b16" style={styles.pickerTitle}>
         포지션 선택
       </NText>
@@ -792,7 +797,12 @@ function MemberPickerBottomSheet({
   onSelect: (member: ScheduleMember) => void;
 }) {
   return (
-    <BottomSheet visible={visible} onClose={onClose} style={styles.pickerSheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      showBackdrop={false}
+      style={styles.pickerSheet}
+    >
       <NText variant="b16" style={styles.pickerTitle}>
         근무자
       </NText>
@@ -868,7 +878,12 @@ function ScheduleDatePickerBottomSheet({
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      showBackdrop={false}
+      style={styles.wheelSheet}
+    >
       <View style={styles.wheelRow}>
         <DateWheelColumn
           items={years}
@@ -969,7 +984,12 @@ function ScheduleTimePickerBottomSheet({
   }, [draft.hour, draft.minute, normalizedHour, normalizedMinute]);
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} style={styles.wheelSheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      showBackdrop={false}
+      style={styles.wheelSheet}
+    >
       <View style={styles.wheelRow}>
         <DateWheelColumn
           items={hours}
