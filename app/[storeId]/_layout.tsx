@@ -41,7 +41,7 @@ function TabIcon({
 type MyStoreItem = {
   storeId: string;
   role: MemberRole;
-  permissions: UserStorePermissions;
+  permissions?: UserStorePermissions | null;
 };
 
 function normalizeParam(value?: string | string[]) {
@@ -54,6 +54,23 @@ function normalizeParam(value?: string | string[]) {
   return nextValue;
 }
 
+function hasValidStoreAccessCache(storeId: string) {
+  const {
+    currentStoreAccessLoaded,
+    currentStoreId,
+    currentStoreRole,
+    currentStorePermissions,
+  } = useUser.getState();
+
+  return (
+    currentStoreId === storeId &&
+    currentStoreAccessLoaded &&
+    currentStoreRole !== null &&
+    (currentStoreRole !== MemberRole.MANAGER ||
+      currentStorePermissions !== null)
+  );
+}
+
 export default function Layout() {
   const params = useLocalSearchParams<{
     storeId?: string | string[];
@@ -63,6 +80,10 @@ export default function Layout() {
 
   useEffect(() => {
     if (!storeId) {
+      return;
+    }
+
+    if (hasValidStoreAccessCache(storeId)) {
       return;
     }
 
