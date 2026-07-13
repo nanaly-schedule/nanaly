@@ -115,6 +115,7 @@ export default function Layout() {
         headerShown: false,
         tabBarActiveTintColor: '#000000',
         tabBarInactiveTintColor: '#000000',
+        tabBarLabelPosition: 'below-icon',
       }}
     >
       <Tabs.Screen name="index" options={{ href: null }} />
