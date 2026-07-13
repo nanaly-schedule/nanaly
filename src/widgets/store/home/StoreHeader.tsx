@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -110,9 +111,12 @@ export default function StoreHeader({
           <NText variant="h2" style={styles.storeName}>
             {displayStoreName}
           </NText>
-          <NText variant="m12" style={styles.chevron}>
-            ▾
-          </NText>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={typoColorPrimary}
+            style={styles.chevron}
+          />
         </Pressable>
         {storeListVisible && (
           <View style={styles.storeDropdown}>
@@ -227,7 +231,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   chevron: {
-    color: typoColorPrimary,
+    transform: [{ rotate: '90deg' }],
   },
   storeDropdown: {
     position: 'absolute',
