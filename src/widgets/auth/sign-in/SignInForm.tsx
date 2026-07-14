@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import {
   backgroundColorPrimary,
@@ -16,7 +16,10 @@ import OrDivider from './OrDivider';
 
 interface SignInFormProps {
   onPressStateChange?: (pressed: boolean) => void;
-  onSubmit?: (data: { email: string; password: string }) => void | Promise<void>;
+  onSubmit?: (data: {
+    email: string;
+    password: string;
+  }) => void | Promise<void>;
 }
 
 export default function SignInForm({
@@ -25,6 +28,15 @@ export default function SignInForm({
 }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const passwordInputRef = useRef<TextInput>(null);
+
+  const handleSubmit = () => {
+    Keyboard.dismiss();
+    onSubmit?.({
+      email: email.trim(),
+      password,
+    });
+  };
 
   return (
     <View>
@@ -37,26 +49,27 @@ export default function SignInForm({
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
+          returnKeyType="next"
+          blurOnSubmit={false}
+          onSubmitEditing={() => passwordInputRef.current?.focus()}
         />
         <Input
+          ref={passwordInputRef}
           placeholder="비밀번호를 입력해주세요"
           variant=""
           value={password}
           onChangeText={setPassword}
           textContentType="password"
           secureTextEntry
+          returnKeyType="done"
+          onSubmitEditing={handleSubmit}
         />
       </View>
       <Pressable
         style={styles.cta}
         onPressIn={() => onPressStateChange?.(true)}
         onPressOut={() => onPressStateChange?.(false)}
-        onPress={() =>
-          onSubmit?.({
-            email: email.trim(),
-            password,
-          })
-        }
+        onPress={handleSubmit}
       >
         <NText variant="m16" style={styles.ctaText}>
           로그인
