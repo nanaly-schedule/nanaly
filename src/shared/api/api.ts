@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import axios, {
   AxiosError,
   AxiosRequestHeaders,
@@ -19,6 +20,16 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
+function shouldCaptureApiError(error: AxiosError) {
+  const status = error.response?.status;
+
+  if (!status) {
+    return true;
+  }
+
+  return status >= 500;
+}
+
 // 요청 인터셉터: 모든 API 요청에 Access Token 자동 추가
 apiClient.interceptors.request.use(
   async (
@@ -33,6 +44,12 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error: unknown): Promise<never> => {
+    Sentry.captureException(error, {
+      tags: {
+        area: 'api',
+        phase: 'request',
+      },
+    });
     return Promise.reject(error);
   },
 );
@@ -71,9 +88,32 @@ apiClient.interceptors.response.use(
         await handleAuthFailure();
       } catch (refreshError: unknown) {
         // Refresh Token도 만료된 경우 로그아웃 처리
+        Sentry.captureException(refreshError, {
+          tags: {
+            area: 'api',
+            action: 'refreshAccessToken',
+          },
+          extra: {
+            requestUrl,
+          },
+        });
         await handleAuthFailure();
         return Promise.reject(refreshError);
       }
+    }
+
+    if (shouldCaptureApiError(error)) {
+      Sentry.captureException(error, {
+        tags: {
+          area: 'api',
+          action: 'response',
+        },
+        extra: {
+          requestUrl,
+          method: originalRequest?.method,
+          status: error.response?.status,
+        },
+      });
     }
 
     return Promise.reject(error);
@@ -94,10 +134,7 @@ async function refreshAccessToken(): Promise<string | null> {
     const { data } = await axios.post<{
       accessToken: string;
       refreshToken: string;
-    }>(
-      `${apiClient.defaults.baseURL}auth/refresh`,
-      { refreshToken },
-    );
+    }>(`${apiClient.defaults.baseURL}auth/refresh`, { refreshToken });
 
     await saveAccessToken(data.accessToken);
     await saveRefreshToken(data.refreshToken);

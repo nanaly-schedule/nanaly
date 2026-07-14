@@ -5,10 +5,10 @@ import { Alert } from 'react-native';
 
 import { signUp } from '@/src/features/auth/api/sign';
 import { sendCode, verifyCode } from '@/src/features/auth/api/verify';
-import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
 import ExistingEmailModal from '@/src/features/auth/ui/ExistingEmailModal';
 import VerificationCodeResendModal from '@/src/features/auth/ui/VerificationCodeResendModal';
+import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
 import { BirthDateValue, formatBirthDate } from '@/src/shared/lib/date';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import AuthInfo from '@/src/widgets/auth/sign-up/AuthInfo';

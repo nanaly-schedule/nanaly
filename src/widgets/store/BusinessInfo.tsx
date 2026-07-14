@@ -22,6 +22,20 @@ interface BusinessInfoProps {
   onChangeStartDate: (t: string) => void;
 }
 
+function formatBusinessRegistrationNumber(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 10);
+
+  if (digits.length <= 3) {
+    return digits;
+  }
+
+  if (digits.length <= 5) {
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  }
+
+  return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+}
+
 export default function BusinessInfo({
   editable = true,
   businessNumber,
@@ -33,9 +47,15 @@ export default function BusinessInfo({
 }: BusinessInfoProps) {
   const [isOpenDatePickerOpen, setIsOpenDatePickerOpen] = useState(false);
   const openDate = parseBirthDate(startDate);
+  const formattedBusinessNumber =
+    formatBusinessRegistrationNumber(businessNumber);
 
   const handleChangeOpenDate = (value: BirthDateValue) => {
     onChangeStartDate(formatBirthDate(value));
+  };
+
+  const handleChangeBusinessNumber = (value: string) => {
+    onChangeBusinessNumber(value.replace(/\D/g, '').slice(0, 10));
   };
 
   const handlePressOpenDate = () => {
@@ -53,8 +73,10 @@ export default function BusinessInfo({
         <Input
           editable={editable}
           placeholder="000-00-00000"
-          value={businessNumber}
-          onChangeText={onChangeBusinessNumber}
+          value={formattedBusinessNumber}
+          onChangeText={handleChangeBusinessNumber}
+          keyboardType="number-pad"
+          maxLength={12}
           variant=""
         />
       </View>

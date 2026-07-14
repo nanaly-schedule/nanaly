@@ -2,7 +2,7 @@
   "expo": {
     "name": "나날이",
     "slug": "nanaly",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./src/shared/assets/app_icon.png",
     "scheme": "nanaly",
@@ -12,16 +12,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.nanaly.app",
       "usesAppleSignIn": true,
-      "associatedDomains": [
-        "applinks:www.nanaly-schedule.com"
-      ]
+      "associatedDomains": ["applinks:www.nanaly-schedule.com"]
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#4E80EE",
-        "foregroundImage": "./src/shared/assets/logo.png",
-        "backgroundImage": "./src/shared/assets/logo.png",
-        "monochromeImage": "./src/shared/assets/logo.png"
+        "foregroundImage": "./src/shared/assets/android-logo.png",
+        "backgroundImage": "./src/shared/assets/android-logo.png",
+        "monochromeImage": "./src/shared/assets/android-logo.png"
       },
       "intentFilters": [
         {
@@ -34,10 +32,7 @@
               "pathPrefix": "/invite"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ],
       "edgeToEdgeEnabled": true,
@@ -86,6 +81,14 @@
           "ios": {
             "useFrameworks": "static"
           }
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "nanaly"
         }
       ]
     ],

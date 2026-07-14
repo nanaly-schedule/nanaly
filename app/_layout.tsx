@@ -1,7 +1,14 @@
+import * as Sentry from '@sentry/react-native';
+import { isRunningInExpoGo } from 'expo';
 import * as Notifications from 'expo-notifications';
-import { Stack, usePathname, useRouter } from 'expo-router';
+import {
+  Stack,
+  useNavigationContainerRef,
+  usePathname,
+  useRouter,
+} from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { emitNotificationReceived } from '@/src/features/push/lib/notificationEvents';
 import { preparePushNotificationsAsync } from '@/src/features/push/lib/pushNotification';
@@ -9,17 +16,100 @@ import { getUserProfile } from '@/src/features/user/api/profile';
 import { navigateFromNotification } from '@/src/features/user/lib/notificationNavigation';
 import useUser from '@/src/features/user/lib/useUser';
 
+const navigationIntegration = Sentry.reactNavigationIntegration({
+  enableTimeToInitialDisplay: !isRunningInExpoGo(),
+});
+
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'accessToken',
+  'refreshToken',
+  'identityToken',
+  'idToken',
+  'expoPushToken',
+  'businessRegistrationNumber',
+]);
+
+function scrubSensitiveData(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(scrubSensitiveData);
+  }
+
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, currentValue]) => [
+      key,
+      SENSITIVE_KEYS.has(key) ? '[REDACTED]' : scrubSensitiveData(currentValue),
+    ]),
+  );
+}
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  tracesSampleRate: __DEV__ ? 1 : 0.2,
+  profilesSampleRate: __DEV__ ? 1 : 0.1,
+  sendDefaultPii: true,
+  enableLogs: true,
+  enableNativeFramesTracking: !isRunningInExpoGo(),
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [
+    navigationIntegration,
+    Sentry.mobileReplayIntegration(),
+    Sentry.feedbackIntegration(),
+  ],
+  beforeSend(event) {
+    event.contexts = scrubSensitiveData(event.contexts) as typeof event.contexts;
+    event.extra = scrubSensitiveData(event.extra) as typeof event.extra;
+
+    if (event.request) {
+      event.request.headers = scrubSensitiveData(event.request.headers) as
+        typeof event.request.headers;
+      event.request.data = scrubSensitiveData(event.request.data) as
+        typeof event.request.data;
+    }
+
+    return event;
+  },
+  beforeBreadcrumb(breadcrumb) {
+    if (!breadcrumb.data) {
+      return breadcrumb;
+    }
+
+    return {
+      ...breadcrumb,
+      data: scrubSensitiveData(breadcrumb.data) as
+        | Record<string, unknown>
+        | undefined,
+    };
+  },
+});
+
 void SplashScreen.preventAutoHideAsync();
 
-export default function Layout() {
+export default Sentry.wrap(function Layout() {
   const router = useRouter();
+  const navigationRef = useNavigationContainerRef();
   const pathname = usePathname();
   const setUser = useUser((state) => state.setUser);
   const clearUser = useUser((state) => state.clearUser);
   const isAuthRoute = pathname.startsWith('/auth');
 
   useEffect(() => {
+    if (navigationRef) {
+      navigationIntegration.registerNavigationContainer(navigationRef);
+    }
+  }, [navigationRef]);
+
+  useEffect(() => {
     if (isAuthRoute) {
+      Sentry.setUser(null);
       void SplashScreen.hideAsync();
       return;
     }
@@ -35,11 +125,19 @@ export default function Layout() {
           email,
           birthDate,
         });
+        Sentry.setUser({
+          email,
+          username: name,
+        });
         await preparePushNotificationsAsync();
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (_) {
+      } catch (error) {
         shouldHideSplash = false;
+        Sentry.captureException(error, {
+          tags: {
+            area: 'bootstrap',
+            action: 'getUserProfile',
+          },
+        });
         await clearUser();
         router.replace('/auth');
       } finally {
@@ -99,4 +197,4 @@ export default function Layout() {
   }, [router]);
 
   return <Stack screenOptions={{ headerShown: false }} />;
-}
+});

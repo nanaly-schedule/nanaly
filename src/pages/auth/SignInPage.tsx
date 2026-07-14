@@ -3,7 +3,12 @@ import { isAxiosError } from 'axios';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import {
+  Keyboard,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 
 import { appleLogin, googleLogin, signIn } from '@/src/features/auth/api/sign';
 import {
@@ -98,15 +103,15 @@ export default function SignInPage() {
       const statusCode = isAxiosError(error)
         ? error.response?.status
         : undefined;
-      const errorMessage = isAxiosError(error)
-        ? typeof error.response?.data === 'string'
-          ? error.response.data
-          : (error.response?.data as { message?: string } | undefined)?.message
-        : undefined;
+      // const errorMessage = isAxiosError(error)
+      //   ? typeof error.response?.data === 'string'
+      //     ? error.response.data
+      //     : (error.response?.data as { message?: string } | undefined)?.message
+      //   : undefined;
       setLoginErrorMessage((prev) =>
         statusCode === 401
           ? '이메일 또는 비밀번호를 확인해주세요'
-          : (errorMessage ?? '로그인 중 오류가 발생했습니다'),
+          : '로그인 중 오류가 발생했습니다',
       );
       setIsLoginErrorModalVisible((prev) => true);
     }
@@ -158,17 +163,15 @@ export default function SignInPage() {
 
       await replaceToInitialRoute(router);
     } catch (error) {
-      const errorMessage = isAxiosError(error)
-        ? typeof error.response?.data === 'string'
-          ? error.response.data
-          : (error.response?.data as { message?: string } | undefined)?.message
-        : error instanceof Error
-          ? error.message
-          : undefined;
+      // const errorMessage = isAxiosError(error)
+      //   ? typeof error.response?.data === 'string'
+      //     ? error.response.data
+      //     : (error.response?.data as { message?: string } | undefined)?.message
+      //   : error instanceof Error
+      //     ? error.message
+      //     : undefined;
 
-      setLoginErrorMessage(
-        errorMessage ?? '구글 로그인 중 오류가 발생했습니다',
-      );
+      setLoginErrorMessage('구글 로그인 중 오류가 발생했습니다');
       setIsLoginErrorModalVisible(true);
     }
   };
@@ -214,51 +217,51 @@ export default function SignInPage() {
 
       await replaceToInitialRoute(router);
     } catch (error: any) {
-      const errorMessage = isAxiosError(error)
-        ? typeof error.response?.data === 'string'
-          ? error.response.data
-          : (error.response?.data as { message?: string } | undefined)?.message
-        : error instanceof Error
-          ? error.message
-          : undefined;
+      // const errorMessage = isAxiosError(error)
+      //   ? typeof error.response?.data === 'string'
+      //     ? error.response.data
+      //     : (error.response?.data as { message?: string } | undefined)?.message
+      //   : error instanceof Error
+      //     ? error.message
+      //     : undefined;
 
-      setLoginErrorMessage(
-        errorMessage ?? '애플 로그인 중 오류가 발생했습니다',
-      );
+      setLoginErrorMessage('애플 로그인 중 오류가 발생했습니다');
       setIsLoginErrorModalVisible(true);
     }
   };
   return (
-    <Main>
-      <View style={styles.main}>
-        <Logo color={basicColorGrey800} />
-        <SignInForm
-          onPressStateChange={setIsSignInButtonPressed}
-          onSubmit={handleSignIn}
-        />
-        <SocialLoginButtons
-          onGoogle={handlePressGoogleLoginButton}
-          onApple={handlePressAppleLoginButton}
-        />
-      </View>
-      <BaseModal
-        visible={isLoginErrorModalVisible}
-        onClose={() => setIsLoginErrorModalVisible(false)}
-      >
-        <BaseModal.Content>
-          <BaseModal.Title>로그인 실패</BaseModal.Title>
-          <BaseModal.Text>{loginErrorMessage}</BaseModal.Text>
-        </BaseModal.Content>
-        <BaseModal.Actions>
-          <BaseModal.Button
-            fullWidth
-            onPress={() => setIsLoginErrorModalVisible(false)}
-          >
-            확인
-          </BaseModal.Button>
-        </BaseModal.Actions>
-      </BaseModal>
-    </Main>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <Main>
+        <View style={styles.main}>
+          <Logo color={basicColorGrey800} />
+          <SignInForm
+            onPressStateChange={setIsSignInButtonPressed}
+            onSubmit={handleSignIn}
+          />
+          <SocialLoginButtons
+            onGoogle={handlePressGoogleLoginButton}
+            onApple={handlePressAppleLoginButton}
+          />
+        </View>
+        <BaseModal
+          visible={isLoginErrorModalVisible}
+          onClose={() => setIsLoginErrorModalVisible(false)}
+        >
+          <BaseModal.Content>
+            <BaseModal.Title>로그인 실패</BaseModal.Title>
+            <BaseModal.Text>{loginErrorMessage}</BaseModal.Text>
+          </BaseModal.Content>
+          <BaseModal.Actions>
+            <BaseModal.Button
+              fullWidth
+              onPress={() => setIsLoginErrorModalVisible(false)}
+            >
+              확인
+            </BaseModal.Button>
+          </BaseModal.Actions>
+        </BaseModal>
+      </Main>
+    </TouchableWithoutFeedback>
   );
 }
 
