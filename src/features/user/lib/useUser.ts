@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { create } from 'zustand';
 
 import { User } from '@/src/entities/user/user';
@@ -36,6 +37,7 @@ const useUser = create<UserStore>((set) => ({
       currentStoreRole: null,
       currentStorePermissions: null,
     });
+    Sentry.setUser(null);
     await unregisterCurrentDeviceAsync();
     await clearTokens();
   },
