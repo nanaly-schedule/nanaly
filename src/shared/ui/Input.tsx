@@ -1,4 +1,5 @@
-import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
+import { forwardRef } from 'react';
+import { StyleSheet, TextInput, TextInputProps } from 'react-native';
 
 import {
   backgroundColorRed,
@@ -14,18 +15,22 @@ interface InputProps extends TextInputProps {
   variant: 'disabled' | '' | 'error';
 }
 
-export default function Input({
-  variant,
-  editable = true,
-  focusable = true,
-  selectTextOnFocus,
-  style,
-  ...props
-}: InputProps) {
+const Input = forwardRef<TextInput, InputProps>(function Input(
+  {
+    variant,
+    editable = true,
+    focusable = true,
+    selectTextOnFocus,
+    style,
+    ...props
+  },
+  ref,
+) {
   const isDisabled = variant === 'disabled';
 
   return (
     <TextInput
+      ref={ref}
       {...props}
       style={[
         styles.container,
@@ -42,7 +47,9 @@ export default function Input({
       placeholderTextColor={typoColorPlaceholder}
     />
   );
-}
+});
+
+export default Input;
 
 const styles = StyleSheet.create({
   container: {
