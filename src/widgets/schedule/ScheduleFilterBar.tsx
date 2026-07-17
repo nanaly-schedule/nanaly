@@ -95,7 +95,12 @@ export default function ScheduleFilterBar({
       )}
 
       {openDropdown === 'workType' && (
-        <View style={[styles.dropdown, styles.workTypeDropdown]}>
+        <View
+          style={[
+            styles.dropdown,
+            showViewFilter ? styles.workTypeDropdown : styles.leftDropdown,
+          ]}
+        >
           <DropdownItem
             label="배정근무"
             onPress={() => {
