@@ -8,7 +8,7 @@ import {
   useRouter,
 } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { emitNotificationReceived } from '@/src/features/push/lib/notificationEvents';
 import { preparePushNotificationsAsync } from '@/src/features/push/lib/pushNotification';
@@ -99,6 +99,7 @@ export default Sentry.wrap(function Layout() {
   const pathname = usePathname();
   const setUser = useUser((state) => state.setUser);
   const clearUser = useUser((state) => state.clearUser);
+  const handledNotificationResponseKeyRef = useRef<string | null>(null);
   const isAuthRoute = pathname.startsWith('/auth');
 
   useEffect(() => {
@@ -170,13 +171,28 @@ export default Sentry.wrap(function Layout() {
       response: Notifications.NotificationResponse,
     ) => {
       const { data } = response.notification.request.content;
+      const notificationId =
+        typeof data.notificationId === 'string' ? data.notificationId : null;
+      const storeId = typeof data.storeId === 'string' ? data.storeId : null;
+      const targetId = typeof data.targetId === 'string' ? data.targetId : null;
+      const type = typeof data.type === 'string' ? data.type : null;
+      const responseKey =
+        notificationId ?? [storeId, type, targetId].filter(Boolean).join(':');
+
+      if (
+        responseKey &&
+        handledNotificationResponseKeyRef.current === responseKey
+      ) {
+        return;
+      }
+
+      handledNotificationResponseKeyRef.current = responseKey;
 
       await navigateFromNotification(router, {
-        notificationId:
-          typeof data.notificationId === 'string' ? data.notificationId : null,
-        storeId: typeof data.storeId === 'string' ? data.storeId : null,
-        targetId: typeof data.targetId === 'string' ? data.targetId : null,
-        type: typeof data.type === 'string' ? data.type : null,
+        notificationId,
+        storeId,
+        targetId,
+        type,
       });
     };
 
