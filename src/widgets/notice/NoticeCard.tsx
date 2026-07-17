@@ -2,6 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Notice } from '@/src/entities/notice/notice';
+import {
+  typoColorPlaceholder,
+  typoColorPrimary,
+} from '@/src/init/styles/tokens';
 
 type NoticeCardProps = {
   notice: Notice;
@@ -95,6 +99,7 @@ export default function NoticeCard({
     const createdAt = formatNoticeDate(notice.createdAt);
     const preview = notice.content?.trim() || '내용이 표시됩니다';
     const isPublic = getNoticeIsPublic(notice);
+    const isRead = isList && notice.isRead === true;
 
     return (
         <Pressable
@@ -122,13 +127,17 @@ export default function NoticeCard({
             <View style={{flex: 1}}>
                 <Text
                     numberOfLines={1}
-                    style={[styles.title, isList && styles.listTitle]}
+                    style={[
+                        styles.title,
+                        isList && styles.listTitle,
+                        isRead && styles.readTitle,
+                    ]}
                 >
                     {notice.title}
                 </Text>
                 <Text
                     numberOfLines={2}
-                    style={styles.content}
+                    style={[styles.content, isRead && styles.readTitle]}
                 >
                     {preview}
                 </Text>
@@ -170,11 +179,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontSize: 16,
     fontWeight: '700',
-    color: '#333333',
+    color: typoColorPrimary,
   },
   listTitle: {
     fontSize: 14,
     lineHeight: 18,
+  },
+  readTitle: {
+    color: typoColorPlaceholder,
   },
   content: {
     fontSize: 14,
