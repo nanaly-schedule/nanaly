@@ -298,13 +298,18 @@ function getUnavailableId(
 function mapMonthlyScheduleEntry(
   entry: ScheduleEntry,
   markAsMine: boolean,
+  fallbackMemberName?: string,
 ): ScheduleItem | null {
   if (!isRecord(entry.item)) {
     return null;
   }
 
   const date = getScheduleDate(entry.item, entry.date);
-  const { memberId, memberName } = getScheduleMember(entry.item);
+  const { memberId, memberName: mappedMemberName } =
+    getScheduleMember(entry.item);
+  const safeFallbackMemberName = fallbackMemberName?.trim() || '나';
+  const memberName =
+    mappedMemberName ?? (markAsMine ? safeFallbackMemberName : null);
   const startTime = getScheduleTime(entry.item, [
     'startTime',
     'start',
@@ -348,14 +353,23 @@ function mapScheduleEntries(params: {
   fallbackDate?: string;
   markAsMine: boolean;
   positions: SchedulePosition[];
+  fallbackMemberName?: string;
 }) {
-  const { data, fallbackDate, markAsMine, positions } = params;
+  const {
+    data,
+    fallbackDate,
+    markAsMine,
+    positions,
+    fallbackMemberName,
+  } = params;
   const entries = extractScheduleEntries(data).map((entry) => ({
     ...entry,
     date: entry.date ?? fallbackDate,
   }));
   const schedules = entries
-    .map((entry) => mapMonthlyScheduleEntry(entry, markAsMine))
+    .map((entry) =>
+      mapMonthlyScheduleEntry(entry, markAsMine, fallbackMemberName),
+    )
     .filter((schedule): schedule is ScheduleItem => !!schedule)
     .map((schedule) => attachPositionIdFromCatalog(schedule, positions));
 
@@ -668,39 +682,46 @@ export default function SchedulePage() {
         });
         const { entries, schedules } = mapScheduleEntries({
           data,
-          markAsMine: false,
+          markAsMine: scope === 'mine',
           positions,
+          fallbackMemberName: userName,
         });
         void entries;
         let nextSchedules = schedules;
 
         if (scope === 'mine' && schedules.length > 0) {
           const dates = getUniqueScheduleDates(schedules);
-          const dailyResults = await Promise.all(
-            dates.map(async (date) => {
-              const response = await getDailySchedules({
-                storeId,
-                date,
-                positionId:
-                  positionId !== 'all' && workType === 'assigned'
-                    ? positionId
-                    : undefined,
-              });
 
-              return mapScheduleEntries({
-                data: response.data,
-                fallbackDate: date,
-                markAsMine: false,
-                positions,
-              }).schedules;
-            }),
-          );
-          const hydratedSchedules = dailyResults
-            .flat()
-            .filter((schedule) => isMySchedule(schedule, userName));
+          try {
+            const dailyResults = await Promise.all(
+              dates.map(async (date) => {
+                const response = await getDailySchedules({
+                  storeId,
+                  date,
+                  positionId:
+                    positionId !== 'all' && workType === 'assigned'
+                      ? positionId
+                      : undefined,
+                });
 
-          if (hydratedSchedules.length > 0) {
-            nextSchedules = hydratedSchedules;
+                return mapScheduleEntries({
+                  data: response.data,
+                  fallbackDate: date,
+                  markAsMine: true,
+                  positions,
+                  fallbackMemberName: userName,
+                }).schedules;
+              }),
+            );
+            const hydratedSchedules = dailyResults
+              .flat()
+              .filter((schedule) => isMySchedule(schedule, userName));
+
+            if (hydratedSchedules.length > 0) {
+              nextSchedules = hydratedSchedules;
+            }
+          } catch {
+            nextSchedules = schedules;
           }
         }
 
@@ -856,8 +877,9 @@ export default function SchedulePage() {
         const { schedules } = mapScheduleEntries({
           data,
           fallbackDate: selectedDate,
-          markAsMine: false,
+          markAsMine: viewType === 'mine' && !canViewAllUnavailable,
           positions,
+          fallbackMemberName: userName,
         });
 
         setDailyAssignedDate(selectedDate);
@@ -871,6 +893,7 @@ export default function SchedulePage() {
     fetchDailySchedules();
   }, [
     access.loaded,
+    canViewAllUnavailable,
     dateDetailVisible,
     isFocused,
     positionId,
@@ -878,6 +901,7 @@ export default function SchedulePage() {
     scheduleRefreshKey,
     selectedDate,
     storeId,
+    userName,
     viewType,
     workType,
   ]);
