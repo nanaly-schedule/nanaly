@@ -670,11 +670,12 @@ export default function SchedulePage() {
       try {
         const { year, month } = parseMonth(currentMonth);
         const scope: ScheduleScope = viewType;
+        const requestScope = canViewAllUnavailable ? undefined : scope;
         const { data } = await getMonthlySchedules({
           storeId,
           year,
           month,
-          scope,
+          scope: requestScope,
           positionId:
             positionId !== 'all' && workType === 'assigned'
               ? positionId
@@ -682,14 +683,14 @@ export default function SchedulePage() {
         });
         const { entries, schedules } = mapScheduleEntries({
           data,
-          markAsMine: scope === 'mine',
+          markAsMine: requestScope === 'mine',
           positions,
           fallbackMemberName: userName,
         });
         void entries;
         let nextSchedules = schedules;
 
-        if (scope === 'mine' && schedules.length > 0) {
+        if (requestScope === 'mine' && schedules.length > 0) {
           const dates = getUniqueScheduleDates(schedules);
 
           try {
@@ -743,6 +744,7 @@ export default function SchedulePage() {
   }, [
     access.loaded,
     accessDefaultViewType,
+    canViewAllUnavailable,
     currentMonth,
     isFocused,
     nextAccessDefaultViewType,
