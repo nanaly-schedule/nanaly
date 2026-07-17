@@ -43,6 +43,7 @@ export default function ScheduleCalendar({
       </View>
 
       <Calendar
+        key={currentMonth}
         style={styles.calendar}
         current={currentMonth}
         hideArrows
