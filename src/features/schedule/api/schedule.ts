@@ -13,6 +13,14 @@ export type CreateScheduleRequest = {
 
 export type UpdateScheduleRequest = CreateScheduleRequest;
 
+export type CreateUnavailableRequest = {
+  date: string;
+  isAllDay: boolean;
+  startTime: string;
+  endTime: string;
+  reason: string;
+};
+
 export async function getDailySchedules(params: {
   storeId: string;
   date: string;
@@ -87,4 +95,11 @@ export async function getMonthlyUnavailable(params: {
   return apiClient.get(`/stores/${storeId}/unavailable/monthly`, {
     params: { year, month },
   });
+}
+
+export async function createUnavailable(
+  storeId: string,
+  data: CreateUnavailableRequest,
+) {
+  return apiClient.post(`/stores/${storeId}/unavailable`, data);
 }

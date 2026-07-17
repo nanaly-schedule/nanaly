@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import { isAxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
 
 import DateWheelColumn from '@/src/features/auth/ui/DateWheelColumn';
+import { createUnavailable } from '@/src/features/schedule/api/schedule';
 import {
   backgroundColorWhite,
   buttonColorCta,
@@ -26,13 +28,38 @@ import { ScheduleItem } from './mock';
 
 type ScheduleUnavailableFormBottomSheetProps = {
   visible: boolean;
+  storeId: string;
   memberName: string;
   onClose: () => void;
   onCreated?: (schedule: ScheduleItem) => void;
 };
 
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const responseData = error.response?.data;
+
+    if (typeof responseData === 'string') {
+      return responseData;
+    }
+
+    if (
+      responseData &&
+      typeof responseData === 'object' &&
+      'message' in responseData &&
+      typeof responseData.message === 'string'
+    ) {
+      return responseData.message;
+    }
+
+    return error.message;
+  }
+
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function ScheduleUnavailableFormBottomSheet({
   visible,
+  storeId,
   memberName,
   onClose,
   onCreated,
@@ -48,7 +75,11 @@ export default function ScheduleUnavailableFormBottomSheet({
   >(null);
   const [missingRequiredVisible, setMissingRequiredVisible] = useState(false);
   const [saveConfirmVisible, setSaveConfirmVisible] = useState(false);
+  const [saveFailedVisible, setSaveFailedVisible] = useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] =
+    useState('근무불가 신청에 실패했어요');
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
+  const [saving, setSaving] = useState(false);
   const hasChanges = !!date || !!startTime || !!endTime || allDay || !!memo;
   const hasRequiredValues = !!date && (allDay || (!!startTime && !!endTime));
 
@@ -82,22 +113,54 @@ export default function ScheduleUnavailableFormBottomSheet({
     setSaveConfirmVisible(true);
   };
 
-  const handleCreate = () => {
-    setSaveConfirmVisible(false);
-    onCreated?.({
-      id: `unavailable-${Date.now()}`,
-      date,
-      memberId: 'me',
-      memberName: memberName || '나',
-      positionId: 'unavailable',
-      positionName: '근무불가',
-      positionColor: '#FF6B6B',
-      startTime: allDay ? '00:00' : startTime,
-      endTime: allDay ? '23:59' : endTime,
-      memo,
-      isMine: true,
-    });
-    onClose();
+  const handleCreate = async () => {
+    if (!storeId || saving) {
+      return;
+    }
+
+    const nextStartTime = allDay ? '00:00' : startTime;
+    const nextEndTime = allDay ? '23:59' : endTime;
+
+    setSaving(true);
+
+    try {
+      const { data } = await createUnavailable(storeId, {
+        date,
+        isAllDay: allDay,
+        startTime: nextStartTime,
+        endTime: nextEndTime,
+        reason: memo.trim(),
+      });
+      const createdId =
+        data?.unAvailableId ??
+        data?.unavailableId ??
+        data?.id ??
+        `unavailable-${Date.now()}`;
+
+      setSaveConfirmVisible(false);
+      onCreated?.({
+        id: createdId,
+        date,
+        memberId: data?.memberId ?? 'me',
+        memberName: data?.memberName ?? memberName ?? '나',
+        positionId: 'unavailable',
+        positionName: '근무불가',
+        positionColor: '#FF6B6B',
+        startTime: nextStartTime,
+        endTime: nextEndTime,
+        memo,
+        isMine: true,
+      });
+      onClose();
+    } catch (error) {
+      setSaveConfirmVisible(false);
+      setSaveErrorMessage(
+        getApiErrorMessage(error, '근무불가 신청에 실패했어요'),
+      );
+      setSaveFailedVisible(true);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -240,7 +303,9 @@ export default function ScheduleUnavailableFormBottomSheet({
           >
             취소
           </BaseModal.Button>
-          <BaseModal.Button onPress={handleCreate}>추가하기</BaseModal.Button>
+          <BaseModal.Button onPress={handleCreate}>
+            {saving ? '추가중' : '추가하기'}
+          </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
 
@@ -280,6 +345,23 @@ export default function ScheduleUnavailableFormBottomSheet({
           <BaseModal.Button
             fullWidth
             onPress={() => setMissingRequiredVisible(false)}
+          >
+            확인
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
+      <BaseModal
+        visible={saveFailedVisible}
+        onClose={() => setSaveFailedVisible(false)}
+      >
+        <BaseModal.Content>
+          <BaseModal.Title>저장에 실패했어요</BaseModal.Title>
+          <BaseModal.Text>{saveErrorMessage}</BaseModal.Text>
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            fullWidth
+            onPress={() => setSaveFailedVisible(false)}
           >
             확인
           </BaseModal.Button>
