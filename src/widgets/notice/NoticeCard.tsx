@@ -136,7 +136,7 @@ export default function NoticeCard({
                     {notice.title}
                 </Text>
                 <Text
-                    numberOfLines={2}
+                    numberOfLines={isList ? 2 : 1}
                     style={[styles.content, isRead && styles.readTitle]}
                 >
                     {preview}
