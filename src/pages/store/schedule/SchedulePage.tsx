@@ -582,8 +582,7 @@ export default function SchedulePage() {
   const handledNotificationScheduleIdRef = useRef<string | null>(null);
   const monthlySchedulesRequestIdRef = useRef(0);
   const monthlyUnavailableRequestIdRef = useRef(0);
-  const canSelectAllView =
-    workType === 'assigned' || canViewAllUnavailable;
+  const canSelectAllView = canViewAllUnavailable;
   const nextAccessDefaultViewType = canViewAllUnavailable ? 'all' : 'mine';
 
   useEffect(() => {
@@ -1090,6 +1089,7 @@ export default function SchedulePage() {
         onChangePosition={setPositionId}
         canManagePosition={canEditSchedule}
         canSelectAllView={canSelectAllView}
+        showViewFilter={canSelectAllView}
         showPositionFilter={workType === 'assigned' && viewType === 'all'}
         onPressPositionManage={() =>
           router.push(`/${storeId}/schedule/positions`)

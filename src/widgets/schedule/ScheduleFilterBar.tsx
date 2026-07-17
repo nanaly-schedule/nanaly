@@ -19,6 +19,7 @@ type ScheduleFilterBarProps = {
   onPressPositionManage: () => void;
   canManagePosition?: boolean;
   canSelectAllView?: boolean;
+  showViewFilter?: boolean;
   showPositionFilter?: boolean;
 };
 
@@ -35,6 +36,7 @@ export default function ScheduleFilterBar({
   onPressPositionManage,
   canManagePosition = false,
   canSelectAllView = true,
+  showViewFilter = true,
   showPositionFilter = true,
 }: ScheduleFilterBarProps) {
   const [openDropdown, setOpenDropdown] = useState<OpenDropdown>(null);
@@ -53,10 +55,12 @@ export default function ScheduleFilterBar({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.row}
       >
-        <DropdownButton
-          label={viewType === 'mine' ? '내근무' : '전체근무'}
-          onPress={toggleDropdown('view')}
-        />
+        {showViewFilter && (
+          <DropdownButton
+            label={viewType === 'mine' ? '내근무' : '전체근무'}
+            onPress={toggleDropdown('view')}
+          />
+        )}
         <DropdownButton
           label={workType === 'assigned' ? '배정근무' : '근무 불가'}
           onPress={toggleDropdown('workType')}
@@ -69,7 +73,7 @@ export default function ScheduleFilterBar({
         )}
       </ScrollView>
 
-      {openDropdown === 'view' && (
+      {openDropdown === 'view' && showViewFilter && (
         <View style={[styles.dropdown, styles.leftDropdown]}>
           <DropdownItem
             label="내근무"
