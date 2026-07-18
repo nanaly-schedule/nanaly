@@ -2,7 +2,7 @@
   "expo": {
     "name": "나날이",
     "slug": "nanaly",
-    "version": "1.0.1",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./src/shared/assets/app_icon.png",
     "scheme": "nanaly",
@@ -12,7 +12,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.nanaly.app",
       "usesAppleSignIn": true,
-      "associatedDomains": ["applinks:www.nanaly-schedule.com"]
+      "associatedDomains": ["applinks:www.nanaly-schedule.com"],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -87,7 +90,7 @@
         "@sentry/react-native/expo",
         {
           "url": "https://sentry.io/",
-          "project": "react-native",
+          "project": "nanaly-front",
           "organization": "nanaly"
         }
       ]
