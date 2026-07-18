@@ -9,6 +9,8 @@ import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 
+const TITLE_MAX_LENGTH = 25;
+
 export default function FeedbackPage() {
   const [title, setTitle] = useState('');
   const [feedback, setFeedback] = useState('');
@@ -21,7 +23,7 @@ export default function FeedbackPage() {
   };
 
   const handleChangeTitle = (t: string) => {
-    setTitle(t);
+    setTitle(t.replace(/[\r\n]/g, '').slice(0, TITLE_MAX_LENGTH));
   };
 
   const handlePressBack = () => {
@@ -70,9 +72,14 @@ export default function FeedbackPage() {
           variant=""
           value={title}
           onChangeText={handleChangeTitle}
-          multiline
-          placeholder="제목을 작성해주세요"
-          style={styles.titleInput}
+          maxLength={TITLE_MAX_LENGTH}
+          returnKeyType="done"
+          blurOnSubmit
+          placeholder="제목을 작성해주세요(25글자)"
+          style={[
+            styles.titleInput,
+            title.length === 0 && styles.titlePlaceholderInput,
+          ]}
         />
         <Input
           variant=""
@@ -143,7 +150,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     letterSpacing: 0,
-    textAlignVertical: 'top',
+    textAlignVertical: 'center',
     marginTop: spacingSpaicng14,
+  },
+  titlePlaceholderInput: {
+    fontWeight: '400',
   },
 });

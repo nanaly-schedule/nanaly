@@ -15,6 +15,9 @@ export default function NotificationPage() {
   const [notifications, setNotifications] = useState<NotificationResponse[]>(
     [],
   );
+  const [pendingNotificationId, setPendingNotificationId] = useState<
+    string | null
+  >(null);
   const storeIdRef = useRef(storeId);
 
   useEffect(() => {
@@ -46,6 +49,12 @@ export default function NotificationPage() {
 
   const handleReadNotification =
     (notification: NotificationResponse) => async () => {
+      if (pendingNotificationId === notification.id) {
+        return;
+      }
+
+      setPendingNotificationId(notification.id);
+
       try {
         await navigateFromNotification(route, {
           notificationId: notification.id,
@@ -53,7 +62,12 @@ export default function NotificationPage() {
           targetId: notification.targetId,
           type: notification.type,
         });
-      } catch {}
+      } catch {
+      } finally {
+        setPendingNotificationId((currentId) =>
+          currentId === notification.id ? null : currentId,
+        );
+      }
     };
   return (
     <PageLayout showHeader showBackButton title="알림">
