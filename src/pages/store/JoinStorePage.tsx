@@ -25,19 +25,11 @@ import SectionHeader from '@/src/widgets/store/SectionHeader';
 
 export default function JoinStorePage() {
   const router = useRouter();
-  const clearUser = useUser((state) => state.clearUser);
   const { width } = useWindowDimensions();
   const [isInviteLinkBottomSheetVisible, setIsInviteLinkBottomSheetVisible] =
     useState(false);
-  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const inviteImageWidth = Math.max(width - spacingSpacing16 * 2, 343);
-
-  const handleLogout = async () => {
-    await clearUser();
-    setIsLogoutModalVisible(false);
-    router.replace('/auth');
-  };
 
   return (
     <PageLayout title="매장 참여하기">
@@ -84,26 +76,6 @@ export default function JoinStorePage() {
 
           router.push(`/invite/${inviteId}`);
         }}
-      />
-      <Pressable
-        onPress={() => setIsLogoutModalVisible(true)}
-        style={{ marginTop: 'auto' }}
-      >
-        <NText
-          variant="sb14"
-          style={{
-            color: typoColorRed,
-            marginBottom: spacingSpacing12 + insets.bottom,
-            textAlign: 'center',
-          }}
-        >
-          로그 아웃
-        </NText>
-      </Pressable>
-      <LogoutModal
-        visible={isLogoutModalVisible}
-        onClose={() => setIsLogoutModalVisible(false)}
-        onConfirm={handleLogout}
       />
     </PageLayout>
   );
