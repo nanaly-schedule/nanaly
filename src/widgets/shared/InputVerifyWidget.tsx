@@ -23,7 +23,13 @@ export default function InputVerifyWidget({
   disabled = false,
 }: InputVerifyWidgetProps) {
   const [isShowPassword, setIsShowPassword] = useState(false);
-
+  const [isShowIcon, setIsShowIcon] = useState(false);
+  const handleFocus = () => {
+    setIsShowIcon(true);
+  };
+  const handleBlur = () => {
+    setIsShowIcon(false);
+  };
   return (
     <View style={styles.inputContainer}>
       <Input
@@ -32,22 +38,26 @@ export default function InputVerifyWidget({
         secureTextEntry={!isShowPassword}
         value={value}
         onChangeText={onChangeText}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
-      <View style={styles.iconContainer}>
-        <Pressable disabled={disabled} onPress={() => onChangeText('')}>
-          <XIcon size={24} color={typoColorPrimary} />
-        </Pressable>
-        <Pressable
-          disabled={disabled}
-          onPress={() => setIsShowPassword((prev) => !prev)}
-        >
-          {isShowPassword ? (
-            <EyeOnIcon size={24} color={typoColorPrimary} />
-          ) : (
-            <EyeOffIcon size={24} color={typoColorPrimary} />
-          )}
-        </Pressable>
-      </View>
+      {isShowIcon && (
+        <View style={styles.iconContainer}>
+          <Pressable disabled={disabled} onPress={() => onChangeText('')}>
+            <XIcon size={24} color={typoColorPrimary} />
+          </Pressable>
+          <Pressable
+            disabled={disabled}
+            onPress={() => setIsShowPassword((prev) => !prev)}
+          >
+            {isShowPassword ? (
+              <EyeOnIcon size={24} color={typoColorPrimary} />
+            ) : (
+              <EyeOffIcon size={24} color={typoColorPrimary} />
+            )}
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
