@@ -279,7 +279,7 @@ export default function NoticeDetailPage() {
         onClose={() => setDeleteModalVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>공지를 삭제할까요?</BaseModal.Title>
+          <BaseModal.Text>공지를 삭제할까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button

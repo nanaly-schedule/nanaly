@@ -18,10 +18,7 @@ import {
   updateNotice,
 } from '@/src/features/notice/api/notice';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
-import {
-  buttonColorCta,
-  typoColorPrimary,
-} from '@/src/init/styles/tokens';
+import { buttonColorCta, typoColorPrimary } from '@/src/init/styles/tokens';
 import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
@@ -235,10 +232,7 @@ export default function NoticeCreatePage() {
 
               <View style={styles.segment}>
                 <Pressable
-                  style={[
-                    styles.segmentButton,
-                    isPublic && styles.selected,
-                  ]}
+                  style={[styles.segmentButton, isPublic && styles.selected]}
                   disabled={submitting}
                   onPress={() => setIsPublic(true)}
                 >
@@ -246,10 +240,7 @@ export default function NoticeCreatePage() {
                 </Pressable>
 
                 <Pressable
-                  style={[
-                    styles.segmentButton,
-                    !isPublic && styles.selected,
-                  ]}
+                  style={[styles.segmentButton, !isPublic && styles.selected]}
                   disabled={submitting}
                   onPress={() => setIsPublic(false)}
                 >
@@ -272,16 +263,14 @@ export default function NoticeCreatePage() {
         onClose={() => setExitModalVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>
-            뒤로 가면 작성 중인 내용이 사라져요
-          </BaseModal.Title>
+          <BaseModal.Text>뒤로 가면 작성 중인 내용이 사라져요</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={() => setExitModalVisible(false)}
           >
-            취소
+            머무르기
           </BaseModal.Button>
           <BaseModal.Button
             onPress={() => {
@@ -289,7 +278,7 @@ export default function NoticeCreatePage() {
               router.back();
             }}
           >
-            뒤로가기
+            나가기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>

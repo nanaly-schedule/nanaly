@@ -570,11 +570,11 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setSaveConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>
+          <BaseModal.Text>
             {isCreateMode
               ? '일하는 날을 추가할까요?'
               : '일하는 날을 수정할까요?'}
-          </BaseModal.Title>
+          </BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -601,7 +601,7 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setExitConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>저장하지 않고 나갈까요?</BaseModal.Title>
+          <BaseModal.Text>저장하지 않고 나갈까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -625,7 +625,7 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setMissingRequiredVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>입력되지 않은 항목이 있어요</BaseModal.Title>
+          <BaseModal.Text>입력되지 않은 항목이 있어요</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -658,7 +658,7 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setDeleteConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>일하는 날을 삭제할까요?</BaseModal.Title>
+          <BaseModal.Text>일하는 날을 삭제할까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button

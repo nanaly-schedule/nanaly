@@ -14,7 +14,7 @@ export default function DeleteMemberModal({
   return (
     <BaseModal visible={visible} onClose={onClose}>
       <BaseModal.Content>
-        <BaseModal.Title>근무자를 삭제할까요?</BaseModal.Title>
+        <BaseModal.Text>근무자를 삭제할까요?</BaseModal.Text>
       </BaseModal.Content>
       <BaseModal.Actions>
         <BaseModal.Button variant="secondary" onPress={onClose}>

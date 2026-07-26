@@ -3,9 +3,7 @@ import { useEffect, useState } from 'react';
 import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  canEditStoreInfo,
-} from '@/src/features/permission/lib/access';
+import { canEditStoreInfo } from '@/src/features/permission/lib/access';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import { deleteStore, getStore } from '@/src/features/store/api/store';
 import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
@@ -81,7 +79,7 @@ export default function StoreInfoPage() {
   const insets = useSafeAreaInsets();
 
   return (
-    <PageLayout showBackButton showHeader title="매장정보">
+    <PageLayout showBackButton showHeader title="매장 정보">
       <StoreInfoWidget
         storeName={storeName}
         storeNumber={storeNumber ?? ''}
@@ -111,14 +109,14 @@ export default function StoreInfoPage() {
         onClose={() => setDeleteModalStep('none')}
       >
         <BaseModal.Content>
-          <BaseModal.Title>매장을 삭제할까요?</BaseModal.Title>
+          <BaseModal.Text>매장을 삭제할까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={() => setDeleteModalStep('none')}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={() => setDeleteModalStep('second')}>
             삭제하기
@@ -138,7 +136,7 @@ export default function StoreInfoPage() {
             variant="secondary"
             onPress={() => setDeleteModalStep('none')}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={handleDeleteStore}>
             삭제하기

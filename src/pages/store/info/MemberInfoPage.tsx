@@ -5,9 +5,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EditableMemberRole, MemberRole } from '@/src/entities/member/member';
-import {
-  canEditMemberInfo,
-} from '@/src/features/permission/lib/access';
+import { canEditMemberInfo } from '@/src/features/permission/lib/access';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import {
   deleteMember,
@@ -282,7 +280,7 @@ export default function MemberInfoPage() {
             onPress={() => setIsDeleteMemberModalVisible(true)}
             style={{
               marginTop: 'auto',
-              marginBottom: spacingSpacing12 + insets.bottom,
+              marginBottom: spacingSpacing12,
               paddingTop: spacingSpacing12,
             }}
           >
@@ -318,7 +316,7 @@ export default function MemberInfoPage() {
         onClose={handleCloseConfirmModal}
       >
         <BaseModal.Content>
-          <BaseModal.Title>변경사항을 저장할까요?</BaseModal.Title>
+          <BaseModal.Text>변경사항을 저장할까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -365,14 +363,14 @@ export default function MemberInfoPage() {
         onClose={() => setIsBackWithoutSave(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>저장하지 않고 나갈가요?</BaseModal.Title>
+          <BaseModal.Text>저장하지 않고 나갈가요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={() => setIsBackWithoutSave(false)}
           >
-            취소
+            머무르기
           </BaseModal.Button>
           <BaseModal.Button onPress={handlePressBackButton}>
             나가기
