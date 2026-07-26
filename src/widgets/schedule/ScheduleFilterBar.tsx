@@ -76,7 +76,7 @@ export default function ScheduleFilterBar({
       {openDropdown === 'view' && showViewFilter && (
         <View style={[styles.dropdown, styles.leftDropdown]}>
           <DropdownItem
-            label="내근무"
+            label="나만보기"
             onPress={() => {
               onChangeViewType('mine');
               setOpenDropdown(null);
@@ -84,7 +84,7 @@ export default function ScheduleFilterBar({
           />
           {canSelectAllView && (
             <DropdownItem
-              label="전체근무"
+              label="전체보기"
               onPress={() => {
                 onChangeViewType('all');
                 setOpenDropdown(null);

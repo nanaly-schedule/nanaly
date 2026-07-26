@@ -121,7 +121,7 @@ export default function ScheduleFormBottomSheet({
   const [saveFailedVisible, setSaveFailedVisible] = useState(false);
   const [failedTitle, setFailedTitle] = useState('저장에 실패했어요');
   const [saveErrorMessage, setSaveErrorMessage] =
-    useState('근무 등록에 실패했어요');
+    useState('일하는 날 등록에 실패했어요');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [members, setMembers] = useState<ScheduleMember[]>(MOCK_MEMBERS);
@@ -224,7 +224,9 @@ export default function ScheduleFormBottomSheet({
     } catch (error) {
       setSaveConfirmVisible(false);
       setFailedTitle('저장에 실패했어요');
-      setSaveErrorMessage(getApiErrorMessage(error, '근무 등록에 실패했어요'));
+      setSaveErrorMessage(
+        getApiErrorMessage(error, '일하는 날 등록에 실패했어요'),
+      );
       setSaveFailedVisible(true);
     } finally {
       setSaving(false);
@@ -265,7 +267,9 @@ export default function ScheduleFormBottomSheet({
     } catch (error) {
       setSaveConfirmVisible(false);
       setFailedTitle('수정에 실패했어요');
-      setSaveErrorMessage(getApiErrorMessage(error, '근무 수정에 실패했어요'));
+      setSaveErrorMessage(
+        getApiErrorMessage(error, '일하는 날 수정에 실패했어요'),
+      );
       setSaveFailedVisible(true);
     } finally {
       setSaving(false);
@@ -287,7 +291,9 @@ export default function ScheduleFormBottomSheet({
     } catch (error) {
       setDeleteConfirmVisible(false);
       setFailedTitle('삭제에 실패했어요');
-      setSaveErrorMessage(getApiErrorMessage(error, '근무 삭제에 실패했어요'));
+      setSaveErrorMessage(
+        getApiErrorMessage(error, '일하는 날 삭제에 실패했어요'),
+      );
       setSaveFailedVisible(true);
     } finally {
       setDeleting(false);
@@ -565,7 +571,9 @@ export default function ScheduleFormBottomSheet({
       >
         <BaseModal.Content>
           <BaseModal.Title>
-            {isCreateMode ? '근무를 추가할까요?' : '근무를 수정할까요?'}
+            {isCreateMode
+              ? '일하는 날을 추가할까요?'
+              : '일하는 날을 수정할까요?'}
           </BaseModal.Title>
         </BaseModal.Content>
         <BaseModal.Actions>
@@ -650,7 +658,7 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setDeleteConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>근무를 삭제할까요?</BaseModal.Title>
+          <BaseModal.Title>일하는 날을 삭제할까요?</BaseModal.Title>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
