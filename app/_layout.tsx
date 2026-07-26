@@ -10,8 +10,10 @@ import {
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef } from 'react';
 
+import { getAccessToken } from '@/src/features/auth/lib/storage';
 import { emitNotificationReceived } from '@/src/features/push/lib/notificationEvents';
 import { preparePushNotificationsAsync } from '@/src/features/push/lib/pushNotification';
+import { getMyStore } from '@/src/features/store/api/store';
 import { getUserProfile } from '@/src/features/user/api/profile';
 import { navigateFromNotification } from '@/src/features/user/lib/notificationNavigation';
 import useUser from '@/src/features/user/lib/useUser';
@@ -65,14 +67,18 @@ Sentry.init({
     Sentry.feedbackIntegration(),
   ],
   beforeSend(event) {
-    event.contexts = scrubSensitiveData(event.contexts) as typeof event.contexts;
+    event.contexts = scrubSensitiveData(
+      event.contexts,
+    ) as typeof event.contexts;
     event.extra = scrubSensitiveData(event.extra) as typeof event.extra;
 
     if (event.request) {
-      event.request.headers = scrubSensitiveData(event.request.headers) as
-        typeof event.request.headers;
-      event.request.data = scrubSensitiveData(event.request.data) as
-        typeof event.request.data;
+      event.request.headers = scrubSensitiveData(
+        event.request.headers,
+      ) as typeof event.request.headers;
+      event.request.data = scrubSensitiveData(
+        event.request.data,
+      ) as typeof event.request.data;
     }
 
     return event;
@@ -118,6 +124,12 @@ export default Sentry.wrap(function Layout() {
     const fetchUser = async () => {
       let shouldHideSplash = true;
       try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) {
+          shouldHideSplash = false;
+          router.replace('/auth');
+          return;
+        }
         const { data } = await getUserProfile();
         const { name, email, birthDate, isTempPassword } = data;
         setUser({
@@ -130,7 +142,38 @@ export default Sentry.wrap(function Layout() {
           email,
           username: name,
         });
-        await preparePushNotificationsAsync();
+
+        try {
+          await preparePushNotificationsAsync();
+        } catch (error) {
+          Sentry.captureException(error, {
+            tags: {
+              area: 'bootstrap',
+              action: 'preparePushNotifications',
+            },
+          });
+        }
+
+        if (pathname === '/') {
+          const { data: myStores } = await getMyStore();
+
+          shouldHideSplash = false;
+          if (myStores[0]) {
+            const [{ permissions, storeId, role, storeName }] = myStores;
+            router.replace({
+              pathname: '/[storeId]',
+              params: {
+                storeId,
+                role,
+                permissions,
+                displayStoreName: storeName,
+              },
+            });
+          } else {
+            router.replace('/store');
+          }
+          return;
+        }
       } catch (error) {
         shouldHideSplash = false;
         Sentry.captureException(error, {
@@ -140,7 +183,6 @@ export default Sentry.wrap(function Layout() {
           },
         });
         await clearUser();
-        router.replace('/auth');
       } finally {
         if (shouldHideSplash) {
           void SplashScreen.hideAsync();
@@ -149,7 +191,7 @@ export default Sentry.wrap(function Layout() {
     };
 
     fetchUser();
-  }, [isAuthRoute, router]);
+  }, [clearUser, isAuthRoute, pathname, router, setUser]);
 
   useEffect(() => {
     const notificationSubscription =
