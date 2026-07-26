@@ -57,12 +57,12 @@ export default function ScheduleFilterBar({
       >
         {showViewFilter && (
           <DropdownButton
-            label={viewType === 'mine' ? '내근무' : '전체근무'}
+            label={viewType === 'mine' ? '나만보기' : '전체보기'}
             onPress={toggleDropdown('view')}
           />
         )}
         <DropdownButton
-          label={workType === 'assigned' ? '배정근무' : '근무 불가'}
+          label={workType === 'assigned' ? '일하는 날' : '쉬는 날'}
           onPress={toggleDropdown('workType')}
         />
         {showPositionFilter && (
@@ -102,14 +102,14 @@ export default function ScheduleFilterBar({
           ]}
         >
           <DropdownItem
-            label="배정근무"
+            label="일하는 날"
             onPress={() => {
               onChangeWorkType('assigned');
               setOpenDropdown(null);
             }}
           />
           <DropdownItem
-            label="근무 불가"
+            label="쉬는 날"
             onPress={() => {
               onChangeWorkType('unavailable');
               setOpenDropdown(null);
