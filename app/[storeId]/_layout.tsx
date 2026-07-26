@@ -6,6 +6,10 @@ import { MemberRole } from '@/src/entities/member/member';
 import { UserStorePermissions } from '@/src/entities/user/user';
 import { getMyStore } from '@/src/features/store/api/store';
 import useUser from '@/src/features/user/lib/useUser';
+import {
+  typoColorPrimary,
+  typoColorSub1,
+} from '@/src/init/styles/tokens';
 
 const TAB_ICONS = {
   home: {
@@ -24,15 +28,17 @@ const TAB_ICONS = {
 
 function TabIcon({
   focused,
+  color,
   icon,
 }: {
   focused: boolean;
+  color: string;
   icon: { on: ImageSourcePropType; off: ImageSourcePropType };
 }) {
   return (
     <Image
       source={focused ? icon.on : icon.off}
-      style={{ width: 24, height: 24 }}
+      style={{ width: 24, height: 24, tintColor: color }}
       resizeMode="contain"
     />
   );
@@ -134,9 +140,12 @@ export default function Layout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#000000',
-        tabBarInactiveTintColor: '#000000',
+        tabBarActiveTintColor: typoColorPrimary,
+        tabBarInactiveTintColor: typoColorSub1,
         tabBarLabelPosition: 'below-icon',
+        tabBarIconStyle: {
+          marginBottom: 4,
+        },
       }}
     >
       <Tabs.Screen name="index" options={{ href: null }} />
@@ -144,8 +153,8 @@ export default function Layout() {
         name="home"
         options={{
           title: '홈',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={TAB_ICONS.home} />
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon focused={focused} color={color} icon={TAB_ICONS.home} />
           ),
         }}
       />
@@ -153,8 +162,12 @@ export default function Layout() {
         name="schedule"
         options={{
           title: '스케줄',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={TAB_ICONS.schedule} />
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon
+              focused={focused}
+              color={color}
+              icon={TAB_ICONS.schedule}
+            />
           ),
           href: storeId
             ? {
@@ -168,8 +181,8 @@ export default function Layout() {
         name="my"
         options={{
           title: '마이',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={TAB_ICONS.my} />
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon focused={focused} color={color} icon={TAB_ICONS.my} />
           ),
         }}
       />

@@ -36,7 +36,7 @@ export default function Header({
             }
           }}
         >
-          <LeftArrowIcon size={20} color={typoColorPrimary} />
+          <LeftArrowIcon size={24} color={typoColorPrimary} />
         </Pressable>
       )}
       <NText variant="b16" style={styles.text}>
@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
   btn: {
     position: 'absolute',
     marginVertical: 'auto',
-    top: 12,
-    bottom: 12,
+    top: 6,
+    bottom: 6,
     paddingVertical: 6,
     paddingHorizontal: 9,
   },

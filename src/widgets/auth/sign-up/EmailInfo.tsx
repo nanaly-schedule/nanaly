@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     borderRadius: radiusRadius8,
     backgroundColor: backgroundColorWhite,
     paddingHorizontal: spacingSpacing8,
-    gap: spacingSpacing8,
     flexDirection: 'row',
     alignItems: 'center',
     height: 46,
@@ -60,6 +59,7 @@ const styles = StyleSheet.create({
     height: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: spacingSpacing8,
   },
   googleIcon: {
     backgroundColor: backgroundColorWhite,

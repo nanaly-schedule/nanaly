@@ -5,6 +5,7 @@ import {
   brandColorPrimary,
   radiusRadius12,
   spacingSpacing8,
+  spacingSpacing10,
   spacingSpacing12,
   typoColorPrimary,
   typoColorSub1,
@@ -22,10 +23,13 @@ export default function TodayWorker({ todayWorker }: TodayWorkerProps) {
         오늘 근무자
       </NText>
       <View style={styles.row}>
-        <NText variant="h1" style={{ color: brandColorPrimary }}>
+        <NText
+          variant="h1"
+          style={{ color: brandColorPrimary, fontSize: 24, fontWeight: '700' }}
+        >
           {todayWorker}
         </NText>
-        <NText variant="m12" style={{ color: typoColorPrimary }}>
+        <NText variant="m16" style={{ color: typoColorPrimary }}>
           명
         </NText>
       </View>
@@ -36,7 +40,7 @@ export default function TodayWorker({ todayWorker }: TodayWorkerProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: spacingSpacing8,
+    paddingHorizontal: spacingSpacing10,
     gap: spacingSpacing12,
     borderRadius: radiusRadius12,
     justifyContent: 'center',
@@ -45,7 +49,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacingSpacing8,
+    alignItems: 'flex-end',
+    gap: 4,
   },
 });

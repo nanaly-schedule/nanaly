@@ -20,6 +20,7 @@ const Input = forwardRef<TextInput, InputProps>(function Input(
     variant,
     editable = true,
     focusable = true,
+    placeholderTextColor = typoColorPlaceholder,
     selectTextOnFocus,
     style,
     ...props
@@ -39,12 +40,18 @@ const Input = forwardRef<TextInput, InputProps>(function Input(
           : variant === 'error'
             ? styles.error
             : styles.input,
+        {
+          fontFamily: 'Pretendard',
+          fontWeight: '500',
+          fontSize: 14,
+          lineHeight: 16,
+        },
         style,
       ]}
       editable={!isDisabled && editable}
       focusable={!isDisabled && focusable}
       selectTextOnFocus={isDisabled ? false : selectTextOnFocus}
-      placeholderTextColor={typoColorPlaceholder}
+      placeholderTextColor={placeholderTextColor}
     />
   );
 });

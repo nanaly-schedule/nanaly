@@ -9,6 +9,7 @@ import {
   backgroundColorWhite,
   radiusRadius12,
   spacingSpacing8,
+  spacingSpacing10,
   spacingSpacing30,
   spacingSpaicng14,
   typoColorPrimary,
@@ -92,7 +93,9 @@ export default function AlarmSettingPage() {
 
   return (
     <PageLayout title="알림 설정">
-      <View style={[styles.card, { marginTop: spacingSpaicng14 }]}>
+      <View
+        style={[styles.container, styles.card, { marginTop: spacingSpaicng14 }]}
+      >
         <View style={styles.row}>
           <NText variant="m14" style={styles.label}>
             알림
@@ -103,7 +106,7 @@ export default function AlarmSettingPage() {
           />
         </View>
       </View>
-      <View style={[styles.card, { marginTop: spacingSpacing30 }]}>
+      <View style={[styles.container, { marginTop: spacingSpacing30 }]}>
         <View style={styles.card}>
           <View style={styles.row}>
             <NText variant="m14" style={styles.label}>
@@ -145,10 +148,12 @@ export default function AlarmSettingPage() {
   );
 }
 const styles = StyleSheet.create({
-  card: {
+  container: {
     backgroundColor: backgroundColorWhite,
     borderRadius: radiusRadius12,
-    paddingHorizontal: spacingSpacing8,
+  },
+  card: {
+    paddingHorizontal: spacingSpacing10,
   },
   row: {
     height: 52,

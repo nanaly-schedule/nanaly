@@ -1,5 +1,7 @@
-import { Pressable, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Pressable } from 'react-native';
+
+import RightArrowIcon from '@/src/shared/assets/RightArrowIcon';
+import NText from '@/src/shared/ui/NText';
 
 type NoticeHeaderProps = {
   onPress?: () => void;
@@ -16,16 +18,9 @@ export default function NoticeHeader({ onPress }: NoticeHeaderProps) {
         marginBottom: 12,
       }}
     >
-      <Text
-        style={{
-          fontSize: 20,
-          fontWeight: '700',
-        }}
-      >
-        공지사항
-      </Text>
+      <NText variant="b14">공지사항</NText>
 
-      <Ionicons name='chevron-forward' size={20} color='#666' />
+      <RightArrowIcon size={24} />
     </Pressable>
   );
 }
