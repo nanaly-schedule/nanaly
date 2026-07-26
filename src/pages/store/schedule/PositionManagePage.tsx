@@ -310,9 +310,9 @@ export default function PositionManagePage() {
         closeOnBackdropPress={!deleting}
       >
         <BaseModal.Content>
-          <BaseModal.Title>
+          <BaseModal.Text>
             {deleteTarget?.name} 포지션을 삭제할까요?
-          </BaseModal.Title>
+          </BaseModal.Text>
           {errorMessage && (
             <NText variant="r12" style={styles.error}>
               {errorMessage}

@@ -11,12 +11,17 @@ import {
   basicColorGrey200,
   radiusRadius8,
   spacingSpacing8,
+  spacingSpacing10,
   spacingSpacing12,
   spacingSpacing16,
   spacingSpacing30,
   spacingSpaicng14,
+  typoColorPrimary,
+  typoColorSecondary,
+  typoColorSub1,
 } from '@/src/init/styles/tokens';
 import SearchIcon from '@/src/shared/assets/SearchIcon';
+import XIcon from '@/src/shared/assets/XIcon';
 import Input from '@/src/shared/ui/Input';
 import NText from '@/src/shared/ui/NText';
 
@@ -44,6 +49,7 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
 
   const [worker, setWorker] = useState('');
   const [debouncedWorker, setDebouncedWorker] = useState('');
+  const [isInputFocused, setIsInputFocused] = useState(false);
   useEffect(() => {
     if (!storeId) {
       return;
@@ -93,7 +99,14 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
           placeholder="근무자 이름을 검색해 주세요"
           value={worker}
           onChangeText={handleChangeTextWorker}
+          onFocus={() => setIsInputFocused(true)}
+          onBlur={() => setIsInputFocused(false)}
         />
+        {isInputFocused && (
+          <Pressable onPress={() => setWorker('')}>
+            <XIcon size={24} color={typoColorPrimary} />
+          </Pressable>
+        )}
       </View>
 
       <ScrollView
@@ -125,13 +138,21 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
                 }
               >
                 <NText variant="sb14">{item.name}</NText>
-                <NText variant="r14">·</NText>
-                <NText variant="r14">{getMemberRoleLabel(item.role)}</NText>
+                <NText variant="r14" style={{ color: typoColorSub1 }}>
+                  ·
+                </NText>
+                <NText variant="r14" style={{ color: typoColorSecondary }}>
+                  {getMemberRoleLabel(item.role)}
+                </NText>
                 <View style={{ margin: 'auto' }} />
-                <NText variant="r14">{item.joinDate}</NText>
+                <NText variant="r14" style={{ color: typoColorSecondary }}>
+                  {item.joinDate}
+                </NText>
                 {item.leaveDate && <NText variant="r14">-</NText>}
                 {item.leaveDate && (
-                  <NText variant="r14">{item.leaveDate}</NText>
+                  <NText variant="r14" style={{ color: typoColorSecondary }}>
+                    {item.leaveDate}
+                  </NText>
                 )}
               </Pressable>
             );
@@ -171,7 +192,7 @@ const styles = StyleSheet.create({
     marginTop: spacingSpaicng14,
     marginBottom: spacingSpacing16,
     borderRadius: radiusRadius8,
-    paddingHorizontal: spacingSpacing8,
+    paddingHorizontal: spacingSpacing10,
     backgroundColor: backgroundColorWhite,
     alignItems: 'center',
   },
@@ -184,7 +205,7 @@ const styles = StyleSheet.create({
     // marginTop: spacingSpacing16,
     backgroundColor: backgroundColorWhite,
     borderRadius: spacingSpacing12,
-    paddingHorizontal: spacingSpacing8,
+    paddingHorizontal: spacingSpacing10,
   },
   row: {
     flexDirection: 'row',

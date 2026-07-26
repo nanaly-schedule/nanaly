@@ -7,9 +7,9 @@ export default function RightArrowIcon({
   color = '#333333',
 }: TypeIconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 7 12" fill="none">
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
-        d="M0.625 0.625L5.625 5.625L0.625 10.625"
+        d="M10 7L15 12L10 17"
         stroke={color}
         strokeWidth={1.25}
         strokeLinecap="round"

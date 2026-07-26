@@ -7,6 +7,7 @@ import {
   backgroundColorWhite,
   radiusRadius12,
   spacingSpacing8,
+  spacingSpacing10,
   typoColorPrimary,
   typoColorSub1,
 } from '@/src/init/styles/tokens';
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     borderRadius: radiusRadius12,
-    paddingHorizontal: spacingSpacing8,
+    paddingHorizontal: spacingSpacing10,
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: backgroundColorWhite,

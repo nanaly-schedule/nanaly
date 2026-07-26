@@ -4,10 +4,12 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+
+import { typoColorPrimary, typoColorSub1 } from '@/src/init/styles/tokens';
+
 import CheckedIcon from '../assets/CheckedIcon';
 import UncheckedIcon from '../assets/UncheckedIcon';
 import NText from './NText';
-import { typoColorPrimary, typoColorSub1 } from '@/src/init/styles/tokens';
 
 interface CheckBoxProps {
   label?: string;
@@ -18,7 +20,7 @@ interface CheckBoxProps {
 export default function CheckBox({ label, isActive, onPress }: CheckBoxProps) {
   return (
     <Pressable style={styles.container} onPress={onPress}>
-      {isActive ? <CheckedIcon size={24} /> : <UncheckedIcon size={24} />}
+      {isActive ? <CheckedIcon size={16} /> : <UncheckedIcon size={16} />}
       {label && (
         <NText
           variant="m14"

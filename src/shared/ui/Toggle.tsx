@@ -13,9 +13,6 @@ import {
   basicColorBlue600,
   basicColorGrey200,
   basicColorGrey300,
-  shadowShadowSmBlur,
-  shadowShadowSmColor,
-  shadowShadowSmY,
 } from '@/src/init/styles/tokens';
 
 interface ToggleProps extends Omit<
@@ -101,15 +98,5 @@ const styles = StyleSheet.create({
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
     backgroundColor: backgroundColorWhite,
-    // shadowColor: shadowShadowSmColor,
-    // shadowOffset: {
-    //   width: 0,
-    //   height: shadowShadowSmY / 2,
-    // },
-    // shadowOpacity: 0.16,
-    // shadowRadius: shadowShadowSmBlur / 4,
-    // elevation: 2,
-    borderWidth: 1,
-    borderColor: basicColorGrey300,
   },
 });

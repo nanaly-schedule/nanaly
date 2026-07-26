@@ -199,7 +199,12 @@ function getMappedFieldReport(item: unknown, inheritedDate?: string | null) {
       inheritedDate ??
       getStringField(item, ['date', 'workDate', 'scheduleDate']),
     memberId:
-      getStringField(item, ['memberId', 'storeMemberId', 'workerId', 'staffId']) ??
+      getStringField(item, [
+        'memberId',
+        'storeMemberId',
+        'workerId',
+        'staffId',
+      ]) ??
       getStringField(member, ['memberId', 'id', 'storeMemberId', 'staffId']),
     memberName:
       getStringField(item, ['memberName', 'workerName', 'staffName']) ??
@@ -218,7 +223,10 @@ function normalizeDate(value?: string | null) {
   return value.slice(0, 10);
 }
 
-function getScheduleDate(item: Record<string, unknown>, inheritedDate?: string | null) {
+function getScheduleDate(
+  item: Record<string, unknown>,
+  inheritedDate?: string | null,
+) {
   return normalizeDate(
     inheritedDate ?? getStringField(item, ['date', 'workDate', 'scheduleDate']),
   );
@@ -233,7 +241,12 @@ function getScheduleMember(item: Record<string, unknown>) {
 
   return {
     memberId:
-      getStringField(item, ['memberId', 'storeMemberId', 'workerId', 'staffId']) ??
+      getStringField(item, [
+        'memberId',
+        'storeMemberId',
+        'workerId',
+        'staffId',
+      ]) ??
       getStringField(member, ['memberId', 'id', 'storeMemberId', 'staffId']),
     memberName:
       getStringField(item, ['memberName', 'workerName', 'staffName']) ??
@@ -305,8 +318,9 @@ function mapMonthlyScheduleEntry(
   }
 
   const date = getScheduleDate(entry.item, entry.date);
-  const { memberId, memberName: mappedMemberName } =
-    getScheduleMember(entry.item);
+  const { memberId, memberName: mappedMemberName } = getScheduleMember(
+    entry.item,
+  );
   const safeFallbackMemberName = fallbackMemberName?.trim() || '나';
   const memberName =
     mappedMemberName ?? (markAsMine ? safeFallbackMemberName : null);
@@ -315,14 +329,19 @@ function mapMonthlyScheduleEntry(
     'start',
     'workStartTime',
   ]);
-  const endTime = getScheduleTime(entry.item, ['endTime', 'end', 'workEndTime']);
+  const endTime = getScheduleTime(entry.item, [
+    'endTime',
+    'end',
+    'workEndTime',
+  ]);
 
   if (!date || !memberName) {
     return null;
   }
 
-  const { positionId, positionName, positionColor } =
-    getSchedulePosition(entry.item);
+  const { positionId, positionName, positionColor } = getSchedulePosition(
+    entry.item,
+  );
   const safeMemberId = memberId ?? `${date}-${memberName}`;
   const safeStartTime = startTime ?? '00:00';
   const safeEndTime = endTime ?? '00:00';
@@ -355,13 +374,8 @@ function mapScheduleEntries(params: {
   positions: SchedulePosition[];
   fallbackMemberName?: string;
 }) {
-  const {
-    data,
-    fallbackDate,
-    markAsMine,
-    positions,
-    fallbackMemberName,
-  } = params;
+  const { data, fallbackDate, markAsMine, positions, fallbackMemberName } =
+    params;
   const entries = extractScheduleEntries(data).map((entry) => ({
     ...entry,
     date: entry.date ?? fallbackDate,
@@ -483,8 +497,7 @@ function attachPositionIdFromCatalog(
       (position) =>
         position.name === schedule.positionName &&
         (!schedule.positionColor || position.color === schedule.positionColor),
-    ) ??
-    positions.find((position) => position.name === schedule.positionName);
+    ) ?? positions.find((position) => position.name === schedule.positionName);
 
   if (!matchedPosition) {
     return schedule;
@@ -510,7 +523,8 @@ function matchesPositionFilter(
 
   return (
     schedule.positionName === selectedPosition.name &&
-    (!schedule.positionColor || schedule.positionColor === selectedPosition.color)
+    (!schedule.positionColor ||
+      schedule.positionColor === selectedPosition.color)
   );
 }
 
@@ -567,8 +581,9 @@ export default function SchedulePage() {
   const [formVisible, setFormVisible] = useState(false);
   const [unavailableFormVisible, setUnavailableFormVisible] = useState(false);
   const [dateDetailVisible, setDateDetailVisible] = useState(false);
-  const [selectedSchedule, setSelectedSchedule] =
-    useState<ScheduleItem | null>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(
+    null,
+  );
   const [assignedSchedules, setAssignedSchedules] = useState<ScheduleItem[]>(
     [],
   );
@@ -822,11 +837,7 @@ export default function SchedulePage() {
       return;
     }
 
-    if (
-      !storeId ||
-      !isFocused ||
-      !assignedSchedulesLoaded
-    ) {
+    if (!storeId || !isFocused || !assignedSchedulesLoaded) {
       return;
     }
 
@@ -958,9 +969,7 @@ export default function SchedulePage() {
 
   const filteredSchedules = useMemo(() => {
     const sourceSchedules =
-      workType === 'unavailable'
-        ? unavailableSchedules
-        : assignedSchedules;
+      workType === 'unavailable' ? unavailableSchedules : assignedSchedules;
     const selectedPosition = positions.find(
       (position) => position.id === positionId,
     );
@@ -1067,10 +1076,7 @@ export default function SchedulePage() {
 
   if (!access.loaded) {
     return (
-      <PageLayout
-        showHeader={false}
-        style={styles.page}
-      >
+      <PageLayout showHeader={false} style={styles.page}>
         <View style={styles.loading}>
           <NText variant="r14" style={styles.loadingText}>
             권한 정보를 불러오는 중이에요
@@ -1093,10 +1099,7 @@ export default function SchedulePage() {
     : 100;
 
   return (
-    <PageLayout
-      showHeader={false}
-      style={styles.page}
-    >
+    <PageLayout showHeader={false} style={styles.page}>
       <View style={styles.header}>
         <Pressable onPress={() => setMonthPickerVisible(true)}>
           <NText variant="b16" style={styles.monthTitle}>

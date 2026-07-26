@@ -115,7 +115,7 @@ export default function ScheduleEditPage() {
 
       <BaseModal visible={saveVisible} onClose={() => setSaveVisible(false)}>
         <BaseModal.Content>
-          <BaseModal.Title>저장하시겠습니까?</BaseModal.Title>
+          <BaseModal.Text>저장하시겠습니까?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -137,7 +137,7 @@ export default function ScheduleEditPage() {
 
       <BaseModal visible={exitVisible} onClose={() => setExitVisible(false)}>
         <BaseModal.Content>
-          <BaseModal.Title>저장하지 않고 나가실까요?</BaseModal.Title>
+          <BaseModal.Text>저장하지 않고 나가실까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button

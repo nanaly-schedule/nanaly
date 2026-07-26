@@ -107,7 +107,7 @@ function BaseModalTitle({ children }: BaseModalTextProps) {
 
 function BaseModalText({ children }: BaseModalTextProps) {
   return (
-    <NText variant="b14" style={styles.text}>
+    <NText variant="m16" style={styles.text}>
       {children}
     </NText>
   );

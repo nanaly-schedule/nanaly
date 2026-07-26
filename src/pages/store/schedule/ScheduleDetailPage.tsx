@@ -99,7 +99,7 @@ export default function ScheduleDetailPage() {
         onClose={() => setDeleteVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>해당 근무를 삭제할까요?</BaseModal.Title>
+          <BaseModal.Text>해당 근무를 삭제할까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button

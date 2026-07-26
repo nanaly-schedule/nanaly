@@ -4,6 +4,7 @@ import {
   spacingSpacing16,
   spacingSpacing30,
   typoColorPrimary,
+  typoColorSub2,
 } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 
@@ -86,5 +87,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
+    color: typoColorSub2,
   },
 });

@@ -99,14 +99,14 @@ export default function FeedbackPage() {
         onClose={() => setIsExitModalVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>저장하지 않고 나갈까요?</BaseModal.Title>
+          <BaseModal.Text>저장하지 않고 나갈까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={() => setIsExitModalVisible(false)}
           >
-            취소
+            머무르기
           </BaseModal.Button>
           <BaseModal.Button
             onPress={() => {
@@ -123,9 +123,9 @@ export default function FeedbackPage() {
         onClose={() => setIsSuccessModalVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>
+          <BaseModal.Text>
             소중한 의견 감사합니다!{'\n'}더 나은 서비스로 보답할게요
-          </BaseModal.Title>
+          </BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button

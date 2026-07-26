@@ -108,7 +108,10 @@ export default function StoreHeader({
   return (
     <View style={styles.container}>
       <View style={styles.storeSelector}>
-        <Pressable onPress={handlePressStoreName} style={styles.storeNameButton}>
+        <Pressable
+          onPress={handlePressStoreName}
+          style={styles.storeNameButton}
+        >
           <NText variant="h2" style={styles.storeName}>
             {displayStoreName}
           </NText>
@@ -200,7 +203,7 @@ export default function StoreHeader({
         onPress={() => route.push(`/store/${storeId}/notification`)}
       >
         {unreadNotificationCount > 0 && <View style={styles.unreadDot} />}
-        <AlarmIcon size={20} color={typoColorPrimary} />
+        <AlarmIcon size={24} color={typoColorPrimary} />
       </Pressable>
     </View>
   );

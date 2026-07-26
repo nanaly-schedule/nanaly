@@ -37,7 +37,7 @@ export default function TitleButton({
         {title}
       </NText>
       <View style={{ paddingHorizontal: 6 }}>
-        {showIcon && <RightArrowIcon size={10} color={typoColorPrimary} />}
+        {showIcon && <RightArrowIcon size={24} color={typoColorPrimary} />}
       </View>
     </Pressable>
   );

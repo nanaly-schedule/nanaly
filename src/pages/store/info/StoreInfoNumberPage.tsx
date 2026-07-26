@@ -82,7 +82,10 @@ export default function StoreInfoNumberPage() {
           variant=""
           value={newStoreNumber}
           onChangeText={handleChangeNewStoreNumber}
-          placeholder={!hasStoreNumber ? '000-0000-0000' : storeNumber}
+          keyboardType="number-pad"
+          placeholder={
+            !hasStoreNumber ? '매장 대표번호를 입력해 주세요' : storeNumber
+          }
         />
       </View>
       <BaseModal
@@ -90,14 +93,14 @@ export default function StoreInfoNumberPage() {
         onClose={handleCloseConfirmModal}
       >
         <BaseModal.Content>
-          <BaseModal.Title>{content}</BaseModal.Title>
+          <BaseModal.Text>{content}</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={handleCloseConfirmModal}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={handlePressEditButton}>
             {btnContent}

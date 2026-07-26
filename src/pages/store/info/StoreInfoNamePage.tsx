@@ -83,14 +83,14 @@ export default function StoreInfoNamePage() {
         onClose={handleCloseConfirmModal}
       >
         <BaseModal.Content>
-          <BaseModal.Title>매장명을 수정할까요?</BaseModal.Title>
+          <BaseModal.Text>매장명을 수정할까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={handleCloseConfirmModal}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={handlePressEditButton}>
             수정하기

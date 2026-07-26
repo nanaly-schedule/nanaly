@@ -85,7 +85,7 @@ export default function ChangePasswordPage() {
           <InputVerifyWidget
             placeholder="새 비밀번호를 다시 입력해주세요"
             value={passwordConfirm}
-            disabled={!isPasswordValid}
+            disabled={false}
             isError={isPasswordConfirmError}
             onChangeText={setPasswordConfirm}
           />

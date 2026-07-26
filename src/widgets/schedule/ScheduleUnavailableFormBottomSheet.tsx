@@ -77,7 +77,7 @@ export default function ScheduleUnavailableFormBottomSheet({
   const [saveConfirmVisible, setSaveConfirmVisible] = useState(false);
   const [saveFailedVisible, setSaveFailedVisible] = useState(false);
   const [saveErrorMessage, setSaveErrorMessage] =
-    useState('근무불가 신청에 실패했어요');
+    useState('쉬는 날 신청에 실패했어요');
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
   const [saving, setSaving] = useState(false);
   const hasChanges = !!date || !!startTime || !!endTime || allDay || !!memo;
@@ -144,7 +144,7 @@ export default function ScheduleUnavailableFormBottomSheet({
         memberId: data?.memberId ?? 'me',
         memberName: data?.memberName ?? memberName ?? '나',
         positionId: 'unavailable',
-        positionName: '근무불가',
+        positionName: '쉬는 날',
         positionColor: '#FF6B6B',
         startTime: nextStartTime,
         endTime: nextEndTime,
@@ -155,7 +155,7 @@ export default function ScheduleUnavailableFormBottomSheet({
     } catch (error) {
       setSaveConfirmVisible(false);
       setSaveErrorMessage(
-        getApiErrorMessage(error, '근무불가 신청에 실패했어요'),
+        getApiErrorMessage(error, '쉬는 날 신청에 실패했어요'),
       );
       setSaveFailedVisible(true);
     } finally {
@@ -294,7 +294,7 @@ export default function ScheduleUnavailableFormBottomSheet({
         onClose={() => setSaveConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>근무불가를 추가할까요?</BaseModal.Title>
+          <BaseModal.Text>쉬는 날을 추가할까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -314,7 +314,7 @@ export default function ScheduleUnavailableFormBottomSheet({
         onClose={() => setExitConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>저장하지 않고 나갈까요?</BaseModal.Title>
+          <BaseModal.Text>저장하지 않고 나갈까요?</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -339,7 +339,7 @@ export default function ScheduleUnavailableFormBottomSheet({
         onClose={() => setMissingRequiredVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Title>입력되지 않은 항목이 있어요</BaseModal.Title>
+          <BaseModal.Text>입력되지 않은 항목이 있어요</BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
@@ -471,9 +471,7 @@ function ScheduleUnavailableTimePickerBottomSheet({
       return;
     }
 
-    const [hour, minute] = value
-      ? value.split(':').map(Number)
-      : [0, 0];
+    const [hour, minute] = value ? value.split(':').map(Number) : [0, 0];
 
     setDraft({
       hour: Number.isFinite(hour) ? hour : 0,

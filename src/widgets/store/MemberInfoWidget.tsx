@@ -12,6 +12,7 @@ import {
   backgroundColorWhite,
   radiusRadius8,
   spacingSpacing8,
+  spacingSpacing10,
   spacingSpacing12,
   spacingSpacing20,
   spacingSpaicng14,
@@ -63,6 +64,9 @@ export default function MemberInfoWidget({
   const currentStoreRole = useUser((state) => state.currentStoreRole);
   const [isRoleMenuVisible, setIsRoleMenuVisible] = useState(false);
   const { name, role, memo, birthDate, startDate, endDate } = member;
+  const hasBirthDate = birthDate.trim().length > 0;
+  const hasEndDate = !!endDate?.trim();
+  const hasMemo = !!memo?.trim();
   const { onChangeMemo, onChangeRole, onChangeEndDate, onChangeStartDate } =
     actions;
   const handlePressRole = () => {
@@ -130,7 +134,12 @@ export default function MemberInfoWidget({
       </View>
       <View>
         <InputLabel label="생년월일" />
-        <TitleButton title={birthDate} onPress={() => {}} showIcon={false} />
+        <TitleButton
+          title={hasBirthDate ? birthDate : '미지정'}
+          onPress={() => {}}
+          showIcon={false}
+          isPlaceholder
+        />
       </View>
       {role === MemberRoleType.MANAGER && (
         <MemberRole
@@ -152,9 +161,10 @@ export default function MemberInfoWidget({
       <View>
         <InputLabel label="퇴사일" />
         <TitleButton
-          title={endDate ?? ''}
+          title={hasEndDate ? (endDate ?? '') : '미지정'}
           onPress={onChangeEndDate}
           showIcon={false}
+          isPlaceholder={!hasEndDate}
         />
       </View>
       <View>
@@ -165,7 +175,11 @@ export default function MemberInfoWidget({
           onChangeText={onChangeMemo}
           multiline
           placeholder="작성된 내용이 아직 없어요"
-          style={{ minHeight: 130, textAlignVertical: 'top' }}
+          placeholderTextColor={typoColorSub1}
+          style={[
+            styles.memoInput,
+            { color: hasMemo ? typoColorPrimary : typoColorSub1 },
+          ]}
           editable={editable}
         />
       </View>
@@ -207,5 +221,10 @@ const styles = StyleSheet.create({
     minHeight: 48,
     justifyContent: 'center',
     paddingHorizontal: spacingSpacing12,
+  },
+  memoInput: {
+    minHeight: 130,
+    textAlignVertical: 'top',
+    padding: spacingSpacing10,
   },
 });

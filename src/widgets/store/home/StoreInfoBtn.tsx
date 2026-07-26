@@ -5,6 +5,7 @@ import {
   backgroundColorWhite,
   radiusRadius12,
   spacingSpacing8,
+  spacingSpacing10,
   typoColorPrimary,
   typoColorSub1,
 } from '@/src/init/styles/tokens';
@@ -24,7 +25,7 @@ export default function StoreInfoBtn() {
         매장 정보
       </NText>
 
-      <RightArrowIcon size={10} color={typoColorPrimary} />
+      <RightArrowIcon size={24} color={typoColorPrimary} />
     </Pressable>
   );
 }
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     borderRadius: radiusRadius12,
-    paddingHorizontal: spacingSpacing8,
+    paddingHorizontal: spacingSpacing10,
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: backgroundColorWhite,
