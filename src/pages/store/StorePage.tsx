@@ -54,7 +54,7 @@ export default function StorePage() {
             textAlign: 'center',
           }}
         >
-          로그 아웃
+          로그아웃
         </NText>
       </Pressable>
       <LogoutModal
