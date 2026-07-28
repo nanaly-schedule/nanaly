@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import * as tokens from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 
 import { SchedulePosition, ScheduleViewType } from './mock';
@@ -167,7 +168,7 @@ function DropdownButton({
       <NText variant="b16" style={styles.buttonText}>
         {label}
       </NText>
-      <Ionicons name="chevron-down" size={16} color="#333333" />
+      <Ionicons name="chevron-down" size={16} color={tokens.typoColorPrimary} />
     </Pressable>
   );
 }
@@ -192,11 +193,11 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     zIndex: 10,
-    marginBottom: 12,
+    marginBottom: tokens.spacingSpacing12,
   },
   row: {
     flexDirection: 'row',
-    gap: 8,
+    gap: tokens.spacingSpacing8,
   },
   button: {
     height: 26,
@@ -206,23 +207,23 @@ const styles = StyleSheet.create({
     gap: 4,
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    borderRadius: 8,
+    borderRadius: tokens.radiusRadius8,
     backgroundColor: 'transparent',
-    paddingHorizontal: 10,
+    paddingHorizontal: tokens.spacingSpacing10,
   },
   buttonText: {
-    color: '#333333',
-    fontSize: 12,
-    lineHeight: 16,
+    color: tokens.typoColorPrimary,
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight16,
   },
   dropdown: {
     position: 'absolute',
     top: 34,
     minWidth: 132,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
     paddingVertical: 6,
-    shadowColor: '#000000',
+    shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
       height: 6,
@@ -244,10 +245,10 @@ const styles = StyleSheet.create({
   dropdownItem: {
     minHeight: 32,
     justifyContent: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: tokens.spacingSpacing12,
   },
   dropdownText: {
-    color: '#333333',
+    color: tokens.typoColorPrimary,
   },
   divider: {
     height: 1,

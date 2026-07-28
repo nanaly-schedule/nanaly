@@ -18,6 +18,7 @@ import {
   updateSchedule,
 } from '@/src/features/schedule/api/schedule';
 import { getMembers } from '@/src/features/store/api/member';
+import * as tokens from '@/src/init/styles/tokens';
 import {
   backgroundColorWhite,
   buttonColorCta,
@@ -1045,8 +1046,8 @@ function ConfirmButton({ onPress }: { onPress: () => void }) {
 const styles = StyleSheet.create({
   sheet: {
     minHeight: 720,
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: tokens.spacingSpacing16,
+    paddingTop: tokens.spacingSpacing8,
     paddingBottom: 32,
   },
   header: {
@@ -1055,7 +1056,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginHorizontal: -10,
-    marginBottom: 16,
+    marginBottom: tokens.spacingSpacing16,
   },
   headerButton: {
     width: 36,
@@ -1072,10 +1073,10 @@ const styles = StyleSheet.create({
     top: 58,
     right: 16,
     width: 140,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    shadowColor: '#000000',
+    borderRadius: tokens.radiusRadius20,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingVertical: tokens.spacingSpacing8,
+    shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
       height: 12,
@@ -1093,18 +1094,18 @@ const styles = StyleSheet.create({
     color: typoColorPrimary,
   },
   content: {
-    paddingBottom: 20,
+    paddingBottom: tokens.spacingSpacing20,
   },
   sectionTitle: {
     color: typoColorPrimary,
-    marginBottom: 10,
+    marginBottom: tokens.spacingSpacing10,
   },
   infoCard: {
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 10,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing10,
     paddingVertical: 4,
-    marginBottom: 20,
+    marginBottom: tokens.spacingSpacing20,
   },
   infoRow: {
     minHeight: 44,
@@ -1122,36 +1123,36 @@ const styles = StyleSheet.create({
     color: typoColorSub2,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: tokens.spacingSpacing20,
   },
   input: {
     height: 44,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing12,
     color: typoColorPrimary,
-    fontSize: 12,
+    fontSize: tokens.typographyPrimitiveFontSize12,
   },
   memoInput: {
     height: 76,
-    paddingTop: 12,
+    paddingTop: tokens.spacingSpacing12,
     textAlignVertical: 'top',
   },
   timeRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: tokens.spacingSpacing12,
   },
   timeColumn: {
     flex: 1,
-    gap: 8,
+    gap: tokens.spacingSpacing8,
   },
   timeLabel: {
     color: typoColorPrimary,
   },
   pickerSheet: {
     minHeight: 520,
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingHorizontal: tokens.spacingSpacing20,
+    paddingTop: tokens.spacingSpacing12,
   },
   pickerTitle: {
     color: typoColorPrimary,
@@ -1159,15 +1160,15 @@ const styles = StyleSheet.create({
     marginBottom: 36,
   },
   memberList: {
-    gap: 14,
+    gap: tokens.spacingSpaicng14,
   },
   memberRow: {
     minHeight: 70,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing12,
   },
   memberText: {
     flex: 1,
@@ -1180,11 +1181,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginRight: 10,
+    marginRight: tokens.spacingSpacing10,
   },
   wheelSheet: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingHorizontal: tokens.spacingSpacing20,
+    paddingTop: tokens.spacingSpacing12,
   },
   wheelRow: {
     flexDirection: 'row',

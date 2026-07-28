@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import * as tokens from '@/src/init/styles/tokens';
 import {
   typoColorPrimary,
   typoColorRed,
@@ -74,8 +75,7 @@ export default function ScheduleDateBottomSheet({
                 {isUnavailable ? (
                   <View style={styles.rowText}>
                     <NText variant="r14" style={styles.unavailableText}>
-                      <Text style={styles.rowName}>{schedule.memberName}</Text>
-                      {' '}
+                      <Text style={styles.rowName}>{schedule.memberName}</Text>{' '}
                       · 근무불가 · {getScheduleTimeLabel(schedule)}
                     </NText>
                     {isConflict && (
@@ -146,12 +146,12 @@ const styles = StyleSheet.create({
   sheet: {
     minHeight: 468,
     paddingHorizontal: 28,
-    paddingTop: 8,
+    paddingTop: tokens.spacingSpacing8,
   },
   title: {
     color: typoColorPrimary,
     marginTop: 26,
-    marginBottom: 30,
+    marginBottom: tokens.spacingSpacing30,
   },
   list: {
     gap: 18,
@@ -160,15 +160,15 @@ const styles = StyleSheet.create({
     minHeight: 52,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    paddingLeft: 8,
-    paddingRight: 8,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingLeft: tokens.spacingSpacing8,
+    paddingRight: tokens.spacingSpacing8,
   },
   rowText: {
     flex: 1,
     color: typoColorPrimary,
-    fontSize: 14,
+    fontSize: tokens.typographyPrimitiveFontSize14,
     lineHeight: 26,
   },
   rowName: {
@@ -190,9 +190,9 @@ const styles = StyleSheet.create({
   emptyRow: {
     minHeight: 38,
     justifyContent: 'center',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing12,
   },
   emptyText: {
     color: typoColorSub2,

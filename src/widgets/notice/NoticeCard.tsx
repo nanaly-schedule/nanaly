@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Notice } from '@/src/entities/notice/notice';
+import * as tokens from '@/src/init/styles/tokens';
 import {
   typoColorPlaceholder,
   typoColorPrimary,
@@ -11,7 +12,7 @@ type NoticeCardProps = {
   notice: Notice;
   onPress?: () => void;
   variant?: 'card' | 'list';
-}
+};
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -45,9 +46,7 @@ function getBooleanLikeValue(value?: boolean | string | number) {
   const normalizedValue = value.toLowerCase();
 
   if (
-    ['true', '1', 'public', 'open', 'visible', '공개'].includes(
-      normalizedValue,
-    )
+    ['true', '1', 'public', 'open', 'visible', '공개'].includes(normalizedValue)
   ) {
     return true;
   }
@@ -95,58 +94,54 @@ export default function NoticeCard({
   onPress,
   variant = 'card',
 }: NoticeCardProps) {
-    const isList = variant === 'list';
-    const createdAt = formatNoticeDate(notice.createdAt);
-    const preview = notice.content?.trim() || '내용이 표시됩니다';
-    const isPublic = getNoticeIsPublic(notice);
-    const isRead = isList && notice.isRead === true;
+  const isList = variant === 'list';
+  const createdAt = formatNoticeDate(notice.createdAt);
+  const preview = notice.content?.trim() || '내용이 표시됩니다';
+  const isPublic = getNoticeIsPublic(notice);
+  const isRead = isList && notice.isRead === true;
 
-    return (
-        <Pressable
-            disabled={!onPress}
-            onPress={onPress}
-            style={[styles.container, isList ? styles.list : styles.card]}
+  return (
+    <Pressable
+      disabled={!onPress}
+      onPress={onPress}
+      style={[styles.container, isList ? styles.list : styles.card]}
+    >
+      <View
+        style={[
+          styles.icon,
+          isList && styles.listIcon,
+          {
+            backgroundColor: isPublic ? '#86BEFF' : '#D9D9D9',
+          },
+        ]}
+      >
+        <Ionicons
+          name="megaphone-outline"
+          size={20}
+          color={tokens.basicColorWhiteBase}
+        />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.title,
+            isList && styles.listTitle,
+            isRead && styles.readTitle,
+          ]}
         >
-        <View
-            style={[
-                styles.icon,
-                isList && styles.listIcon,
-                {
-                    backgroundColor: isPublic
-                        ? '#86BEFF'
-                        : '#D9D9D9',
-                },
-            ]}
-            >
-                <Ionicons
-                    name="megaphone-outline"
-                    size={20}
-                    color="#fff"
-                />
-            </View>
-            <View style={{flex: 1}}>
-                <Text
-                    numberOfLines={1}
-                    style={[
-                        styles.title,
-                        isList && styles.listTitle,
-                        isRead && styles.readTitle,
-                    ]}
-                >
-                    {notice.title}
-                </Text>
-                <Text
-                    numberOfLines={1}
-                    style={[styles.content, isRead && styles.readTitle]}
-                >
-                    {preview}
-                </Text>
-                {isList && createdAt && (
-                    <Text style={styles.date}>{createdAt}</Text>
-                )}
-            </View>
-        </Pressable>
-    );
+          {notice.title}
+        </Text>
+        <Text
+          numberOfLines={1}
+          style={[styles.content, isRead && styles.readTitle]}
+        >
+          {preview}
+        </Text>
+        {isList && createdAt && <Text style={styles.date}>{createdAt}</Text>}
+      </View>
+    </Pressable>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -155,10 +150,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   card: {
-    marginBottom: 12,
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    marginBottom: tokens.spacingSpacing12,
+    padding: tokens.spacingSpacing16,
+    borderRadius: tokens.radiusRadius16,
+    backgroundColor: tokens.basicColorWhiteBase,
   },
   list: {
     alignItems: 'flex-start',
@@ -167,36 +162,36 @@ const styles = StyleSheet.create({
   icon: {
     width: 40,
     height: 40,
-    marginRight: 14,
-    borderRadius: 20,
+    marginRight: tokens.spacingSpaicng14,
+    borderRadius: tokens.radiusRadius20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   listIcon: {
-    marginTop: 16,
+    marginTop: tokens.spacingSpacing16,
   },
   title: {
     marginBottom: 6,
-    fontSize: 16,
+    fontSize: tokens.typographyPrimitiveFontSize16,
     fontWeight: '700',
     color: typoColorPrimary,
   },
   listTitle: {
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight18,
   },
   readTitle: {
     color: typoColorPlaceholder,
   },
   content: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight20,
     color: '#555555',
   },
   date: {
-    marginTop: 12,
-    fontSize: 14,
-    lineHeight: 18,
+    marginTop: tokens.spacingSpacing12,
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight18,
     color: '#666666',
   },
 });

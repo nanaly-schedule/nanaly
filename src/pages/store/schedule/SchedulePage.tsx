@@ -15,6 +15,7 @@ import {
   ScheduleScope,
 } from '@/src/features/schedule/api/schedule';
 import useUser from '@/src/features/user/lib/useUser';
+import * as tokens from '@/src/init/styles/tokens';
 import { buttonColorCta, typoColorPrimary } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -1159,7 +1160,7 @@ export default function SchedulePage() {
             setFormVisible(true);
           }}
         >
-          <Ionicons name="add" size={28} color="#FFFFFF" />
+          <Ionicons name="add" size={28} color={tokens.basicColorWhiteBase} />
         </Pressable>
       )}
 
@@ -1271,8 +1272,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 16,
-    marginBottom: 20,
+    paddingTop: tokens.spacingSpacing16,
+    marginBottom: tokens.spacingSpacing20,
   },
   monthTitle: {
     color: typoColorPrimary,
@@ -1290,7 +1291,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: buttonColorCta,
-    shadowColor: '#000000',
+    shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
       height: 4,

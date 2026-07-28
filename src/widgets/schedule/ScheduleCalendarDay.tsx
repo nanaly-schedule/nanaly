@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import * as tokens from '@/src/init/styles/tokens';
 import { backgroundColorPrimary } from '@/src/init/styles/tokens';
 
 import { ScheduleItem } from './mock';
@@ -51,7 +52,9 @@ export default function ScheduleCalendarDay({
 }: ScheduleCalendarDayProps) {
   if (!date) {
     return (
-      <View style={[styles.container, { width: dayWidth, height: dayHeight }]} />
+      <View
+        style={[styles.container, { width: dayWidth, height: dayHeight }]}
+      />
     );
   }
 
@@ -135,26 +138,26 @@ const styles = StyleSheet.create({
     backgroundColor: backgroundColorPrimary,
   },
   day: {
-    color: '#333333',
-    fontSize: 12,
+    color: tokens.typoColorPrimary,
+    fontSize: tokens.typographyPrimitiveFontSize12,
     lineHeight: 15,
   },
   sundayDay: {
     color: '#FF3B30',
   },
   disabledDay: {
-    color: '#A5A5A5',
+    color: tokens.typoColorPlaceholder,
   },
   todayDay: {
-    color: '#3B82F6',
+    color: tokens.brandColorPrimary,
   },
   badges: {
     alignItems: 'center',
   },
   moreText: {
-    color: '#A5A5A5',
-    fontSize: 12,
-    lineHeight: 12,
+    color: tokens.typoColorPlaceholder,
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight12,
     textAlign: 'center',
   },
 });

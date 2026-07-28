@@ -1,5 +1,7 @@
 import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
 
+import * as tokens from '@/src/init/styles/tokens';
+
 import { ScheduleItem } from './mock';
 
 type ScheduleBadgeProps = {
@@ -61,9 +63,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 5,
     paddingVertical: 2,
-    color: '#FFFFFF',
-    fontSize: 10,
-    lineHeight: 12,
+    color: tokens.basicColorWhiteBase,
+    fontSize: tokens.typographyPrimitiveFontSize10,
+    lineHeight: tokens.typographyPrimitiveLineHeight12,
     fontWeight: '700',
   },
   compact: {
@@ -71,8 +73,8 @@ const styles = StyleSheet.create({
     height: 18,
     paddingHorizontal: 3,
     paddingVertical: 0,
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight18,
     textAlign: 'center',
   },
 });

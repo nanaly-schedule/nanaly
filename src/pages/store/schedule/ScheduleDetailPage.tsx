@@ -4,10 +4,8 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
-import {
-  typoColorPrimary,
-  typoColorSecondary,
-} from '@/src/init/styles/tokens';
+import * as tokens from '@/src/init/styles/tokens';
+import { typoColorPrimary, typoColorSecondary } from '@/src/init/styles/tokens';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -23,8 +21,7 @@ export default function ScheduleDetailPage() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
   const schedule =
-    MOCK_SCHEDULES.find((item) => item.id === scheduleId) ??
-    MOCK_SCHEDULES[0];
+    MOCK_SCHEDULES.find((item) => item.id === scheduleId) ?? MOCK_SCHEDULES[0];
 
   if (!access.loaded) {
     return <View />;
@@ -84,7 +81,10 @@ export default function ScheduleDetailPage() {
         </NText>
         <View style={styles.infoCard}>
           <InfoRow label="근무자" value={schedule.memberName} />
-          <InfoRow label="포지션" value={schedule.positionName ?? '선택 안함'} />
+          <InfoRow
+            label="포지션"
+            value={schedule.positionName ?? '선택 안함'}
+          />
         </View>
         <InfoRow label="날짜" value={schedule.date} />
         <InfoRow
@@ -142,10 +142,10 @@ const styles = StyleSheet.create({
     top: 46,
     right: 0,
     width: 150,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    shadowColor: '#000000',
+    borderRadius: tokens.radiusRadius20,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingVertical: tokens.spacingSpacing8,
+    shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
       height: 12,
@@ -164,22 +164,22 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingTop: 56,
-    gap: 16,
+    gap: tokens.spacingSpacing16,
   },
   sectionTitle: {
     color: typoColorPrimary,
   },
   infoCard: {
     overflow: 'hidden',
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    borderRadius: tokens.radiusRadius16,
+    backgroundColor: tokens.basicColorWhiteBase,
   },
   row: {
     minHeight: 64,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: tokens.spacingSpacing16,
   },
   label: {
     color: typoColorPrimary,

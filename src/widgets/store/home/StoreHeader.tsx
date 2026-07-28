@@ -7,6 +7,7 @@ import { MemberRole } from '@/src/entities/member/member';
 import { UserStorePermissions } from '@/src/entities/user/user';
 import { getMyStore } from '@/src/features/store/api/store';
 import useUser from '@/src/features/user/lib/useUser';
+import * as tokens from '@/src/init/styles/tokens';
 import {
   backgroundColorPrimary,
   basicColorBlue50,
@@ -243,9 +244,9 @@ const styles = StyleSheet.create({
     left: 0,
     width: 150,
     borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: tokens.basicColorWhiteBase,
     paddingVertical: 4,
-    shadowColor: '#000000',
+    shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
       height: 12,
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacingSpacing8,
     height: 28,
     justifyContent: 'center',
-    shadowColor: '#0f172a',
+    shadowColor: tokens.shadowShadowSmColor,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,

@@ -8,12 +8,11 @@ import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
 import { getNotices, NoticeFilter } from '@/src/features/notice/api/notice';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
+import * as tokens from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import NoticeCard from '@/src/widgets/notice/NoticeCard';
-import NoticeTabs, {
-  NoticeTabType,
-} from '@/src/widgets/notice/NoticeTabs';
+import NoticeTabs, { NoticeTabType } from '@/src/widgets/notice/NoticeTabs';
 // const MOCK_NOTICES: Notice[] = [
 //   {
 //     id: 1,
@@ -87,10 +86,7 @@ export default function NoticePage() {
     <PageLayout title="공지사항">
       {canViewPrivateNotice && (
         <View style={styles.tabsWrapper}>
-          <NoticeTabs
-            value={tab}
-            onChange={setTab}
-          />
+          <NoticeTabs value={tab} onChange={setTab} />
         </View>
       )}
 
@@ -101,19 +97,20 @@ export default function NoticePage() {
       >
         {loading && <NText variant="r14">불러오는 중...</NText>}
 
-        {!loading && notices.map((notice) => (
-          <NoticeCard
-            key={notice.id}
-            notice={notice}
-            variant="list"
-            onPress={() => {
-              router.push({
-                pathname: '/(notice)/[storeId]/notice-detail',
-                params: { storeId, noticeId: notice.id },
-              });
-            }}
-          />
-        ))}
+        {!loading &&
+          notices.map((notice) => (
+            <NoticeCard
+              key={notice.id}
+              notice={notice}
+              variant="list"
+              onPress={() => {
+                router.push({
+                  pathname: '/(notice)/[storeId]/notice-detail',
+                  params: { storeId, noticeId: notice.id },
+                });
+              }}
+            />
+          ))}
       </ScrollView>
 
       {canManageNotice && (
@@ -126,11 +123,7 @@ export default function NoticePage() {
             });
           }}
         >
-          <Ionicons
-            name="add"
-            size={28}
-            color="#fff"
-          />
+          <Ionicons name="add" size={28} color={tokens.basicColorWhiteBase} />
         </Pressable>
       )}
     </PageLayout>
@@ -139,7 +132,7 @@ export default function NoticePage() {
 
 const styles = StyleSheet.create({
   tabsWrapper: {
-    marginTop: 16,
+    marginTop: tokens.spacingSpacing16,
   },
   list: {
     flex: 1,
@@ -164,7 +157,7 @@ const styles = StyleSheet.create({
 
     backgroundColor: '#6EA8FF',
 
-    shadowColor: '#000',
+    shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
       height: 4,
