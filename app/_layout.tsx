@@ -17,6 +17,7 @@ import { getMyStore } from '@/src/features/store/api/store';
 import { getUserProfile } from '@/src/features/user/api/profile';
 import { navigateFromNotification } from '@/src/features/user/lib/notificationNavigation';
 import useUser from '@/src/features/user/lib/useUser';
+import { backgroundColorPrimary } from '@/src/init/styles/tokens';
 
 const navigationIntegration = Sentry.reactNavigationIntegration({
   enableTimeToInitialDisplay: !isRunningInExpoGo(),
@@ -254,5 +255,12 @@ export default Sentry.wrap(function Layout() {
     };
   }, [router]);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: backgroundColorPrimary },
+      }}
+    />
+  );
 });

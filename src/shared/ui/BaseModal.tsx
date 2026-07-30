@@ -4,7 +4,9 @@ import {
   ModalProps,
   Pressable,
   PressableProps,
+  StyleProp,
   StyleSheet,
+  TextStyle,
   View,
   ViewProps,
 } from 'react-native';
@@ -49,6 +51,7 @@ interface BaseModalButtonProps extends PressableProps {
   children: ReactNode;
   variant?: 'primary' | 'secondary';
   fullWidth?: boolean;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 function BaseModalRoot({
@@ -129,6 +132,7 @@ function BaseModalButton({
   children,
   variant = 'primary',
   fullWidth = false,
+  textStyle,
   ...props
 }: BaseModalButtonProps) {
   return (
@@ -142,11 +146,12 @@ function BaseModalButton({
     >
       <NText
         variant="m14"
-        style={
+        style={[
           variant === 'primary'
             ? styles.primaryButtonText
-            : styles.secondaryButtonText
-        }
+            : styles.secondaryButtonText,
+          textStyle,
+        ]}
       >
         {children}
       </NText>

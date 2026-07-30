@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Notice } from '@/src/entities/notice/notice';
@@ -109,16 +109,18 @@ export default function NoticeCard({
       <View
         style={[
           styles.icon,
+          !isList && styles.cardIcon,
           isList && styles.listIcon,
-          {
-            backgroundColor: isPublic ? '#86BEFF' : '#D9D9D9',
-          },
         ]}
       >
-        <Ionicons
-          name="megaphone-outline"
-          size={20}
-          color={tokens.basicColorWhiteBase}
+        <Image
+          source={
+            isPublic
+              ? require('@/src/shared/assets/megaphone_pub.svg')
+              : require('@/src/shared/assets/megaphone_prv.svg')
+          }
+          style={styles.noticeIcon}
+          contentFit="contain"
         />
       </View>
       <View style={{ flex: 1 }}>
@@ -134,11 +136,19 @@ export default function NoticeCard({
         </Text>
         <Text
           numberOfLines={1}
-          style={[styles.content, isRead && styles.readTitle]}
+          style={[
+            styles.content,
+            isList ? styles.listContent : styles.cardContent,
+            isRead && styles.readTitle,
+          ]}
         >
           {preview}
         </Text>
-        {isList && createdAt && <Text style={styles.date}>{createdAt}</Text>}
+        {isList && createdAt && (
+          <Text style={[styles.date, isRead && styles.readTitle]}>
+            {createdAt}
+          </Text>
+        )}
       </View>
     </Pressable>
   );
@@ -150,14 +160,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   card: {
+    height: 64,
     marginBottom: tokens.spacingSpacing12,
-    padding: tokens.spacingSpacing16,
-    borderRadius: tokens.radiusRadius16,
+    paddingHorizontal: tokens.spacingSpacing10,
+    borderRadius: tokens.radiusRadius8,
     backgroundColor: tokens.basicColorWhiteBase,
   },
   list: {
     alignItems: 'flex-start',
-    marginBottom: 28,
+    marginBottom: tokens.spacingSpacing10,
   },
   icon: {
     width: 40,
@@ -167,31 +178,60 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  cardIcon: {
+    marginRight: tokens.spacingSpacing10,
+  },
+  noticeIcon: {
+    width: 24,
+    height: 24,
+  },
   listIcon: {
     marginTop: tokens.spacingSpacing16,
   },
   title: {
     marginBottom: 6,
-    fontSize: tokens.typographyPrimitiveFontSize16,
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight14,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
     fontWeight: '700',
     color: typoColorPrimary,
   },
   listTitle: {
-    fontSize: tokens.typographyPrimitiveFontSize14,
-    lineHeight: tokens.typographyPrimitiveLineHeight18,
+    marginBottom: tokens.spacingSpacing8,
+    fontFamily: 'Pretendard',
+    fontWeight: '700',
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight14,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   readTitle: {
     color: typoColorPlaceholder,
   },
   content: {
-    fontSize: tokens.typographyPrimitiveFontSize14,
-    lineHeight: tokens.typographyPrimitiveLineHeight20,
     color: '#555555',
+  },
+  cardContent: {
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight14,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+  },
+  listContent: {
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight14,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   date: {
     marginTop: tokens.spacingSpacing12,
-    fontSize: tokens.typographyPrimitiveFontSize14,
-    lineHeight: tokens.typographyPrimitiveLineHeight18,
+    paddingBottom: tokens.spacingSpacing12,
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight14,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
     color: '#666666',
   },
 });

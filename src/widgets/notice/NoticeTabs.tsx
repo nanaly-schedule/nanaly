@@ -24,7 +24,7 @@ export default function NoticeTabs({ value, onChange }: NoticeTabsProps) {
     <View
       style={{
         flexDirection: 'row',
-        gap: tokens.spacingSpacing24,
+        gap: tokens.spacingSpaicng14,
         marginBottom: 22,
       }}
     >
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     paddingBottom: tokens.spacingSpacing10,
   },
   label: {
-    color: '#A0A0A0',
+    color: tokens.typoColorSub2,
   },
   selectedLabel: {
     color: '#222222',

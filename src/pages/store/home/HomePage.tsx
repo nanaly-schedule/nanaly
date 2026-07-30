@@ -157,7 +157,7 @@ export default function HomePage() {
   );
   return (
     <PageLayout showHeader={false}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <StoreHeader
           storeName={displayStoreName ?? headerInfo?.storeName ?? ''}
           isOwner={

@@ -2,7 +2,10 @@ import { useRouter } from 'expo-router';
 import { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { typoColorPrimary } from '@/src/init/styles/tokens';
+import {
+  typoColorPrimary,
+  typographyPrimitiveLetterSpacing0,
+} from '@/src/init/styles/tokens';
 
 import LeftArrowIcon from '../assets/LeftArrowIcon';
 import NText from './NText';
@@ -63,10 +66,11 @@ const styles = StyleSheet.create({
   },
   btn: {
     position: 'absolute',
-    marginVertical: 'auto',
-    top: 6,
-    bottom: 6,
-    paddingVertical: 6,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 0,
     paddingHorizontal: 9,
   },
   left: {
@@ -74,13 +78,10 @@ const styles = StyleSheet.create({
   },
   text: {
     color: typoColorPrimary,
-    margin: 'auto',
+    marginHorizontal: 'auto',
+    letterSpacing: typographyPrimitiveLetterSpacing0,
   },
   right: {
     right: 2,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    paddingVertical: 0,
   },
 });

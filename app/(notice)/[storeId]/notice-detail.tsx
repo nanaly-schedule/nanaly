@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { isAxiosError } from 'axios';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -14,8 +14,17 @@ import {
 } from '@/src/features/notice/api/notice';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import {
+  basicColorBlackBase,
+  basicColorWhiteBase,
+  borderDividerPrimary,
+  radiusRadius12,
+  spacingSpacing8,
+  spacingSpacing20,
+  spacingSpaicng14,
   typoColorPrimary,
   typoColorSecondary,
+  typoColorSub1,
+  typographyPrimitiveLetterSpacing2,
 } from '@/src/init/styles/tokens';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
@@ -180,13 +189,12 @@ export default function NoticeDetailPage() {
 
   return (
     <PageLayout
-      title="공지사항"
       icon={
         canManageNotice ? (
-          <Ionicons
-            name="ellipsis-vertical"
-            size={20}
-            color={typoColorPrimary}
+          <Image
+            source={require('@/src/shared/assets/more_option_btn.svg')}
+            style={styles.moreOptionIcon}
+            contentFit="contain"
           />
         ) : undefined
       }
@@ -204,7 +212,7 @@ export default function NoticeDetailPage() {
               disabled={updatingVisibility}
               onPress={handleToggleVisibility}
             >
-              <NText variant="r14" style={styles.menuText}>
+              <NText variant="r12" style={styles.menuText}>
                 {updatingVisibility
                   ? '변경 중'
                   : notice?.isPublic
@@ -217,20 +225,20 @@ export default function NoticeDetailPage() {
               style={styles.menuItem}
               onPress={handlePressEdit}
             >
-              <NText variant="r14" style={styles.menuText}>
-                수정
+              <NText variant="r12" style={styles.menuText}>
+                수정하기
               </NText>
             </Pressable>
 
             <Pressable
-              style={styles.menuItem}
+              style={[styles.menuItem, styles.deleteMenuItem]}
               disabled={deleting}
               onPress={() => {
                 setMenuVisible(false);
                 setDeleteModalVisible(true);
               }}
             >
-              <NText variant="r14" style={styles.menuText}>
+              <NText variant="r12" style={styles.menuText}>
                 삭제하기
               </NText>
             </Pressable>
@@ -279,20 +287,24 @@ export default function NoticeDetailPage() {
         onClose={() => setDeleteModalVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Text>공지를 삭제할까요?</BaseModal.Text>
+          <NText variant="m16" style={styles.deleteModalQuestion}>
+            공지를 삭제할까요?
+          </NText>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={() => setDeleteModalVisible(false)}
+            textStyle={styles.deleteModalButtonText}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button
             disabled={deleting}
             onPress={handleDelete}
+            textStyle={styles.deleteModalButtonText}
           >
-            {deleting ? '삭제 중' : '삭제'}
+            {deleting ? '삭제 중' : '삭제하기'}
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -301,6 +313,10 @@ export default function NoticeDetailPage() {
 }
 
 const styles = StyleSheet.create({
+  moreOptionIcon: {
+    width: 24,
+    height: 24,
+  },
   menuBackdrop: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1,
@@ -308,13 +324,15 @@ const styles = StyleSheet.create({
   menu: {
     position: 'absolute',
     zIndex: 2,
-    top: 48,
+    top: 44,
     right: 0,
-    width: 180,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
+    width: 178,
+    height: 120,
+    paddingHorizontal: spacingSpacing8,
+    paddingVertical: 0,
+    borderRadius: radiusRadius12,
+    backgroundColor: basicColorWhiteBase,
+    shadowColor: basicColorBlackBase,
     shadowOffset: {
       width: 0,
       height: 8,
@@ -324,12 +342,16 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   menuItem: {
-    minHeight: 52,
+    height: 40,
     justifyContent: 'center',
-    paddingHorizontal: 16,
+  },
+  deleteMenuItem: {
+    borderTopWidth: 1,
+    borderTopColor: borderDividerPrimary,
   },
   menuText: {
     color: typoColorSecondary,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
   },
   container: {
     flexGrow: 1,
@@ -338,18 +360,20 @@ const styles = StyleSheet.create({
   },
   title: {
     color: typoColorPrimary,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
   },
   metaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: spacingSpaicng14,
   },
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   metaText: {
-    color: typoColorSecondary,
+    color: typoColorSub1,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
   },
   divider: {
     width: 1,
@@ -358,9 +382,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9D9D9',
   },
   contentContainer: {
-    marginTop: 28,
+    marginTop: spacingSpacing20,
   },
   content: {
     color: typoColorPrimary,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
+  },
+  deleteModalQuestion: {
+    color: typoColorPrimary,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
+    textAlign: 'center',
+  },
+  deleteModalButtonText: {
+    letterSpacing: typographyPrimitiveLetterSpacing2,
   },
 });
