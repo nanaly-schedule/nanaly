@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   lightBackdrop: {
     backgroundColor: dimOverlayLight,
-    opacity: 0.08,
+    opacity: 0.16,
   },
   sheet: {
     minHeight: 360,

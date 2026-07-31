@@ -153,6 +153,9 @@ export default function Layout() {
         name="home"
         options={{
           title: '홈',
+          sceneStyle: {
+            backgroundColor: '#F5F7FA',
+          },
           tabBarIcon: ({ focused, color }) => (
             <TabIcon focused={focused} color={color} icon={TAB_ICONS.home} />
           ),

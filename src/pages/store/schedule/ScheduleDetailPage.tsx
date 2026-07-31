@@ -106,7 +106,7 @@ export default function ScheduleDetailPage() {
             variant="secondary"
             onPress={() => setDeleteVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button
             onPress={() => {

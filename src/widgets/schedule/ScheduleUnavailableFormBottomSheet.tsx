@@ -302,7 +302,7 @@ export default function ScheduleUnavailableFormBottomSheet({
             variant="secondary"
             onPress={() => setSaveConfirmVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={handleCreate}>
             {saving ? '추가중' : '추가하기'}
@@ -322,7 +322,7 @@ export default function ScheduleUnavailableFormBottomSheet({
             variant="secondary"
             onPress={() => setExitConfirmVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button
             onPress={() => {
@@ -330,7 +330,7 @@ export default function ScheduleUnavailableFormBottomSheet({
               onClose();
             }}
           >
-            마무리
+            나가기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -428,22 +428,27 @@ function ScheduleUnavailableDatePickerBottomSheet({
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={years}
           selectedValue={draft.year}
-          formatLabel={(year) => `${year}년`}
+          formatLabel={(year) => `${year}`}
+          unit="년"
+          unitOffset={26}
           onChange={(year) => updateDraft({ year })}
         />
         <DateWheelColumn
           items={months}
           selectedValue={draft.month}
-          formatLabel={(month) => `${month}월`}
+          formatLabel={(month) => `${month}`}
+          unit="월"
           onChange={(month) => updateDraft({ month })}
         />
         <DateWheelColumn
           items={days}
           selectedValue={draft.day}
-          formatLabel={(day) => `${String(day).padStart(2, '0')}일`}
+          formatLabel={(day) => String(day).padStart(2, '0')}
+          unit="일"
           onChange={(day) => updateDraft({ day })}
         />
       </View>
@@ -488,16 +493,19 @@ function ScheduleUnavailableTimePickerBottomSheet({
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={hours}
           selectedValue={draft.hour}
-          formatLabel={(hour) => `${String(hour).padStart(2, '0')}시`}
+          formatLabel={(hour) => String(hour).padStart(2, '0')}
+          unit="시"
           onChange={(hour) => setDraft((prev) => ({ ...prev, hour }))}
         />
         <DateWheelColumn
           items={minutes}
           selectedValue={draft.minute}
-          formatLabel={(minute) => `${String(minute).padStart(2, '0')}분`}
+          formatLabel={(minute) => String(minute).padStart(2, '0')}
+          unit="분"
           onChange={(minute) => setDraft((prev) => ({ ...prev, minute }))}
         />
       </View>
@@ -596,13 +604,23 @@ const styles = StyleSheet.create({
     color: typoColorPrimary,
   },
   wheelSheet: {
-    paddingHorizontal: tokens.spacingSpacing20,
+    paddingHorizontal: tokens.spacingSpacing16,
     paddingTop: tokens.spacingSpacing12,
   },
   wheelRow: {
+    position: 'relative',
     flexDirection: 'row',
     gap: spacingSpacing20,
     marginBottom: spacingSpacing20,
+  },
+  wheelSelectionHighlight: {
+    position: 'absolute',
+    top: 91,
+    left: 0,
+    right: 0,
+    height: 38,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: '#E7EBF2',
   },
   confirmButton: {
     height: 46,

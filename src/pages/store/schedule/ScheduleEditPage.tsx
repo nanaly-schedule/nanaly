@@ -127,7 +127,7 @@ export default function ScheduleEditPage() {
               router.back();
             }}
           >
-            마무리
+            머무르기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -149,7 +149,7 @@ export default function ScheduleEditPage() {
               router.back();
             }}
           >
-            마무리
+            머무르기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>

@@ -156,7 +156,7 @@ export default function HomePage() {
     }, [storeId, syncCurrentStoreAccess]),
   );
   return (
-    <PageLayout showHeader={false}>
+    <PageLayout showHeader={false} style={{ backgroundColor: '#F5F7FA' }}>
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <StoreHeader
           storeName={displayStoreName ?? headerInfo?.storeName ?? ''}

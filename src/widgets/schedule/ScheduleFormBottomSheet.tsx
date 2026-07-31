@@ -622,7 +622,7 @@ export default function ScheduleFormBottomSheet({
             variant="secondary"
             onPress={() => setSaveConfirmVisible(false)}
           >
-            {isCreateMode ? '취소' : '아니요'}
+            아니요
           </BaseModal.Button>
           <BaseModal.Button
             onPress={isCreateMode ? handleCreateSchedule : handleUpdateSchedule}
@@ -653,7 +653,7 @@ export default function ScheduleFormBottomSheet({
             variant="secondary"
             onPress={() => setExitConfirmVisible(false)}
           >
-            {isEditMode ? '아니요' : '취소'}
+            아니요
           </BaseModal.Button>
           <BaseModal.Button
             onPress={() => {
@@ -666,7 +666,7 @@ export default function ScheduleFormBottomSheet({
               onClose();
             }}
           >
-            {isEditMode ? '나가기' : '마무리'}
+            나가기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -948,22 +948,27 @@ function ScheduleDatePickerBottomSheet({
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={years}
           selectedValue={draft.year}
-          formatLabel={(year) => `${year}년`}
+          formatLabel={(year) => `${year}`}
+          unit="년"
+          unitOffset={26}
           onChange={(year) => updateDraft({ year })}
         />
         <DateWheelColumn
           items={months}
           selectedValue={draft.month}
-          formatLabel={(month) => `${month}월`}
+          formatLabel={(month) => `${month}`}
+          unit="월"
           onChange={(month) => updateDraft({ month })}
         />
         <DateWheelColumn
           items={days}
           selectedValue={draft.day}
-          formatLabel={(day) => `${String(day).padStart(2, '0')}일`}
+          formatLabel={(day) => String(day).padStart(2, '0')}
+          unit="일"
           onChange={(day) => updateDraft({ day })}
         />
       </View>
@@ -1054,10 +1059,12 @@ function ScheduleTimePickerBottomSheet({
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={hours}
           selectedValue={normalizedHour}
-          formatLabel={(hour) => `${hour}시`}
+          formatLabel={(hour) => `${hour}`}
+          unit="시"
           onChange={(hour) =>
             setDraft((prev) => ({
               ...prev,
@@ -1068,7 +1075,8 @@ function ScheduleTimePickerBottomSheet({
         <DateWheelColumn
           items={minutes}
           selectedValue={normalizedMinute}
-          formatLabel={(minute) => `${String(minute).padStart(2, '0')}분`}
+          formatLabel={(minute) => String(minute).padStart(2, '0')}
+          unit="분"
           onChange={(minute) =>
             setDraft((prev) => ({
               ...prev,
@@ -1277,13 +1285,23 @@ const styles = StyleSheet.create({
     marginRight: tokens.spacingSpacing10,
   },
   wheelSheet: {
-    paddingHorizontal: tokens.spacingSpacing20,
+    paddingHorizontal: tokens.spacingSpacing16,
     paddingTop: tokens.spacingSpacing12,
   },
   wheelRow: {
+    position: 'relative',
     flexDirection: 'row',
     gap: spacingSpacing20,
     marginBottom: spacingSpacing20,
+  },
+  wheelSelectionHighlight: {
+    position: 'absolute',
+    top: 91,
+    left: 0,
+    right: 0,
+    height: 38,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: '#E7EBF2',
   },
   confirmButton: {
     height: 46,

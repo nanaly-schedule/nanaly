@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
@@ -90,28 +90,38 @@ export default function NoticePage() {
         </View>
       )}
 
-      <ScrollView
+      <FlatList
         style={styles.list}
+        data={loading ? [] : notices}
+        keyExtractor={(notice) => String(notice.id)}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-      >
-        {loading && <NText variant="r14">불러오는 중...</NText>}
-
-        {!loading &&
-          notices.map((notice) => (
-            <NoticeCard
-              key={notice.id}
-              notice={notice}
-              variant="list"
-              onPress={() => {
-                router.push({
-                  pathname: '/(notice)/[storeId]/notice-detail',
-                  params: { storeId, noticeId: notice.id },
-                });
-              }}
-            />
-          ))}
-      </ScrollView>
+        renderItem={({ item: notice }) => (
+          <NoticeCard
+            notice={notice}
+            variant="list"
+            onPress={() => {
+              router.push({
+                pathname: '/(notice)/[storeId]/notice-detail',
+                params: { storeId, noticeId: notice.id },
+              });
+            }}
+          />
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            {loading ? (
+              <NText variant="r14" style={styles.emptyText}>
+                불러오는 중...
+              </NText>
+            ) : (
+              <NText variant="r14" style={styles.emptyText}>
+                등록된 공지가 없어요
+              </NText>
+            )}
+          </View>
+        }
+      />
 
       {canManageNotice && (
         <Pressable
@@ -139,7 +149,17 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   listContent: {
+    flexGrow: 1,
     paddingBottom: 96,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    color: '#767676',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
 
   floatingButton: {

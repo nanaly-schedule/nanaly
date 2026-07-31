@@ -144,7 +144,7 @@ export default function MyInfoPage() {
             ))}
           </View>
         ))}
-        <NText variant="r14l" style={styles.footer}>
+        <NText variant="b14" style={styles.footer}>
           © 2026 Nanaly. All rights reserved.
         </NText>
       </ScrollView>
