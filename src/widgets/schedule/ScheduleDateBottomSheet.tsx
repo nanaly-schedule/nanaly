@@ -1,11 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import * as tokens from '@/src/init/styles/tokens';
 import {
   typoColorPrimary,
   typoColorRed,
-  typoColorSub2,
 } from '@/src/init/styles/tokens';
 import BottomSheet from '@/src/shared/ui/BottomSheet';
 import NText from '@/src/shared/ui/NText';
@@ -18,6 +24,7 @@ type ScheduleDateBottomSheetProps = {
   date: string;
   workType: ScheduleWorkType;
   schedules: ScheduleItem[];
+  loading?: boolean;
   onClose: () => void;
   onPressSchedule?: (schedule: ScheduleItem) => void;
   onPressDeleteUnavailable?: (scheduleId: string) => void;
@@ -37,6 +44,7 @@ export default function ScheduleDateBottomSheet({
   date,
   workType,
   schedules,
+  loading = false,
   onClose,
   onPressSchedule,
   onPressDeleteUnavailable,
@@ -53,10 +61,17 @@ export default function ScheduleDateBottomSheet({
       </NText>
 
       <View style={styles.list}>
-        {schedules.length === 0 ? (
-          <View style={styles.emptyRow}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator
+              size="large"
+              color={tokens.brandColorPrimary}
+            />
+          </View>
+        ) : schedules.length === 0 ? (
+          <View style={styles.emptyContainer}>
             <NText variant="r14" style={styles.emptyText}>
-              등록된 {isUnavailable ? '근무불가' : '근무'}가 없어요
+              등록된 스케줄이 없어요
             </NText>
           </View>
         ) : (
@@ -108,10 +123,10 @@ export default function ScheduleDateBottomSheet({
                   </Pressable>
                 )}
                 {!isUnavailable && isEditable && (
-                  <Ionicons
-                    name="chevron-forward"
-                    size={28}
-                    color={typoColorPrimary}
+                  <Image
+                    source={require('@/src/shared/assets/arrow_btn.svg')}
+                    style={styles.arrowIcon}
+                    contentFit="contain"
                   />
                 )}
               </Pressable>
@@ -145,37 +160,50 @@ function isAllDayUnavailable(schedule: ScheduleItem) {
 const styles = StyleSheet.create({
   sheet: {
     minHeight: 468,
-    paddingHorizontal: 28,
+    paddingHorizontal: 0,
     paddingTop: tokens.spacingSpacing8,
   },
   title: {
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+    marginLeft: tokens.spacingSpacing16,
     marginTop: 26,
     marginBottom: tokens.spacingSpacing30,
   },
   list: {
-    gap: 18,
+    flex: 1,
+    gap: 10,
+    marginHorizontal: tokens.spacingSpacing16,
   },
   row: {
-    minHeight: 52,
+    width: '100%',
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: tokens.radiusRadius12,
     backgroundColor: tokens.basicColorWhiteBase,
-    paddingLeft: tokens.spacingSpacing8,
-    paddingRight: tokens.spacingSpacing8,
+    paddingHorizontal: tokens.spacingSpacing10,
   },
   rowText: {
     flex: 1,
-    color: typoColorPrimary,
+    color: '#575757',
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
     fontSize: tokens.typographyPrimitiveFontSize14,
-    lineHeight: 26,
+    lineHeight: tokens.typographyPrimitiveLineHeight16,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   rowName: {
-    fontWeight: '700',
+    color: '#333333',
+    fontFamily: 'Pretendard',
+    fontWeight: '600',
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight16,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   unavailableText: {
-    color: typoColorPrimary,
+    color: '#575757',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   conflictText: {
     color: typoColorRed,
@@ -187,14 +215,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyRow: {
-    minHeight: 38,
+  arrowIcon: {
+    width: 24,
+    height: 24,
+    transform: [{ rotate: '-90deg' }],
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radiusRadius8,
-    backgroundColor: tokens.basicColorWhiteBase,
-    paddingHorizontal: tokens.spacingSpacing12,
+    paddingBottom: 60,
   },
   emptyText: {
-    color: typoColorSub2,
+    color: '#767676',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 60,
   },
 });

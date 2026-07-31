@@ -11,6 +11,7 @@ type ScheduleCalendarProps = {
   selectedDate: string;
   schedulesByDate: Record<string, ScheduleItem[]>;
   compactLabel?: 'member' | 'time';
+  badgeColor?: string;
   dayWidth?: number;
   dayHeight?: number;
   tablet?: boolean;
@@ -24,6 +25,7 @@ export default function ScheduleCalendar({
   selectedDate,
   schedulesByDate,
   compactLabel = 'member',
+  badgeColor,
   dayWidth,
   dayHeight,
   tablet = false,
@@ -59,6 +61,7 @@ export default function ScheduleCalendar({
             selected={date?.dateString === selectedDate}
             schedules={date ? (schedulesByDate[date.dateString] ?? []) : []}
             compactLabel={compactLabel}
+            badgeColor={badgeColor}
             dayWidth={dayWidth}
             dayHeight={dayHeight}
             tablet={tablet}

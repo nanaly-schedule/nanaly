@@ -1,8 +1,14 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
@@ -16,7 +22,7 @@ import {
 } from '@/src/features/schedule/api/schedule';
 import useUser from '@/src/features/user/lib/useUser';
 import * as tokens from '@/src/init/styles/tokens';
-import { buttonColorCta, typoColorPrimary } from '@/src/init/styles/tokens';
+import { typoColorPrimary } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import {
@@ -336,7 +342,7 @@ function mapMonthlyScheduleEntry(
     'workEndTime',
   ]);
 
-  if (!date || !memberName) {
+  if (!date || !memberName || !startTime || !endTime) {
     return null;
   }
 
@@ -344,13 +350,11 @@ function mapMonthlyScheduleEntry(
     entry.item,
   );
   const safeMemberId = memberId ?? `${date}-${memberName}`;
-  const safeStartTime = startTime ?? '00:00';
-  const safeEndTime = endTime ?? '00:00';
   const id = getScheduleId(entry.item, {
     date,
     memberId: safeMemberId,
-    startTime: safeStartTime,
-    endTime: safeEndTime,
+    startTime,
+    endTime,
   });
 
   return {
@@ -361,8 +365,8 @@ function mapMonthlyScheduleEntry(
     positionId,
     positionName,
     positionColor,
-    startTime: normalizeTime(safeStartTime),
-    endTime: normalizeTime(safeEndTime),
+    startTime: normalizeTime(startTime),
+    endTime: normalizeTime(endTime),
     memo: getScheduleMemo(entry.item) ?? undefined,
     isMine: markAsMine || getBooleanField(entry.item, ['isMine', 'mine']),
   };
@@ -460,10 +464,6 @@ function mapUnavailableEntries(params: {
     .filter((schedule): schedule is ScheduleItem => !!schedule);
 
   return { entries, schedules };
-}
-
-function getUniqueScheduleDates(schedules: ScheduleItem[]) {
-  return Array.from(new Set(schedules.map((schedule) => schedule.date)));
 }
 
 function groupSchedulesByDate(schedules: ScheduleItem[]) {
@@ -591,6 +591,7 @@ export default function SchedulePage() {
   const [dailyAssignedSchedules, setDailyAssignedSchedules] = useState<
     ScheduleItem[]
   >([]);
+  const [dailyAssignedLoading, setDailyAssignedLoading] = useState(false);
   const [dailyAssignedDate, setDailyAssignedDate] = useState<string | null>(
     null,
   );
@@ -600,6 +601,7 @@ export default function SchedulePage() {
   const [dailyUnavailableSchedules, setDailyUnavailableSchedules] = useState<
     ScheduleItem[]
   >([]);
+  const [dailyUnavailableLoading, setDailyUnavailableLoading] = useState(false);
   const [dailyUnavailableDate, setDailyUnavailableDate] = useState<
     string | null
   >(null);
@@ -706,8 +708,18 @@ export default function SchedulePage() {
         void entries;
         let nextSchedules = schedules;
 
-        if (requestScope === 'mine' && schedules.length > 0) {
-          const dates = getUniqueScheduleDates(schedules);
+        if (entries.length > 0 && schedules.length === 0) {
+          const dates = Array.from(
+            new Set(
+              entries
+                .map((entry) =>
+                  isRecord(entry.item)
+                    ? getScheduleDate(entry.item, entry.date)
+                    : null,
+                )
+                .filter((date): date is string => !!date),
+            ),
+          );
 
           try {
             const dailyResults = await Promise.all(
@@ -724,15 +736,18 @@ export default function SchedulePage() {
                 return mapScheduleEntries({
                   data: response.data,
                   fallbackDate: date,
-                  markAsMine: true,
+                  markAsMine: requestScope === 'mine',
                   positions,
                   fallbackMemberName: userName,
                 }).schedules;
               }),
             );
-            const hydratedSchedules = dailyResults
-              .flat()
-              .filter((schedule) => isMySchedule(schedule, userName));
+            const hydratedSchedules =
+              requestScope === 'mine'
+                ? dailyResults
+                    .flat()
+                    .filter((schedule) => isMySchedule(schedule, userName))
+                : dailyResults.flat();
 
             if (hydratedSchedules.length > 0) {
               nextSchedules = hydratedSchedules;
@@ -877,6 +892,8 @@ export default function SchedulePage() {
     }
 
     const fetchDailySchedules = async () => {
+      setDailyAssignedLoading(true);
+
       try {
         setDailyAssignedDate(selectedDate);
         setDailyAssignedSchedules([]);
@@ -901,6 +918,8 @@ export default function SchedulePage() {
       } catch {
         setDailyAssignedDate(null);
         setDailyAssignedSchedules([]);
+      } finally {
+        setDailyAssignedLoading(false);
       }
     };
 
@@ -933,6 +952,8 @@ export default function SchedulePage() {
     }
 
     const fetchDailyUnavailable = async () => {
+      setDailyUnavailableLoading(true);
+
       try {
         setDailyUnavailableDate(selectedDate);
         setDailyUnavailableSchedules([]);
@@ -952,6 +973,8 @@ export default function SchedulePage() {
       } catch {
         setDailyUnavailableDate(null);
         setDailyUnavailableSchedules([]);
+      } finally {
+        setDailyUnavailableLoading(false);
       }
     };
 
@@ -1102,10 +1125,18 @@ export default function SchedulePage() {
   return (
     <PageLayout showHeader={false} style={styles.page}>
       <View style={styles.header}>
-        <Pressable onPress={() => setMonthPickerVisible(true)}>
-          <NText variant="b16" style={styles.monthTitle}>
-            {formatMonthTitle(currentMonth)}⌄
+        <Pressable
+          style={styles.monthButton}
+          onPress={() => setMonthPickerVisible(true)}
+        >
+          <NText variant="h2" style={styles.monthTitle}>
+            {formatMonthTitle(currentMonth)}
           </NText>
+          <Image
+            source={require('@/src/shared/assets/arrow_btn.svg')}
+            style={styles.monthButtonIcon}
+            contentFit="contain"
+          />
         </Pressable>
       </View>
 
@@ -1134,17 +1165,33 @@ export default function SchedulePage() {
           },
         ]}
       >
-        <ScheduleCalendar
-          currentMonth={currentMonth}
-          selectedDate={selectedDate}
-          schedulesByDate={schedulesByDate}
-          compactLabel={viewType === 'mine' ? 'time' : 'member'}
-          dayWidth={calendarDayWidth}
-          dayHeight={calendarDayHeight}
-          tablet={isTabletLayout}
-          onPressDate={handlePressDate}
-          onPressSchedule={handlePressSchedule}
-        />
+        {workType === 'assigned' && !assignedSchedulesLoaded ? (
+          <View style={styles.loading}>
+            <ActivityIndicator
+              size="large"
+              color={tokens.brandColorPrimary}
+            />
+          </View>
+        ) : (
+          <ScheduleCalendar
+            currentMonth={currentMonth}
+            selectedDate={selectedDate}
+            schedulesByDate={schedulesByDate}
+            compactLabel={viewType === 'mine' ? 'time' : 'member'}
+            badgeColor={
+              workType === 'unavailable'
+                ? '#FA6D60'
+                : viewType === 'mine'
+                  ? '#60A5FA'
+                  : undefined
+            }
+            dayWidth={calendarDayWidth}
+            dayHeight={calendarDayHeight}
+            tablet={isTabletLayout}
+            onPressDate={handlePressDate}
+            onPressSchedule={handlePressSchedule}
+          />
+        )}
       </View>
 
       {canCreateCurrentWorkType && (
@@ -1160,7 +1207,11 @@ export default function SchedulePage() {
             setFormVisible(true);
           }}
         >
-          <Ionicons name="add" size={28} color={tokens.basicColorWhiteBase} />
+          <Image
+            source={require('@/src/shared/assets/plus_btn.svg')}
+            style={styles.floatingButtonIcon}
+            contentFit="contain"
+          />
         </Pressable>
       )}
 
@@ -1236,6 +1287,11 @@ export default function SchedulePage() {
         date={selectedDate}
         workType={workType}
         schedules={selectedDateSchedules}
+        loading={
+          workType === 'assigned'
+            ? dailyAssignedLoading
+            : canViewAllUnavailable && dailyUnavailableLoading
+        }
         canEditSchedule={canEditScheduleItem}
         canDeleteUnavailable={canDeleteUnavailable}
         hasConflict={hasUnavailableConflict}
@@ -1266,7 +1322,7 @@ export default function SchedulePage() {
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: '#F1F1F6',
+    backgroundColor: '#F5F7FA',
   },
   header: {
     flexDirection: 'row',
@@ -1277,28 +1333,35 @@ const styles = StyleSheet.create({
   },
   monthTitle: {
     color: typoColorPrimary,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+  },
+  monthButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  monthButtonIcon: {
+    width: 24,
+    height: 24,
   },
   calendarContainer: {
     flex: 1,
   },
   floatingButton: {
     position: 'absolute',
-    right: 8,
-    bottom: 18,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    right: 0,
+    bottom: 20,
+    width: 52,
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: buttonColorCta,
-    shadowColor: tokens.basicColorBlackBase,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+  },
+  floatingButtonIcon: {
+    position: 'absolute',
+    top: -8,
+    left: -12,
+    width: 76,
+    height: 76,
   },
   loading: {
     flex: 1,

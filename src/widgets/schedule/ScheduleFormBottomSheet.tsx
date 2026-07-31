@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { isAxiosError } from 'axios';
+import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import {
   Modal,
@@ -153,6 +154,14 @@ export default function ScheduleFormBottomSheet({
     !!startTime ||
     !!endTime ||
     !!memo;
+  const hasEditChanges =
+    !!schedule &&
+    (selectedMemberId !== schedule.memberId ||
+      selectedPositionId !== (schedule.positionId ?? null) ||
+      selectedDate !== schedule.date ||
+      startTime !== schedule.startTime ||
+      endTime !== schedule.endTime ||
+      memo !== (schedule.memo ?? ''));
   const hasRequiredValues =
     !!selectedMemberId && !!displayDate && !!startTime && !!endTime;
 
@@ -163,6 +172,11 @@ export default function ScheduleFormBottomSheet({
     }
 
     if (isEditMode) {
+      if (hasEditChanges) {
+        setExitConfirmVisible(true);
+        return;
+      }
+
       setIsEditMode(false);
       return;
     }
@@ -173,6 +187,22 @@ export default function ScheduleFormBottomSheet({
     }
 
     onClose();
+  };
+
+  const discardEditChanges = () => {
+    const originalPosition =
+      positions.find((position) => position.id === schedule?.positionId) ??
+      null;
+
+    setSelectedMember(null);
+    setSelectedPosition(originalPosition);
+    setPositionCleared(false);
+    setSelectedDate(schedule?.date ?? '');
+    setStartTime(schedule?.startTime ?? '');
+    setEndTime(schedule?.endTime ?? '');
+    setMemo(schedule?.memo ?? '');
+    setExitConfirmVisible(false);
+    setIsEditMode(false);
   };
 
   const handleSave = () => {
@@ -380,10 +410,10 @@ export default function ScheduleFormBottomSheet({
             style={styles.headerButton}
             onPress={() => setMenuVisible((v) => !v)}
           >
-            <Ionicons
-              name="ellipsis-vertical"
-              size={24}
-              color={typoColorPrimary}
+            <Image
+              source={require('@/src/shared/assets/more_option_btn.svg')}
+              style={styles.moreOptionIcon}
+              contentFit="contain"
             />
           </Pressable>
         )}
@@ -398,7 +428,7 @@ export default function ScheduleFormBottomSheet({
               setIsEditMode(true);
             }}
           >
-            <NText variant="m16" style={styles.menuText}>
+            <NText variant="r12" style={styles.menuText}>
               수정하기
             </NText>
           </Pressable>
@@ -409,7 +439,7 @@ export default function ScheduleFormBottomSheet({
               setDeleteConfirmVisible(true);
             }}
           >
-            <NText variant="m16" style={styles.menuText}>
+            <NText variant="r12" style={styles.menuText}>
               삭제하기
             </NText>
           </Pressable>
@@ -421,7 +451,7 @@ export default function ScheduleFormBottomSheet({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.content}
       >
-        <NText variant="r12" style={styles.sectionTitle}>
+        <NText variant="sb14" style={styles.sectionTitle}>
           근무자 정보
         </NText>
 
@@ -429,6 +459,7 @@ export default function ScheduleFormBottomSheet({
           <InfoRow
             label="근무자"
             value={memberName}
+            isPlaceholder={isEditMode}
             onPress={
               isFormMode ? () => setMemberPickerVisible(true) : undefined
             }
@@ -436,6 +467,7 @@ export default function ScheduleFormBottomSheet({
           <InfoRow
             label="포지션"
             value={positionName}
+            isPlaceholder={isEditMode || positionName === '지정안됨'}
             onPress={
               isFormMode ? () => setPositionPickerVisible(true) : undefined
             }
@@ -443,13 +475,17 @@ export default function ScheduleFormBottomSheet({
         </View>
 
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             날짜
           </NText>
           <TitleButton
             title={displayDate ? formatDate(displayDate) : 'YYYY.MM.DD'}
-            isPlaceholder={!displayDate}
+            isPlaceholder={isEditMode || !displayDate}
             showIcon={false}
+            textStyle={[
+              styles.dateValue,
+              (isEditMode || !displayDate) && styles.placeholderValue,
+            ]}
             onPress={() => {
               if (isFormMode) {
                 setDatePickerVisible(true);
@@ -459,17 +495,17 @@ export default function ScheduleFormBottomSheet({
         </View>
 
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             시간
           </NText>
           <View style={styles.timeRow}>
             <View style={styles.timeColumn}>
-              <NText variant="r12" style={styles.timeLabel}>
+              <NText variant="m14" style={styles.timeLabel}>
                 시작
               </NText>
               <TitleButton
                 title={startTime ? startTime : '00:00'}
-                isPlaceholder={!startTime}
+                isPlaceholder={isEditMode || !startTime}
                 showIcon={false}
                 onPress={() => {
                   if (isFormMode) {
@@ -479,12 +515,12 @@ export default function ScheduleFormBottomSheet({
               />
             </View>
             <View style={styles.timeColumn}>
-              <NText variant="r12" style={styles.timeLabel}>
+              <NText variant="m14" style={styles.timeLabel}>
                 종료
               </NText>
               <TitleButton
                 title={endTime ? endTime : '00:00'}
-                isPlaceholder={!endTime}
+                isPlaceholder={isEditMode || !endTime}
                 showIcon={false}
                 onPress={() => {
                   if (isFormMode) {
@@ -497,17 +533,21 @@ export default function ScheduleFormBottomSheet({
         </View>
 
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             메모
           </NText>
           <TextInput
             value={memo}
             multiline
             placeholder="전달사항 및 특이사항을 입력해주세요"
-            placeholderTextColor={typoColorSub2}
+            placeholderTextColor="#434343"
             onChangeText={setMemo}
             editable={isFormMode}
-            style={[styles.input, styles.memoInput]}
+            style={[
+              styles.input,
+              styles.memoInput,
+              isEditMode && styles.placeholderValue,
+            ]}
           />
         </View>
       </ScrollView>
@@ -582,7 +622,7 @@ export default function ScheduleFormBottomSheet({
             variant="secondary"
             onPress={() => setSaveConfirmVisible(false)}
           >
-            취소
+            {isCreateMode ? '취소' : '아니요'}
           </BaseModal.Button>
           <BaseModal.Button
             onPress={isCreateMode ? handleCreateSchedule : handleUpdateSchedule}
@@ -602,22 +642,31 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setExitConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Text>저장하지 않고 나갈까요?</BaseModal.Text>
+          <BaseModal.Text>
+            {isEditMode
+              ? '수정사항을 저장하지 않고 나갈까요?'
+              : '저장하지 않고 나갈까요?'}
+          </BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={() => setExitConfirmVisible(false)}
           >
-            취소
+            {isEditMode ? '아니요' : '취소'}
           </BaseModal.Button>
           <BaseModal.Button
             onPress={() => {
+              if (isEditMode) {
+                discardEditChanges();
+                return;
+              }
+
               setExitConfirmVisible(false);
               onClose();
             }}
           >
-            마무리
+            {isEditMode ? '나가기' : '마무리'}
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -666,7 +715,7 @@ export default function ScheduleFormBottomSheet({
             variant="secondary"
             onPress={() => setDeleteConfirmVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={handleDeleteSchedule}>
             {deleting ? '삭제중' : '삭제하기'}
@@ -701,24 +750,26 @@ function toTimeString(totalMinutes: number) {
 function InfoRow({
   label,
   value,
+  isPlaceholder = false,
   onPress,
 }: {
   label: string;
   value: string;
+  isPlaceholder?: boolean;
   onPress?: () => void;
 }) {
   const RowComponent = onPress ? Pressable : View;
 
   return (
     <RowComponent style={styles.infoRow} onPress={onPress}>
-      <NText variant="r14" style={styles.infoLabel}>
+      <NText variant="m14" style={styles.infoLabel}>
         {label}
       </NText>
       <NText
         variant="r14"
         style={[
           styles.infoValue,
-          value === '지정안됨' && styles.placeholderValue,
+          (isPlaceholder || value === '지정안됨') && styles.placeholderValue,
         ]}
       >
         {value}
@@ -778,7 +829,10 @@ function PositionPickerBottomSheet({
                   { backgroundColor: position.color },
                 ]}
               />
-              <NText variant="b16" style={styles.memberText}>
+              <NText
+                variant="sb14"
+                style={[styles.memberText, styles.positionText]}
+              >
                 {position.name}
               </NText>
               {selected && (
@@ -826,7 +880,7 @@ function MemberPickerBottomSheet({
               onPress={() => onSelect(member)}
             >
               <NText variant="r14" style={styles.memberText}>
-                <NText variant="b16" style={styles.memberName}>
+                <NText variant="sb14" style={styles.memberName}>
                   {member.name}
                 </NText>
                 {member.roleName ? ` · ${member.roleName}` : ''}
@@ -1066,6 +1120,11 @@ const styles = StyleSheet.create({
   },
   title: {
     color: typoColorPrimary,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+  },
+  moreOptionIcon: {
+    width: 24,
+    height: 24,
   },
   menu: {
     position: 'absolute',
@@ -1073,31 +1132,33 @@ const styles = StyleSheet.create({
     top: 58,
     right: 16,
     width: 140,
-    borderRadius: tokens.radiusRadius20,
+    borderRadius: tokens.radiusRadius12,
     backgroundColor: tokens.basicColorWhiteBase,
-    paddingVertical: tokens.spacingSpacing8,
+    paddingHorizontal: tokens.spacingSpacing8,
+    paddingVertical: 0,
     shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
-      height: 12,
+      height: 8,
     },
-    shadowOpacity: 0.18,
-    shadowRadius: 28,
-    elevation: 12,
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
   },
   menuItem: {
     height: 40,
     justifyContent: 'center',
-    paddingHorizontal: 18,
   },
   menuText: {
-    color: typoColorPrimary,
+    color: tokens.typoColorSecondary,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   content: {
     paddingBottom: tokens.spacingSpacing20,
   },
   sectionTitle: {
     color: typoColorPrimary,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
     marginBottom: tokens.spacingSpacing10,
   },
   infoCard: {
@@ -1114,10 +1175,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   infoLabel: {
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   infoValue: {
-    color: typoColorPrimary,
+    color: '#434343',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+    textAlign: 'right',
   },
   placeholderValue: {
     color: typoColorSub2,
@@ -1134,8 +1198,16 @@ const styles = StyleSheet.create({
     fontSize: tokens.typographyPrimitiveFontSize12,
   },
   memoInput: {
-    height: 76,
-    paddingTop: tokens.spacingSpacing12,
+    width: '100%',
+    height: 80,
+    paddingHorizontal: tokens.spacingSpacing10,
+    paddingVertical: tokens.spacingSpacing10,
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight24,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+    includeFontPadding: false,
     textAlignVertical: 'top',
   },
   timeRow: {
@@ -1147,35 +1219,54 @@ const styles = StyleSheet.create({
     gap: tokens.spacingSpacing8,
   },
   timeLabel: {
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+  },
+  dateValue: {
+    color: '#434343',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   pickerSheet: {
     minHeight: 520,
-    paddingHorizontal: tokens.spacingSpacing20,
-    paddingTop: tokens.spacingSpacing12,
+    paddingHorizontal: 0,
+    paddingTop: tokens.spacingSpacing8,
   },
   pickerTitle: {
-    color: typoColorPrimary,
-    textAlign: 'center',
-    marginBottom: 36,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+    marginLeft: tokens.spacingSpacing16,
+    marginTop: 26,
+    marginBottom: tokens.spacingSpacing30,
   },
   memberList: {
-    gap: tokens.spacingSpaicng14,
+    gap: tokens.spacingSpacing10,
+    marginHorizontal: tokens.spacingSpacing16,
   },
   memberRow: {
-    minHeight: 70,
+    width: '100%',
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: tokens.radiusRadius12,
     backgroundColor: tokens.basicColorWhiteBase,
-    paddingHorizontal: tokens.spacingSpacing12,
+    paddingHorizontal: tokens.spacingSpacing10,
   },
   memberText: {
     flex: 1,
-    color: typoColorPrimary,
+    color: '#575757',
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight16,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   memberName: {
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+  },
+  positionText: {
+    color: '#333333',
+    fontWeight: '600',
   },
   positionDot: {
     width: 8,

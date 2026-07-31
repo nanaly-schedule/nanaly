@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
 import { isAxiosError } from 'axios';
+import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -227,7 +227,7 @@ export default function PositionManagePage() {
                 <View
                   style={[styles.colorDot, { backgroundColor: position.color }]}
                 />
-                <NText variant="r14" style={styles.positionName}>
+                <NText variant="sb14" style={styles.positionName}>
                   {position.name}
                 </NText>
                 <Pressable
@@ -237,10 +237,10 @@ export default function PositionManagePage() {
                     setDeleteTarget(position);
                   }}
                 >
-                  <Ionicons
-                    name="trash-outline"
-                    size={18}
-                    color={typoColorSub2}
+                  <Image
+                    source={require('@/src/shared/assets/delete_btn.svg')}
+                    style={styles.deleteIcon}
+                    contentFit="contain"
                   />
                 </Pressable>
               </View>
@@ -329,7 +329,7 @@ export default function PositionManagePage() {
             disabled={deleting}
             onPress={() => setDeleteTarget(null)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button disabled={deleting} onPress={handleDelete}>
             {deleting ? '삭제중' : '삭제하기'}
@@ -376,7 +376,12 @@ const styles = StyleSheet.create({
   },
   positionName: {
     flex: 1,
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+  },
+  deleteIcon: {
+    width: 24,
+    height: 24,
   },
   createButton: {
     height: 48,
