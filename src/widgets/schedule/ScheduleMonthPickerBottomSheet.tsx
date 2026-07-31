@@ -48,12 +48,20 @@ export default function ScheduleMonthPickerBottomSheet({
   }, [currentMonthNumber, currentYear, visible]);
 
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
-      <View style={styles.picker}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      backdropVariant="light"
+      style={styles.wheelSheet}
+    >
+      <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={years}
           selectedValue={draft.year}
-          formatLabel={(year) => `${year}년`}
+          formatLabel={(year) => `${year}`}
+          unit="년"
+          unitOffset={26}
           onChange={(year) =>
             setDraft((prev) => ({
               ...prev,
@@ -64,7 +72,8 @@ export default function ScheduleMonthPickerBottomSheet({
         <DateWheelColumn
           items={months}
           selectedValue={draft.month}
-          formatLabel={(month) => `${month}월`}
+          formatLabel={(month) => `${month}`}
+          unit="월"
           onChange={(month) =>
             setDraft((prev) => ({
               ...prev,
@@ -91,10 +100,24 @@ export default function ScheduleMonthPickerBottomSheet({
 }
 
 const styles = StyleSheet.create({
-  picker: {
+  wheelSheet: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  wheelRow: {
+    position: 'relative',
     flexDirection: 'row',
     gap: spacingSpacing20,
     marginBottom: spacingSpacing20,
+  },
+  wheelSelectionHighlight: {
+    position: 'absolute',
+    top: 91,
+    left: 0,
+    right: 0,
+    height: 38,
+    borderRadius: radiusRadius12,
+    backgroundColor: '#E7EBF2',
   },
   confirmButton: {
     height: 46,

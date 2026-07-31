@@ -14,6 +14,7 @@ import { MemberRole } from '@/src/entities/member/member';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
 import { getPositions } from '@/src/features/schedule/api/position';
 import {
+  deleteUnavailable,
   getDailySchedules,
   getDailyUnavailable,
   getMonthlySchedules,
@@ -22,7 +23,8 @@ import {
 } from '@/src/features/schedule/api/schedule';
 import useUser from '@/src/features/user/lib/useUser';
 import * as tokens from '@/src/init/styles/tokens';
-import { typoColorPrimary } from '@/src/init/styles/tokens';
+import { typoColorPrimary, typoColorRed } from '@/src/init/styles/tokens';
+import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import {
@@ -581,6 +583,10 @@ export default function SchedulePage() {
   const [monthPickerVisible, setMonthPickerVisible] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
   const [unavailableFormVisible, setUnavailableFormVisible] = useState(false);
+  const [unavailableDeleteTarget, setUnavailableDeleteTarget] =
+    useState<ScheduleItem | null>(null);
+  const [deletingUnavailable, setDeletingUnavailable] = useState(false);
+  const [unavailableDeleteError, setUnavailableDeleteError] = useState('');
   const [dateDetailVisible, setDateDetailVisible] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(
     null,
@@ -1037,7 +1043,35 @@ export default function SchedulePage() {
     return canEditSchedule;
   };
 
-  const canDeleteUnavailable = () => false;
+  const canDeleteUnavailable = (schedule: ScheduleItem) =>
+    access.isOwner || isMySchedule(schedule, userName);
+
+  const handleDeleteUnavailable = async () => {
+    if (!storeId || !unavailableDeleteTarget || deletingUnavailable) {
+      return;
+    }
+
+    const unavailableId = unavailableDeleteTarget.id;
+
+    try {
+      setDeletingUnavailable(true);
+      setUnavailableDeleteError('');
+      await deleteUnavailable(storeId, unavailableId);
+      setUnavailableSchedules((current) =>
+        current.filter((schedule) => schedule.id !== unavailableId),
+      );
+      setDailyUnavailableSchedules((current) =>
+        current.filter((schedule) => schedule.id !== unavailableId),
+      );
+      setUnavailableDeleteTarget(null);
+      setDateDetailVisible(false);
+      setScheduleRefreshKey((current) => current + 1);
+    } catch {
+      setUnavailableDeleteError('근무불가 삭제에 실패했어요');
+    } finally {
+      setDeletingUnavailable(false);
+    }
+  };
 
   const hasUnavailableConflict = (schedule: ScheduleItem) => {
     if (!isUnavailableSchedule(schedule)) {
@@ -1294,6 +1328,7 @@ export default function SchedulePage() {
         }
         canEditSchedule={canEditScheduleItem}
         canDeleteUnavailable={canDeleteUnavailable}
+        showUnavailableMemberName={access.isOwner}
         hasConflict={hasUnavailableConflict}
         onClose={() => {
           setDateDetailVisible(false);
@@ -1308,14 +1343,58 @@ export default function SchedulePage() {
           setFormVisible(true);
         }}
         onPressDeleteUnavailable={(scheduleId) => {
-          setUnavailableSchedules((prev) =>
-            prev.filter(
-              (schedule) =>
-                schedule.id !== scheduleId || !isMySchedule(schedule, userName),
-            ),
+          const target = selectedDateSchedules.find(
+            (schedule) => schedule.id === scheduleId,
           );
+
+          if (!target || !canDeleteUnavailable(target)) {
+            return;
+          }
+
+          setUnavailableDeleteError('');
+          setUnavailableDeleteTarget(target);
         }}
       />
+
+      <BaseModal
+        visible={!!unavailableDeleteTarget}
+        onClose={() => {
+          if (!deletingUnavailable) {
+            setUnavailableDeleteTarget(null);
+            setUnavailableDeleteError('');
+          }
+        }}
+        closeOnBackdropPress={!deletingUnavailable}
+      >
+        <BaseModal.Content>
+          <BaseModal.Text>
+            근무 불가 스케줄을 삭제하시겠습니까?
+          </BaseModal.Text>
+          {unavailableDeleteError && (
+            <NText variant="r12" style={styles.deleteError}>
+              {unavailableDeleteError}
+            </NText>
+          )}
+        </BaseModal.Content>
+        <BaseModal.Actions>
+          <BaseModal.Button
+            variant="secondary"
+            disabled={deletingUnavailable}
+            onPress={() => {
+              setUnavailableDeleteTarget(null);
+              setUnavailableDeleteError('');
+            }}
+          >
+            아니요
+          </BaseModal.Button>
+          <BaseModal.Button
+            disabled={deletingUnavailable}
+            onPress={handleDeleteUnavailable}
+          >
+            {deletingUnavailable ? '삭제중' : '삭제하기'}
+          </BaseModal.Button>
+        </BaseModal.Actions>
+      </BaseModal>
     </PageLayout>
   );
 }
@@ -1370,5 +1449,10 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: typoColorPrimary,
+  },
+  deleteError: {
+    color: typoColorRed,
+    marginTop: tokens.spacingSpacing8,
+    textAlign: 'center',
   },
 });

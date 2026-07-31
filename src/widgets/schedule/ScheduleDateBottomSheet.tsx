@@ -30,6 +30,7 @@ type ScheduleDateBottomSheetProps = {
   onPressDeleteUnavailable?: (scheduleId: string) => void;
   canEditSchedule?: (schedule: ScheduleItem) => boolean;
   canDeleteUnavailable?: (schedule: ScheduleItem) => boolean;
+  showUnavailableMemberName?: boolean;
   hasConflict?: (schedule: ScheduleItem) => boolean;
 };
 
@@ -50,6 +51,7 @@ export default function ScheduleDateBottomSheet({
   onPressDeleteUnavailable,
   canEditSchedule = () => false,
   canDeleteUnavailable = () => false,
+  showUnavailableMemberName = false,
   hasConflict = () => false,
 }: ScheduleDateBottomSheetProps) {
   const isUnavailable = workType === 'unavailable';
@@ -88,17 +90,19 @@ export default function ScheduleDateBottomSheet({
             const isConflict = hasConflict(schedule);
 
             return (
-              <Pressable
-                key={schedule.id}
-                disabled={!isEditable}
-                style={styles.row}
-                onPress={() => onPressSchedule?.(schedule)}
-              >
+              <View key={schedule.id} style={styles.row}>
                 {isUnavailable ? (
                   <View style={styles.rowText}>
                     <NText variant="r14" style={styles.unavailableText}>
-                      <Text style={styles.rowName}>{schedule.memberName}</Text>{' '}
-                      · 근무불가 · {getScheduleTimeLabel(schedule)}
+                      {showUnavailableMemberName && (
+                        <>
+                          <Text style={styles.rowName}>
+                            {schedule.memberName}
+                          </Text>{' '}
+                          ·{' '}
+                        </>
+                      )}
+                      근무불가 · {getScheduleTimeLabel(schedule)}
                     </NText>
                     {isConflict && (
                       <NText variant="r12" style={styles.conflictText}>
@@ -107,19 +111,33 @@ export default function ScheduleDateBottomSheet({
                     )}
                   </View>
                 ) : (
-                  <Text style={styles.rowText}>
-                    <Text style={styles.rowName}>{schedule.memberName}</Text>
-                    <Text>
-                      {' '}
-                      · {schedule.positionName ?? '선택 안함'} ·{' '}
-                      {getScheduleTimeLabel(schedule)}
+                  <Pressable
+                    disabled={!isEditable}
+                    style={styles.scheduleContent}
+                    onPress={() => onPressSchedule?.(schedule)}
+                  >
+                    <Text style={styles.rowText}>
+                      <Text style={styles.rowName}>{schedule.memberName}</Text>
+                      <Text>
+                        {' '}
+                        · {schedule.positionName ?? '선택 안함'} ·{' '}
+                        {getScheduleTimeLabel(schedule)}
+                      </Text>
                     </Text>
-                  </Text>
+                    {isEditable && (
+                      <Image
+                        source={require('@/src/shared/assets/arrow_btn.svg')}
+                        style={styles.arrowIcon}
+                        contentFit="contain"
+                      />
+                    )}
+                  </Pressable>
                 )}
 
                 {isUnavailable && canDelete && (
                   <Pressable
                     style={styles.deleteButton}
+                    hitSlop={10}
                     onPress={() => onPressDeleteUnavailable?.(schedule.id)}
                   >
                     <Ionicons
@@ -129,14 +147,7 @@ export default function ScheduleDateBottomSheet({
                     />
                   </Pressable>
                 )}
-                {!isUnavailable && isEditable && (
-                  <Image
-                    source={require('@/src/shared/assets/arrow_btn.svg')}
-                    style={styles.arrowIcon}
-                    contentFit="contain"
-                  />
-                )}
-              </Pressable>
+              </View>
             );
           })
         )}
@@ -190,6 +201,12 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radiusRadius12,
     backgroundColor: tokens.basicColorWhiteBase,
     paddingHorizontal: tokens.spacingSpacing10,
+  },
+  scheduleContent: {
+    flex: 1,
+    height: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   rowText: {
     flex: 1,
