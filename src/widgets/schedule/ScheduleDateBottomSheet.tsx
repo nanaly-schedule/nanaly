@@ -55,7 +55,14 @@ export default function ScheduleDateBottomSheet({
   const isUnavailable = workType === 'unavailable';
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} style={styles.sheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      style={styles.sheet}
+      resizable
+      minHeight={468}
+      initialHeight={468}
+    >
       <NText variant="b16" style={styles.title}>
         {formatDateTitle(date)}
       </NText>

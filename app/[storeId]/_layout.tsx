@@ -162,6 +162,9 @@ export default function Layout() {
         name="schedule"
         options={{
           title: '스케줄',
+          sceneStyle: {
+            backgroundColor: '#F5F7FA',
+          },
           tabBarIcon: ({ focused, color }) => (
             <TabIcon
               focused={focused}

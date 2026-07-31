@@ -804,7 +804,7 @@ function PositionPickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.pickerSheet}
     >
       <NText variant="b16" style={styles.pickerTitle}>
@@ -863,7 +863,7 @@ function MemberPickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.pickerSheet}
     >
       <NText variant="b16" style={styles.pickerTitle}>
@@ -944,7 +944,7 @@ function ScheduleDatePickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
@@ -1050,7 +1050,7 @@ function ScheduleTimePickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
@@ -1099,7 +1099,9 @@ function ConfirmButton({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   sheet: {
+    height: 720,
     minHeight: 720,
+    maxHeight: 720,
     paddingHorizontal: tokens.spacingSpacing16,
     paddingTop: tokens.spacingSpacing8,
     paddingBottom: 32,

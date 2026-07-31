@@ -424,7 +424,7 @@ function ScheduleUnavailableDatePickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
@@ -484,7 +484,7 @@ function ScheduleUnavailableTimePickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
@@ -526,7 +526,9 @@ function ConfirmButton({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   sheet: {
-    maxHeight: '92%',
+    height: 720,
+    minHeight: 720,
+    maxHeight: 720,
     paddingHorizontal: tokens.spacingSpacing16,
     paddingTop: tokens.spacingSpacing8,
     paddingBottom: 32,
