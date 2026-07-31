@@ -6,6 +6,7 @@ import {
   spacingSpacing20,
   spacingSpaicng14,
   typoColorPrimary,
+  typoColorSecondary,
 } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -143,6 +144,9 @@ export default function MyInfoPage() {
             ))}
           </View>
         ))}
+        <NText variant="r14l" style={styles.footer}>
+          © 2026 Nanaly. All rights reserved.
+        </NText>
       </ScrollView>
     </PageLayout>
   );
@@ -165,5 +169,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: typoColorPrimary,
+  },
+  footer: {
+    color: typoColorSecondary,
   },
 });
