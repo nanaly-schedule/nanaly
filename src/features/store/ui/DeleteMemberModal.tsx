@@ -18,7 +18,7 @@ export default function DeleteMemberModal({
       </BaseModal.Content>
       <BaseModal.Actions>
         <BaseModal.Button variant="secondary" onPress={onClose}>
-          취소
+          아니요
         </BaseModal.Button>
         <BaseModal.Button onPress={onConfirm}>근무자 삭제</BaseModal.Button>
       </BaseModal.Actions>

@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
 import { isAxiosError } from 'axios';
+import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -11,6 +11,7 @@ import {
   getPositions,
 } from '@/src/features/schedule/api/position';
 import useUser from '@/src/features/user/lib/useUser';
+import * as tokens from '@/src/init/styles/tokens';
 import {
   buttonColorCta,
   buttonColorUnavailable,
@@ -28,7 +29,13 @@ import {
   mapPositionResponses,
 } from '@/src/widgets/schedule/positionMapper';
 
-const COLORS = ['#60A5FA', '#F6983B', '#46D81D', '#8B7CF6', '#14B8A6'];
+const COLORS = [
+  tokens.basicColorBlue400,
+  tokens.basicColorOrange500,
+  tokens.basicColorGreen700,
+  '#8B7CF6',
+  '#14B8A6',
+];
 const MAX_POSITION_COUNT = 5;
 
 function normalizeStoreId(value?: string | string[]) {
@@ -218,12 +225,9 @@ export default function PositionManagePage() {
             {positions.map((position) => (
               <View key={position.id} style={styles.row}>
                 <View
-                  style={[
-                    styles.colorDot,
-                    { backgroundColor: position.color },
-                  ]}
+                  style={[styles.colorDot, { backgroundColor: position.color }]}
                 />
-                <NText variant="r14" style={styles.positionName}>
+                <NText variant="sb14" style={styles.positionName}>
                   {position.name}
                 </NText>
                 <Pressable
@@ -233,10 +237,10 @@ export default function PositionManagePage() {
                     setDeleteTarget(position);
                   }}
                 >
-                  <Ionicons
-                    name="trash-outline"
-                    size={18}
-                    color={typoColorSub2}
+                  <Image
+                    source={require('@/src/shared/assets/delete_btn.svg')}
+                    style={styles.deleteIcon}
+                    contentFit="contain"
                   />
                 </Pressable>
               </View>
@@ -269,7 +273,7 @@ export default function PositionManagePage() {
           <BaseModal.Title>포지션 생성</BaseModal.Title>
           <TextInput
             placeholder="포지션명을 입력해주세요"
-            placeholderTextColor="#A5A5A5"
+            placeholderTextColor={tokens.typoColorPlaceholder}
             value={name}
             onChangeText={setName}
             style={styles.input}
@@ -325,12 +329,9 @@ export default function PositionManagePage() {
             disabled={deleting}
             onPress={() => setDeleteTarget(null)}
           >
-            취소
+            아니요
           </BaseModal.Button>
-          <BaseModal.Button
-            disabled={deleting}
-            onPress={handleDelete}
-          >
+          <BaseModal.Button disabled={deleting} onPress={handleDelete}>
             {deleting ? '삭제중' : '삭제하기'}
           </BaseModal.Button>
         </BaseModal.Actions>
@@ -342,10 +343,10 @@ export default function PositionManagePage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 24,
+    paddingTop: tokens.spacingSpacing24,
   },
   label: {
-    marginBottom: 12,
+    marginBottom: tokens.spacingSpacing12,
     color: typoColorPrimary,
   },
   empty: {
@@ -357,55 +358,60 @@ const styles = StyleSheet.create({
     color: typoColorSub2,
   },
   list: {
-    gap: 12,
+    gap: tokens.spacingSpacing12,
   },
   row: {
     minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing12,
   },
   colorDot: {
     width: 8,
     height: 8,
-    marginRight: 8,
+    marginRight: tokens.spacingSpacing8,
     borderRadius: 4,
   },
   positionName: {
     flex: 1,
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+  },
+  deleteIcon: {
+    width: 24,
+    height: 24,
   },
   createButton: {
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
+    borderRadius: tokens.radiusRadius8,
     backgroundColor: buttonColorCta,
     marginTop: 'auto',
-    marginBottom: 24,
+    marginBottom: tokens.spacingSpacing24,
   },
   disabledCreateButton: {
     backgroundColor: buttonColorUnavailable,
   },
   createButtonText: {
-    color: '#FFFFFF',
+    color: tokens.basicColorWhiteBase,
   },
   modalContent: {
     alignItems: 'stretch',
   },
   input: {
     height: 44,
-    borderRadius: 8,
-    backgroundColor: '#F5F7FA',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.backgroundColorPrimary,
+    paddingHorizontal: tokens.spacingSpacing12,
     color: typoColorPrimary,
   },
   colors: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
+    gap: tokens.spacingSpacing12,
+    marginTop: tokens.spacingSpacing16,
   },
   colorButton: {
     width: 20,
@@ -414,10 +420,10 @@ const styles = StyleSheet.create({
   },
   selectedColor: {
     borderWidth: 3,
-    borderColor: '#333333',
+    borderColor: tokens.typoColorPrimary,
   },
   error: {
-    marginTop: 10,
+    marginTop: tokens.spacingSpacing10,
     color: typoColorRed,
   },
 });

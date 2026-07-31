@@ -1,10 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
+import * as tokens from '@/src/init/styles/tokens';
 import {
   typoColorPrimary,
   typoColorRed,
-  typoColorSub2,
 } from '@/src/init/styles/tokens';
 import BottomSheet from '@/src/shared/ui/BottomSheet';
 import NText from '@/src/shared/ui/NText';
@@ -17,11 +24,13 @@ type ScheduleDateBottomSheetProps = {
   date: string;
   workType: ScheduleWorkType;
   schedules: ScheduleItem[];
+  loading?: boolean;
   onClose: () => void;
   onPressSchedule?: (schedule: ScheduleItem) => void;
   onPressDeleteUnavailable?: (scheduleId: string) => void;
   canEditSchedule?: (schedule: ScheduleItem) => boolean;
   canDeleteUnavailable?: (schedule: ScheduleItem) => boolean;
+  showUnavailableMemberName?: boolean;
   hasConflict?: (schedule: ScheduleItem) => boolean;
 };
 
@@ -36,26 +45,42 @@ export default function ScheduleDateBottomSheet({
   date,
   workType,
   schedules,
+  loading = false,
   onClose,
   onPressSchedule,
   onPressDeleteUnavailable,
   canEditSchedule = () => false,
   canDeleteUnavailable = () => false,
+  showUnavailableMemberName = false,
   hasConflict = () => false,
 }: ScheduleDateBottomSheetProps) {
   const isUnavailable = workType === 'unavailable';
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} style={styles.sheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      style={styles.sheet}
+      resizable
+      minHeight={468}
+      initialHeight={468}
+    >
       <NText variant="b16" style={styles.title}>
         {formatDateTitle(date)}
       </NText>
 
       <View style={styles.list}>
-        {schedules.length === 0 ? (
-          <View style={styles.emptyRow}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator
+              size="large"
+              color={tokens.brandColorPrimary}
+            />
+          </View>
+        ) : schedules.length === 0 ? (
+          <View style={styles.emptyContainer}>
             <NText variant="r14" style={styles.emptyText}>
-              등록된 {isUnavailable ? '근무불가' : '근무'}가 없어요
+              등록된 스케줄이 없어요
             </NText>
           </View>
         ) : (
@@ -65,18 +90,19 @@ export default function ScheduleDateBottomSheet({
             const isConflict = hasConflict(schedule);
 
             return (
-              <Pressable
-                key={schedule.id}
-                disabled={!isEditable}
-                style={styles.row}
-                onPress={() => onPressSchedule?.(schedule)}
-              >
+              <View key={schedule.id} style={styles.row}>
                 {isUnavailable ? (
                   <View style={styles.rowText}>
                     <NText variant="r14" style={styles.unavailableText}>
-                      <Text style={styles.rowName}>{schedule.memberName}</Text>
-                      {' '}
-                      · 근무불가 · {getScheduleTimeLabel(schedule)}
+                      {showUnavailableMemberName && (
+                        <>
+                          <Text style={styles.rowName}>
+                            {schedule.memberName}
+                          </Text>{' '}
+                          ·{' '}
+                        </>
+                      )}
+                      근무불가 · {getScheduleTimeLabel(schedule)}
                     </NText>
                     {isConflict && (
                       <NText variant="r12" style={styles.conflictText}>
@@ -85,19 +111,33 @@ export default function ScheduleDateBottomSheet({
                     )}
                   </View>
                 ) : (
-                  <Text style={styles.rowText}>
-                    <Text style={styles.rowName}>{schedule.memberName}</Text>
-                    <Text>
-                      {' '}
-                      · {schedule.positionName ?? '선택 안함'} ·{' '}
-                      {getScheduleTimeLabel(schedule)}
+                  <Pressable
+                    disabled={!isEditable}
+                    style={styles.scheduleContent}
+                    onPress={() => onPressSchedule?.(schedule)}
+                  >
+                    <Text style={styles.rowText}>
+                      <Text style={styles.rowName}>{schedule.memberName}</Text>
+                      <Text>
+                        {' '}
+                        · {schedule.positionName ?? '선택 안함'} ·{' '}
+                        {getScheduleTimeLabel(schedule)}
+                      </Text>
                     </Text>
-                  </Text>
+                    {isEditable && (
+                      <Image
+                        source={require('@/src/shared/assets/arrow_btn.svg')}
+                        style={styles.arrowIcon}
+                        contentFit="contain"
+                      />
+                    )}
+                  </Pressable>
                 )}
 
                 {isUnavailable && canDelete && (
                   <Pressable
                     style={styles.deleteButton}
+                    hitSlop={10}
                     onPress={() => onPressDeleteUnavailable?.(schedule.id)}
                   >
                     <Ionicons
@@ -107,14 +147,7 @@ export default function ScheduleDateBottomSheet({
                     />
                   </Pressable>
                 )}
-                {!isUnavailable && isEditable && (
-                  <Ionicons
-                    name="chevron-forward"
-                    size={28}
-                    color={typoColorPrimary}
-                  />
-                )}
-              </Pressable>
+              </View>
             );
           })
         )}
@@ -145,37 +178,56 @@ function isAllDayUnavailable(schedule: ScheduleItem) {
 const styles = StyleSheet.create({
   sheet: {
     minHeight: 468,
-    paddingHorizontal: 28,
-    paddingTop: 8,
+    paddingHorizontal: 0,
+    paddingTop: tokens.spacingSpacing8,
   },
   title: {
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+    marginLeft: tokens.spacingSpacing16,
     marginTop: 26,
-    marginBottom: 30,
+    marginBottom: tokens.spacingSpacing30,
   },
   list: {
-    gap: 18,
+    flex: 1,
+    gap: 10,
+    marginHorizontal: tokens.spacingSpacing16,
   },
   row: {
-    minHeight: 52,
+    width: '100%',
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    paddingLeft: 8,
-    paddingRight: 8,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing10,
+  },
+  scheduleContent: {
+    flex: 1,
+    height: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   rowText: {
     flex: 1,
-    color: typoColorPrimary,
-    fontSize: 14,
-    lineHeight: 26,
+    color: '#575757',
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight16,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   rowName: {
-    fontWeight: '700',
+    color: '#333333',
+    fontFamily: 'Pretendard',
+    fontWeight: '600',
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight16,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   unavailableText: {
-    color: typoColorPrimary,
+    color: '#575757',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   conflictText: {
     color: typoColorRed,
@@ -187,14 +239,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyRow: {
-    minHeight: 38,
+  arrowIcon: {
+    width: 24,
+    height: 24,
+    transform: [{ rotate: '-90deg' }],
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    paddingBottom: 60,
   },
   emptyText: {
-    color: typoColorSub2,
+    color: '#767676',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 60,
   },
 });

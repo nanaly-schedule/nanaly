@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
+  PanResponder,
   Platform,
   Pressable,
   StyleProp,
   StyleSheet,
+  useWindowDimensions,
   View,
   ViewProps,
   ViewStyle,
@@ -16,6 +18,7 @@ import {
 import {
   backgroundColorPrimary,
   dimOverlayDefault,
+  dimOverlayLight,
   radiusRadius20,
 } from '@/src/init/styles/tokens';
 
@@ -24,7 +27,12 @@ interface BottomSheetProps extends ViewProps {
   onClose: () => void;
   showHandle?: boolean;
   showBackdrop?: boolean;
+  backdropVariant?: 'default' | 'light' | 'none';
   handleStyle?: StyleProp<ViewStyle>;
+  resizable?: boolean;
+  minHeight?: number;
+  initialHeight?: number;
+  maxHeight?: number;
 }
 
 export default function BottomSheet({
@@ -34,10 +42,50 @@ export default function BottomSheet({
   style,
   showHandle = true,
   showBackdrop = true,
+  backdropVariant,
   handleStyle,
+  resizable = false,
+  minHeight = 360,
+  initialHeight,
+  maxHeight,
 }: BottomSheetProps) {
+  const resolvedBackdropVariant =
+    backdropVariant ?? (showBackdrop ? 'default' : 'none');
+  const { height: windowHeight } = useWindowDimensions();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const resolvedMaxHeight = Math.max(
+    minHeight,
+    Math.min(maxHeight ?? windowHeight * 0.9, windowHeight),
+  );
+  const resolvedInitialHeight = Math.min(
+    Math.max(initialHeight ?? minHeight, minHeight),
+    resolvedMaxHeight,
+  );
+  const [sheetHeight, setSheetHeight] = useState(resolvedInitialHeight);
+  const sheetHeightRef = useRef(resolvedInitialHeight);
+  const dragStartHeight = useRef(resolvedInitialHeight);
   const sheetProgress = useRef(new Animated.Value(1)).current;
+  const resizePanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_, gestureState) =>
+          resizable && Math.abs(gestureState.dy) > 2,
+        onPanResponderGrant: () => {
+          dragStartHeight.current = sheetHeightRef.current;
+        },
+        onPanResponderMove: (_, gestureState) => {
+          const nextHeight = dragStartHeight.current - gestureState.dy;
+          const clampedHeight = Math.min(
+            Math.max(nextHeight, minHeight),
+            resolvedMaxHeight,
+          );
+
+          sheetHeightRef.current = clampedHeight;
+          setSheetHeight(clampedHeight);
+        },
+      }),
+    [minHeight, resizable, resolvedMaxHeight],
+  );
 
   useEffect(() => {
     if (Platform.OS !== 'android') {
@@ -65,13 +113,15 @@ export default function BottomSheet({
       return;
     }
 
+    sheetHeightRef.current = resolvedInitialHeight;
+    setSheetHeight(resolvedInitialHeight);
     sheetProgress.setValue(1);
     Animated.timing(sheetProgress, {
       toValue: 0,
       duration: 220,
       useNativeDriver: true,
     }).start();
-  }, [sheetProgress, visible]);
+  }, [resolvedInitialHeight, sheetProgress, visible]);
 
   if (!visible) {
     return null;
@@ -86,7 +136,11 @@ export default function BottomSheet({
     >
       <View style={styles.overlay}>
         <Pressable
-          style={[styles.backdrop, !showBackdrop && styles.transparentBackdrop]}
+          style={[
+            styles.backdrop,
+            resolvedBackdropVariant === 'light' && styles.lightBackdrop,
+            resolvedBackdropVariant === 'none' && styles.transparentBackdrop,
+          ]}
           onPress={onClose}
         />
         <KeyboardAvoidingView
@@ -111,8 +165,25 @@ export default function BottomSheet({
               },
             ]}
           >
-            <View style={[styles.sheet, style]}>
-              {showHandle && <View style={[styles.handle, handleStyle]} />}
+            <View
+              style={[
+                styles.sheet,
+                style,
+                resizable && {
+                  height: sheetHeight,
+                  minHeight,
+                  maxHeight: resolvedMaxHeight,
+                },
+              ]}
+            >
+              {showHandle && (
+                <View
+                  style={styles.handleTouchArea}
+                  {...(resizable ? resizePanResponder.panHandlers : {})}
+                >
+                  <View style={[styles.handle, handleStyle]} />
+                </View>
+              )}
               {children}
             </View>
           </Animated.View>
@@ -145,6 +216,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     opacity: 1,
   },
+  lightBackdrop: {
+    backgroundColor: dimOverlayLight,
+    opacity: 0.16,
+  },
   sheet: {
     minHeight: 360,
     backgroundColor: backgroundColorPrimary,
@@ -161,5 +236,8 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     backgroundColor: '#8D8D8D',
     marginBottom: 20,
+  },
+  handleTouchArea: {
+    alignSelf: 'stretch',
   },
 });

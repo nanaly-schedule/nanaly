@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
 
 import DateWheelColumn from '@/src/features/auth/ui/DateWheelColumn';
 import { createUnavailable } from '@/src/features/schedule/api/schedule';
+import * as tokens from '@/src/init/styles/tokens';
 import {
   backgroundColorWhite,
   buttonColorCta,
@@ -209,7 +210,7 @@ export default function ScheduleUnavailableFormBottomSheet({
               value={allDay}
               onValueChange={setAllDay}
               trackColor={{ false: '#E5E5EA', true: buttonColorCta }}
-              thumbColor="#FFFFFF"
+              thumbColor={tokens.basicColorWhiteBase}
               ios_backgroundColor="#E5E5EA"
             />
           </View>
@@ -301,7 +302,7 @@ export default function ScheduleUnavailableFormBottomSheet({
             variant="secondary"
             onPress={() => setSaveConfirmVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={handleCreate}>
             {saving ? '추가중' : '추가하기'}
@@ -321,7 +322,7 @@ export default function ScheduleUnavailableFormBottomSheet({
             variant="secondary"
             onPress={() => setExitConfirmVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button
             onPress={() => {
@@ -329,7 +330,7 @@ export default function ScheduleUnavailableFormBottomSheet({
               onClose();
             }}
           >
-            마무리
+            나가기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -423,26 +424,31 @@ function ScheduleUnavailableDatePickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={years}
           selectedValue={draft.year}
-          formatLabel={(year) => `${year}년`}
+          formatLabel={(year) => `${year}`}
+          unit="년"
+          unitOffset={26}
           onChange={(year) => updateDraft({ year })}
         />
         <DateWheelColumn
           items={months}
           selectedValue={draft.month}
-          formatLabel={(month) => `${month}월`}
+          formatLabel={(month) => `${month}`}
+          unit="월"
           onChange={(month) => updateDraft({ month })}
         />
         <DateWheelColumn
           items={days}
           selectedValue={draft.day}
-          formatLabel={(day) => `${String(day).padStart(2, '0')}일`}
+          formatLabel={(day) => String(day).padStart(2, '0')}
+          unit="일"
           onChange={(day) => updateDraft({ day })}
         />
       </View>
@@ -483,20 +489,23 @@ function ScheduleUnavailableTimePickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={hours}
           selectedValue={draft.hour}
-          formatLabel={(hour) => `${String(hour).padStart(2, '0')}시`}
+          formatLabel={(hour) => String(hour).padStart(2, '0')}
+          unit="시"
           onChange={(hour) => setDraft((prev) => ({ ...prev, hour }))}
         />
         <DateWheelColumn
           items={minutes}
           selectedValue={draft.minute}
-          formatLabel={(minute) => `${String(minute).padStart(2, '0')}분`}
+          formatLabel={(minute) => String(minute).padStart(2, '0')}
+          unit="분"
           onChange={(minute) => setDraft((prev) => ({ ...prev, minute }))}
         />
       </View>
@@ -525,9 +534,11 @@ function ConfirmButton({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   sheet: {
-    maxHeight: '92%',
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    height: 720,
+    minHeight: 720,
+    maxHeight: 720,
+    paddingHorizontal: tokens.spacingSpacing16,
+    paddingTop: tokens.spacingSpacing8,
     paddingBottom: 32,
   },
   header: {
@@ -536,7 +547,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginHorizontal: -10,
-    marginBottom: 16,
+    marginBottom: tokens.spacingSpacing16,
   },
   headerButton: {
     width: 36,
@@ -548,30 +559,30 @@ const styles = StyleSheet.create({
     color: typoColorPrimary,
   },
   content: {
-    paddingBottom: 20,
+    paddingBottom: tokens.spacingSpacing20,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: tokens.spacingSpacing20,
   },
   sectionTitle: {
     color: typoColorPrimary,
-    marginBottom: 10,
+    marginBottom: tokens.spacingSpacing10,
   },
   input: {
     height: 44,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing12,
     color: typoColorPrimary,
-    fontSize: 12,
+    fontSize: tokens.typographyPrimitiveFontSize12,
   },
   disabledInput: {
-    backgroundColor: '#E6E6E6',
+    backgroundColor: tokens.borderDividerPrimary,
     color: typoColorSub2,
   },
   memoInput: {
     height: 76,
-    paddingTop: 12,
+    paddingTop: tokens.spacingSpacing12,
     textAlignVertical: 'top',
   },
   allDayRow: {
@@ -579,27 +590,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: tokens.spacingSpacing8,
   },
   timeRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: tokens.spacingSpacing12,
   },
   timeColumn: {
     flex: 1,
-    gap: 8,
+    gap: tokens.spacingSpacing8,
   },
   timeLabel: {
     color: typoColorPrimary,
   },
   wheelSheet: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingHorizontal: tokens.spacingSpacing16,
+    paddingTop: tokens.spacingSpacing12,
   },
   wheelRow: {
+    position: 'relative',
     flexDirection: 'row',
     gap: spacingSpacing20,
     marginBottom: spacingSpacing20,
+  },
+  wheelSelectionHighlight: {
+    position: 'absolute',
+    top: 91,
+    left: 0,
+    right: 0,
+    height: 38,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: '#E7EBF2',
   },
   confirmButton: {
     height: 46,

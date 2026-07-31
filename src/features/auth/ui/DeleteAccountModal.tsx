@@ -18,7 +18,7 @@ export default function DeleteAccountModal({
       </BaseModal.Content>
       <BaseModal.Actions>
         <BaseModal.Button variant="secondary" onPress={onClose}>
-          취소
+          아니요
         </BaseModal.Button>
         <BaseModal.Button onPress={onConfirm}>계정 삭제</BaseModal.Button>
       </BaseModal.Actions>

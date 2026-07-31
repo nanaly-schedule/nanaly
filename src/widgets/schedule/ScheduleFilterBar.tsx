@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import * as tokens from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 
 import { SchedulePosition, ScheduleViewType } from './mock';
@@ -50,107 +51,118 @@ export default function ScheduleFilterBar({
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.row}
-      >
+      <View style={styles.row}>
         {showViewFilter && (
-          <DropdownButton
-            label={viewType === 'mine' ? '나만보기' : '전체보기'}
-            onPress={toggleDropdown('view')}
-          />
-        )}
-        <DropdownButton
-          label={workType === 'assigned' ? '일하는 날' : '쉬는 날'}
-          onPress={toggleDropdown('workType')}
-        />
-        {showPositionFilter && (
-          <DropdownButton
-            label={selectedPosition}
-            onPress={toggleDropdown('position')}
-          />
-        )}
-      </ScrollView>
-
-      {openDropdown === 'view' && showViewFilter && (
-        <View style={[styles.dropdown, styles.leftDropdown]}>
-          <DropdownItem
-            label="나만보기"
-            onPress={() => {
-              onChangeViewType('mine');
-              setOpenDropdown(null);
-            }}
-          />
-          {canSelectAllView && (
-            <DropdownItem
-              label="전체보기"
-              onPress={() => {
-                onChangeViewType('all');
-                setOpenDropdown(null);
-              }}
+          <View
+            style={[
+              styles.filterItem,
+              openDropdown === 'view' && styles.openFilterItem,
+            ]}
+          >
+            <DropdownButton
+              label={viewType === 'mine' ? '나만보기' : '전체보기'}
+              onPress={toggleDropdown('view')}
             />
-          )}
-        </View>
-      )}
+            {openDropdown === 'view' && (
+              <View style={styles.dropdown}>
+                <DropdownItem
+                  label="나만보기"
+                  onPress={() => {
+                    onChangeViewType('mine');
+                    setOpenDropdown(null);
+                  }}
+                />
+                {canSelectAllView && (
+                  <DropdownItem
+                    label="전체보기"
+                    onPress={() => {
+                      onChangeViewType('all');
+                      setOpenDropdown(null);
+                    }}
+                  />
+                )}
+              </View>
+            )}
+          </View>
+        )}
 
-      {openDropdown === 'workType' && (
         <View
           style={[
-            styles.dropdown,
-            showViewFilter ? styles.workTypeDropdown : styles.leftDropdown,
+            styles.filterItem,
+            openDropdown === 'workType' && styles.openFilterItem,
           ]}
         >
-          <DropdownItem
-            label="일하는 날"
-            onPress={() => {
-              onChangeWorkType('assigned');
-              setOpenDropdown(null);
-            }}
+          <DropdownButton
+            label={workType === 'assigned' ? '일하는 날' : '쉬는 날'}
+            onPress={toggleDropdown('workType')}
           />
-          <DropdownItem
-            label="쉬는 날"
-            onPress={() => {
-              onChangeWorkType('unavailable');
-              setOpenDropdown(null);
-            }}
-          />
-        </View>
-      )}
-
-      {openDropdown === 'position' && showPositionFilter && (
-        <View style={[styles.dropdown, styles.positionDropdown]}>
-          <DropdownItem
-            label="전체"
-            onPress={() => {
-              onChangePosition('all');
-              setOpenDropdown(null);
-            }}
-          />
-          {positions.map((position) => (
-            <DropdownItem
-              key={position.id}
-              label={position.name}
-              onPress={() => {
-                onChangePosition(position.id);
-                setOpenDropdown(null);
-              }}
-            />
-          ))}
-          {canManagePosition && (
-            <>
-              <View style={styles.divider} />
+          {openDropdown === 'workType' && (
+            <View style={styles.dropdown}>
               <DropdownItem
-                label="포지션 관리"
+                label="일하는 날"
                 onPress={() => {
+                  onChangeWorkType('assigned');
                   setOpenDropdown(null);
-                  onPressPositionManage();
                 }}
               />
-            </>
+              <DropdownItem
+                label="쉬는 날"
+                onPress={() => {
+                  onChangeWorkType('unavailable');
+                  setOpenDropdown(null);
+                }}
+              />
+            </View>
           )}
         </View>
-      )}
+
+        {showPositionFilter && (
+          <View
+            style={[
+              styles.filterItem,
+              openDropdown === 'position' && styles.openFilterItem,
+            ]}
+          >
+            <DropdownButton
+              label={selectedPosition}
+              onPress={toggleDropdown('position')}
+            />
+            {openDropdown === 'position' && (
+              <View style={styles.dropdown}>
+                <DropdownItem
+                  label="전체"
+                  onPress={() => {
+                    onChangePosition('all');
+                    setOpenDropdown(null);
+                  }}
+                />
+                {positions.map((position) => (
+                  <DropdownItem
+                    key={position.id}
+                    label={position.name}
+                    onPress={() => {
+                      onChangePosition(position.id);
+                      setOpenDropdown(null);
+                    }}
+                  />
+                ))}
+                {canManagePosition && (
+                  <>
+                    <View style={styles.divider} />
+                    <DropdownItem
+                      label="포지션 관리"
+                      onPress={() => {
+                        setOpenDropdown(null);
+                        onPressPositionManage();
+                      }}
+                    />
+                  </>
+                )}
+              </View>
+            )}
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -164,10 +176,10 @@ function DropdownButton({
 }) {
   return (
     <Pressable style={styles.button} onPress={onPress}>
-      <NText variant="b16" style={styles.buttonText}>
+      <NText variant="m12" style={styles.buttonText}>
         {label}
       </NText>
-      <Ionicons name="chevron-down" size={16} color="#333333" />
+      <Ionicons name="chevron-down" size={14} color={tokens.typoColorPrimary} />
     </Pressable>
   );
 }
@@ -192,66 +204,63 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     zIndex: 10,
-    marginBottom: 12,
+    marginBottom: tokens.spacingSpacing12,
   },
   row: {
     flexDirection: 'row',
-    gap: 8,
+    gap: tokens.spacingSpacing8,
+  },
+  filterItem: {
+    position: 'relative',
+  },
+  openFilterItem: {
+    zIndex: 1,
   },
   button: {
     height: 26,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
+    justifyContent: 'flex-start',
+    gap: 6,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    backgroundColor: 'transparent',
-    paddingHorizontal: 10,
+    borderColor: '#E1E3E6',
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: '#F5F7FA',
+    paddingLeft: tokens.spacingSpacing10,
+    paddingRight: 6,
   },
   buttonText: {
-    color: '#333333',
-    fontSize: 12,
-    lineHeight: 16,
+    color: tokens.typoColorPrimary,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   dropdown: {
     position: 'absolute',
     top: 34,
-    minWidth: 132,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 6,
-    shadowColor: '#000000',
+    left: 0,
+    width: 140,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing8,
+    paddingVertical: 0,
+    shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
-      height: 6,
+      height: 8,
     },
     shadowOpacity: 0.12,
-    shadowRadius: 14,
+    shadowRadius: 20,
     elevation: 8,
   },
-  leftDropdown: {
-    left: 0,
-  },
-  positionDropdown: {
-    left: 176,
-    minWidth: 168,
-  },
-  workTypeDropdown: {
-    left: 86,
-  },
   dropdownItem: {
-    minHeight: 32,
+    height: 40,
     justifyContent: 'center',
-    paddingHorizontal: 12,
   },
   dropdownText: {
-    color: '#333333',
+    color: tokens.typoColorSecondary,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   divider: {
     height: 1,
-    marginVertical: 4,
-    backgroundColor: '#EEEEEE',
+    backgroundColor: tokens.borderDividerPrimary,
   },
 });

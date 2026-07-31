@@ -3,10 +3,8 @@ import { useEffect, useState } from 'react';
 import { BackHandler, StyleSheet, TextInput, View } from 'react-native';
 
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
-import {
-  buttonColorCta,
-  typoColorPrimary,
-} from '@/src/init/styles/tokens';
+import * as tokens from '@/src/init/styles/tokens';
+import { buttonColorCta, typoColorPrimary } from '@/src/init/styles/tokens';
 import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
@@ -102,15 +100,14 @@ export default function ScheduleEditPage() {
         />
         <InfoInput label="날짜" value={schedule.date} editable={false} />
         <View style={styles.timeRow}>
-          <InfoInput label="시작" value={startTime} onChangeText={setStartTime} />
+          <InfoInput
+            label="시작"
+            value={startTime}
+            onChangeText={setStartTime}
+          />
           <InfoInput label="종료" value={endTime} onChangeText={setEndTime} />
         </View>
-        <InfoInput
-          label="메모"
-          value={memo}
-          onChangeText={setMemo}
-          multiline
-        />
+        <InfoInput label="메모" value={memo} onChangeText={setMemo} multiline />
       </View>
 
       <BaseModal visible={saveVisible} onClose={() => setSaveVisible(false)}>
@@ -130,7 +127,7 @@ export default function ScheduleEditPage() {
               router.back();
             }}
           >
-            마무리
+            머무르기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -152,7 +149,7 @@ export default function ScheduleEditPage() {
               router.back();
             }}
           >
-            마무리
+            머무르기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -191,33 +188,33 @@ function InfoInput({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 24,
-    gap: 16,
+    paddingTop: tokens.spacingSpacing24,
+    gap: tokens.spacingSpacing16,
   },
   saveText: {
     color: buttonColorCta,
   },
   inputGroup: {
     flex: 1,
-    gap: 8,
+    gap: tokens.spacingSpacing8,
   },
   label: {
-    color: '#434343',
+    color: tokens.typoColorSecondary,
   },
   input: {
     minHeight: 44,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing12,
     color: typoColorPrimary,
   },
   memo: {
     minHeight: 88,
     textAlignVertical: 'top',
-    paddingTop: 12,
+    paddingTop: tokens.spacingSpacing12,
   },
   timeRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: tokens.spacingSpacing12,
   },
 });

@@ -1,7 +1,8 @@
 import { isAxiosError } from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   BackHandler,
   KeyboardAvoidingView,
   Platform,
@@ -18,7 +19,18 @@ import {
   updateNotice,
 } from '@/src/features/notice/api/notice';
 import useCurrentStoreAccess from '@/src/features/permission/lib/useCurrentStoreAccess';
-import { buttonColorCta, typoColorPrimary } from '@/src/init/styles/tokens';
+import {
+  buttonColorCta,
+  radiusRadius8,
+  spacingSpacing10,
+  spacingSpacing12,
+  typoColorPlaceholder,
+  typoColorPrimary,
+  typoColorSub1,
+  typographyPrimitiveFontSize14,
+  typographyPrimitiveLetterSpacing2,
+  typographyPrimitiveLineHeight16,
+} from '@/src/init/styles/tokens';
 import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
@@ -38,7 +50,8 @@ export default function NoticeCreatePage() {
   const isEditMode = !!noticeId;
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [isPublic, setIsPublic] = useState(true);
+  const [isPublic, setIsPublic] = useState(false);
+  const togglePosition = useRef(new Animated.Value(1)).current;
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,7 +59,7 @@ export default function NoticeCreatePage() {
   const [initialForm, setInitialForm] = useState({
     title: '',
     content: '',
-    isPublic: true,
+    isPublic: false,
   });
 
   useEffect(() => {
@@ -88,6 +101,14 @@ export default function NoticeCreatePage() {
     title !== initialForm.title ||
     content !== initialForm.content ||
     isPublic !== initialForm.isPublic;
+
+  useEffect(() => {
+    Animated.timing(togglePosition, {
+      toValue: isPublic ? 0 : 1,
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+  }, [isPublic, togglePosition]);
 
   const handlePressBack = () => {
     if (submitting) {
@@ -184,7 +205,7 @@ export default function NoticeCreatePage() {
     <PageLayout
       title={isEditMode ? '공지수정' : '공지작성'}
       icon={
-        <NText variant="b16" style={styles.submit}>
+        <NText variant="b14" style={styles.submit}>
           {submitting
             ? isEditMode
               ? '수정 중'
@@ -208,16 +229,19 @@ export default function NoticeCreatePage() {
             <View style={styles.form}>
               <TextInput
                 placeholder="제목을 입력해주세요"
-                placeholderTextColor="#9A9A9A"
+                placeholderTextColor={typoColorPlaceholder}
                 value={title}
                 onChangeText={setTitle}
                 editable={!submitting}
-                style={styles.titleInput}
+                style={[
+                  styles.titleInput,
+                  isEditMode && styles.editTitleInput,
+                ]}
               />
 
               <TextInput
                 placeholder="공지 내용을 입력해주세요"
-                placeholderTextColor="#9A9A9A"
+                placeholderTextColor={typoColorPlaceholder}
                 value={content}
                 onChangeText={setContent}
                 editable={!submitting}
@@ -228,23 +252,56 @@ export default function NoticeCreatePage() {
             </View>
 
             <View style={styles.settingContainer}>
-              <NText variant="m16">공개 설정</NText>
+              <NText variant="m14" style={styles.settingLabel}>
+                공개 설정
+              </NText>
 
               <View style={styles.segment}>
+                <Animated.View
+                  style={[
+                    styles.selectionIndicator,
+                    {
+                      transform: [
+                        {
+                          translateX: togglePosition.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 52],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
                 <Pressable
-                  style={[styles.segmentButton, isPublic && styles.selected]}
+                  style={styles.segmentButton}
                   disabled={submitting}
                   onPress={() => setIsPublic(true)}
                 >
-                  <NText variant="r14">공개</NText>
+                  <NText
+                    variant="r12"
+                    style={[
+                      styles.segmentText,
+                      isPublic && styles.selectedSegmentText,
+                    ]}
+                  >
+                    공개
+                  </NText>
                 </Pressable>
 
                 <Pressable
-                  style={[styles.segmentButton, !isPublic && styles.selected]}
+                  style={styles.segmentButton}
                   disabled={submitting}
                   onPress={() => setIsPublic(false)}
                 >
-                  <NText variant="r14">비공개</NText>
+                  <NText
+                    variant="r12"
+                    style={[
+                      styles.segmentText,
+                      !isPublic && styles.selectedSegmentText,
+                    ]}
+                  >
+                    비공개
+                  </NText>
                 </Pressable>
               </View>
             </View>
@@ -296,23 +353,33 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   titleInput: {
-    height: 68,
+    width: '100%',
+    height: 46,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    borderRadius: radiusRadius8,
+    paddingHorizontal: spacingSpacing10,
     color: typoColorPrimary,
     fontFamily: 'Pretendard',
-    fontSize: 16,
+    fontWeight: '400',
+    fontSize: typographyPrimitiveFontSize14,
+    lineHeight: typographyPrimitiveLineHeight16,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
+  },
+  editTitleInput: {
+    paddingVertical: 15,
   },
   contentInput: {
-    height: 220,
+    width: '100%',
+    height: 186,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: radiusRadius8,
+    padding: spacingSpacing10,
     color: typoColorPrimary,
     fontFamily: 'Pretendard',
-    fontSize: 16,
-    lineHeight: 24,
+    fontWeight: '400',
+    fontSize: typographyPrimitiveFontSize14,
+    lineHeight: typographyPrimitiveLineHeight16,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
   },
   settingContainer: {
     flexDirection: 'row',
@@ -320,21 +387,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 28,
   },
+  settingLabel: {
+    letterSpacing: typographyPrimitiveLetterSpacing2,
+  },
   segment: {
+    width: 106,
+    height: 32,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     backgroundColor: '#E9E9E9',
-    borderRadius: 12,
+    borderRadius: radiusRadius8,
     padding: 2,
   },
   segmentButton: {
-    minWidth: 72,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
+    flex: 1,
+    zIndex: 1,
+    borderRadius: radiusRadius8,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  selected: {
+  segmentText: {
+    color: typoColorSub1,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
+  },
+  selectedSegmentText: {
+    color: typoColorPrimary,
+  },
+  selectionIndicator: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
+    width: 50,
+    height: 28,
+    paddingHorizontal: spacingSpacing12,
+    paddingVertical: 6,
     backgroundColor: '#FFFFFF',
+    borderRadius: radiusRadius8,
     shadowColor: '#000000',
     shadowOffset: {
       width: 0,
@@ -346,6 +434,7 @@ const styles = StyleSheet.create({
   },
   submit: {
     color: buttonColorCta,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
   },
   error: {
     marginTop: 12,

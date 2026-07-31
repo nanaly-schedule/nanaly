@@ -49,7 +49,7 @@ export default function CurrentWeekSchedules({
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <NText variant="m12" style={styles.emptyText}>
-              이번주 스케줄이 없습니다
+              등록된 일정이 없어요
             </NText>
           </View>
         )}

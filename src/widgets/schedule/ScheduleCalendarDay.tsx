@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { backgroundColorPrimary } from '@/src/init/styles/tokens';
+import * as tokens from '@/src/init/styles/tokens';
 
 import { ScheduleItem } from './mock';
 import ScheduleBadge from './ScheduleBadge';
@@ -16,6 +16,7 @@ type ScheduleCalendarDayProps = {
   schedules: ScheduleItem[];
   selected?: boolean;
   compactLabel?: 'member' | 'time';
+  badgeColor?: string;
   dayWidth?: number;
   dayHeight?: number;
   tablet?: boolean;
@@ -43,6 +44,7 @@ export default function ScheduleCalendarDay({
   schedules,
   selected,
   compactLabel = 'member',
+  badgeColor,
   dayWidth = 49,
   dayHeight = 100,
   tablet = false,
@@ -51,7 +53,9 @@ export default function ScheduleCalendarDay({
 }: ScheduleCalendarDayProps) {
   if (!date) {
     return (
-      <View style={[styles.container, { width: dayWidth, height: dayHeight }]} />
+      <View
+        style={[styles.container, { width: dayWidth, height: dayHeight }]}
+      />
     );
   }
 
@@ -60,7 +64,7 @@ export default function ScheduleCalendarDay({
   const scale = tablet ? Math.max(1, dayWidth / 49) : 1;
   const badgeWidth = tablet ? 94 : 46;
   const badgeHeight = tablet ? 32 : 18;
-  const badgesGap = tablet ? 8 : 2;
+  const badgesGap = tablet ? 8 : 3;
   const badgesTop = tablet ? Math.max(10, 5 * scale) : 5;
 
   return (
@@ -108,6 +112,7 @@ export default function ScheduleCalendarDay({
                 schedule={schedule}
                 compact
                 compactLabel={compactLabel}
+                backgroundColor={badgeColor}
                 compactStyle={{
                   width: badgeWidth,
                   height: badgeHeight,
@@ -132,29 +137,29 @@ const styles = StyleSheet.create({
     paddingTop: 5,
   },
   selected: {
-    backgroundColor: backgroundColorPrimary,
+    backgroundColor: '#F0F2F5',
   },
   day: {
-    color: '#333333',
-    fontSize: 12,
+    color: tokens.typoColorPrimary,
+    fontSize: tokens.typographyPrimitiveFontSize12,
     lineHeight: 15,
   },
   sundayDay: {
     color: '#FF3B30',
   },
   disabledDay: {
-    color: '#A5A5A5',
+    color: tokens.typoColorPlaceholder,
   },
   todayDay: {
-    color: '#3B82F6',
+    color: tokens.brandColorPrimary,
   },
   badges: {
     alignItems: 'center',
   },
   moreText: {
-    color: '#A5A5A5',
-    fontSize: 12,
-    lineHeight: 12,
+    color: tokens.typoColorPlaceholder,
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight12,
     textAlign: 'center',
   },
 });

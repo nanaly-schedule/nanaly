@@ -323,7 +323,7 @@ export default function MemberInfoPage() {
             variant="secondary"
             onPress={handleCloseConfirmModal}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={handlePressSaveButton}>
             저장하기

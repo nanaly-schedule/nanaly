@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
+import * as tokens from '@/src/init/styles/tokens';
+
 import { ScheduleItem } from './mock';
 import ScheduleCalendarDay from './ScheduleCalendarDay';
 
@@ -9,6 +11,7 @@ type ScheduleCalendarProps = {
   selectedDate: string;
   schedulesByDate: Record<string, ScheduleItem[]>;
   compactLabel?: 'member' | 'time';
+  badgeColor?: string;
   dayWidth?: number;
   dayHeight?: number;
   tablet?: boolean;
@@ -22,6 +25,7 @@ export default function ScheduleCalendar({
   selectedDate,
   schedulesByDate,
   compactLabel = 'member',
+  badgeColor,
   dayWidth,
   dayHeight,
   tablet = false,
@@ -55,8 +59,9 @@ export default function ScheduleCalendar({
             date={date}
             state={state}
             selected={date?.dateString === selectedDate}
-            schedules={date ? schedulesByDate[date.dateString] ?? [] : []}
+            schedules={date ? (schedulesByDate[date.dateString] ?? []) : []}
             compactLabel={compactLabel}
+            badgeColor={badgeColor}
             dayWidth={dayWidth}
             dayHeight={dayHeight}
             tablet={tablet}
@@ -121,10 +126,10 @@ const styles = StyleSheet.create({
   },
   weekText: {
     flex: 1,
-    color: '#767676',
-    fontSize: 12,
+    color: tokens.typoColorSub2,
+    fontSize: tokens.typographyPrimitiveFontSize12,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: tokens.typographyPrimitiveLineHeight16,
     textAlign: 'center',
   },
   sundayText: {

@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
+import { ScrollView } from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
 import { Notice } from '@/src/entities/notice/notice';
@@ -35,7 +36,10 @@ type MyStoreAccessItem = {
   permissions?: UserStorePermissions | null;
 };
 
-function getDashboardNotices(dashboard: { notices?: Notice[]; noticeList?: Notice[] }) {
+function getDashboardNotices(dashboard: {
+  notices?: Notice[];
+  noticeList?: Notice[];
+}) {
   return dashboard.notices ?? dashboard.noticeList ?? [];
 }
 
@@ -80,47 +84,41 @@ export default function HomePage() {
   const [schedule, setSchedule] = useState<Schedule[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
 
-  const syncCurrentStoreAccess = useCallback(
-    async () => {
-      try {
-        const { data } = await getMyStore();
-        const currentStore = (Array.isArray(data) ? data : []).find(
-          (store: MyStoreAccessItem) => store.storeId === storeId,
-        );
+  const syncCurrentStoreAccess = useCallback(async () => {
+    try {
+      const { data } = await getMyStore();
+      const currentStore = (Array.isArray(data) ? data : []).find(
+        (store: MyStoreAccessItem) => store.storeId === storeId,
+      );
 
-        if (!currentStore) {
-          return;
-        }
-
-        const nextPermissions = currentStore.permissions ?? null;
-        const {
-          currentStoreId: savedStoreId,
-          currentStoreRole: savedStoreRole,
-          currentStorePermissions: savedStorePermissions,
-          setUser,
-        } = useUser.getState();
-
-        if (
-          savedStoreId !== currentStore.storeId ||
-          savedStoreRole !== currentStore.role ||
-          !isSamePermissions(
-            savedStorePermissions,
-            nextPermissions,
-          )
-        ) {
-          setUser({
-            currentStoreAccessLoaded: true,
-            currentStoreId: currentStore.storeId,
-            currentStoreRole: currentStore.role,
-            currentStorePermissions: nextPermissions,
-          });
-        }
-      } catch {
-        // 권한 동기화 실패 시 기존 전역 권한을 유지하고 다음 홈 포커스에서 다시 시도합니다.
+      if (!currentStore) {
+        return;
       }
-    },
-    [storeId],
-  );
+
+      const nextPermissions = currentStore.permissions ?? null;
+      const {
+        currentStoreId: savedStoreId,
+        currentStoreRole: savedStoreRole,
+        currentStorePermissions: savedStorePermissions,
+        setUser,
+      } = useUser.getState();
+
+      if (
+        savedStoreId !== currentStore.storeId ||
+        savedStoreRole !== currentStore.role ||
+        !isSamePermissions(savedStorePermissions, nextPermissions)
+      ) {
+        setUser({
+          currentStoreAccessLoaded: true,
+          currentStoreId: currentStore.storeId,
+          currentStoreRole: currentStore.role,
+          currentStorePermissions: nextPermissions,
+        });
+      }
+    } catch {
+      // 권한 동기화 실패 시 기존 전역 권한을 유지하고 다음 홈 포커스에서 다시 시도합니다.
+    }
+  }, [storeId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -137,10 +135,12 @@ export default function HomePage() {
             ...(schedules?.current
               ? [{ ...schedules.current, status: 'current' as const }]
               : []),
-            ...(schedules?.upcoming ?? []).map((item: Omit<Schedule, 'status'>) => ({
-              ...item,
-              status: 'upcoming' as const,
-            })),
+            ...(schedules?.upcoming ?? []).map(
+              (item: Omit<Schedule, 'status'>) => ({
+                ...item,
+                status: 'upcoming' as const,
+              }),
+            ),
           ];
           const dashboardNotices = getDashboardNotices(dashboard).slice(0, 5);
 
@@ -156,44 +156,47 @@ export default function HomePage() {
     }, [storeId, syncCurrentStoreAccess]),
   );
   return (
-    <PageLayout showHeader={false}>
-      <StoreHeader
-        storeName={displayStoreName ?? headerInfo?.storeName ?? ''}
-        isOwner={
-          canAccessAdminMode ||
-          (!!headerInfo && headerInfo.role !== MemberRole.STAFF)
-        }
-        isActiveOwner={false}
-        canAddStore={
-          currentStoreRole
-            ? currentStoreRole !== MemberRole.OWNER
-            : headerInfo?.role !== MemberRole.OWNER
-        }
-        unreadNotificationCount={headerInfo?.unreadNotificationCount ?? 0}
-      />
-      <CurrentWeekSchedules schedules={schedule} />
-        <NoticeWidget 
-        notices={notices}
-        onPressNotice={(noticeId) => {
-          if (!storeId) {
-            return;
+    <PageLayout showHeader={false} style={{ backgroundColor: '#F5F7FA' }}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <StoreHeader
+          storeName={displayStoreName ?? headerInfo?.storeName ?? ''}
+          isOwner={
+            canAccessAdminMode ||
+            (!!headerInfo && headerInfo.role !== MemberRole.STAFF)
           }
-
-          router.push({
-            pathname: '/(notice)/[storeId]/notice-detail',
-            params: { storeId, noticeId },
-          });
-        }}
-        onPressHeader={() => {
-          if (!storeId) {
-            return;
+          isActiveOwner={false}
+          canAddStore={
+            currentStoreRole
+              ? currentStoreRole !== MemberRole.OWNER
+              : headerInfo?.role !== MemberRole.OWNER
           }
+          unreadNotificationCount={headerInfo?.unreadNotificationCount ?? 0}
+        />
+        <CurrentWeekSchedules schedules={schedule} />
+        <NoticeWidget
+          notices={notices}
+          onPressNotice={(noticeId) => {
+            if (!storeId) {
+              return;
+            }
 
-          router.push({ 
-            pathname: `/(notice)/[storeId]/notice`,
-            params: { storeId, displayStoreName }
-           })
-        }} />
+            router.push({
+              pathname: '/(notice)/[storeId]/notice-detail',
+              params: { storeId, noticeId },
+            });
+          }}
+          onPressHeader={() => {
+            if (!storeId) {
+              return;
+            }
+
+            router.push({
+              pathname: `/(notice)/[storeId]/notice`,
+              params: { storeId, displayStoreName },
+            });
+          }}
+        />
+      </ScrollView>
     </PageLayout>
   );
 }

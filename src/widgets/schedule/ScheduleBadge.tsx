@@ -1,5 +1,7 @@
 import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
 
+import * as tokens from '@/src/init/styles/tokens';
+
 import { ScheduleItem } from './mock';
 
 type ScheduleBadgeProps = {
@@ -7,6 +9,7 @@ type ScheduleBadgeProps = {
   compact?: boolean;
   compactLabel?: 'member' | 'time';
   compactStyle?: StyleProp<TextStyle>;
+  backgroundColor?: string;
 };
 
 export default function ScheduleBadge({
@@ -14,6 +17,7 @@ export default function ScheduleBadge({
   compact = false,
   compactLabel = 'member',
   compactStyle,
+  backgroundColor,
 }: ScheduleBadgeProps) {
   const positionName = schedule.positionName ?? '선택 안함';
   const compactText =
@@ -24,11 +28,15 @@ export default function ScheduleBadge({
   return (
     <Text
       numberOfLines={1}
+      allowFontScaling={false}
       style={[
         styles.badge,
         compact && styles.compact,
         compact && compactStyle,
-        { backgroundColor: schedule.positionColor ?? '#8D8D8D' },
+        {
+          backgroundColor:
+            backgroundColor ?? schedule.positionColor ?? '#8D8D8D',
+        },
       ]}
     >
       {compact ? compactText : `${schedule.memberName} · ${positionName}`}
@@ -41,7 +49,17 @@ function getCompactTimeLabel(schedule: ScheduleItem) {
     return '종일';
   }
 
-  return `${schedule.startTime.slice(0, 2)}-${schedule.endTime.slice(0, 2)}`;
+  return `${getTimeHour(schedule.startTime)}-${getTimeHour(schedule.endTime)}`;
+}
+
+function getTimeHour(time: string) {
+  const match = time.trim().match(/^(\d{1,2}):\d{2}/);
+
+  if (!match) {
+    return '00';
+  }
+
+  return match[1].padStart(2, '0');
 }
 
 function isAllDayUnavailable(schedule: ScheduleItem) {
@@ -61,9 +79,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 5,
     paddingVertical: 2,
-    color: '#FFFFFF',
-    fontSize: 10,
-    lineHeight: 12,
+    color: tokens.basicColorWhiteBase,
+    fontSize: tokens.typographyPrimitiveFontSize10,
+    lineHeight: tokens.typographyPrimitiveLineHeight12,
     fontWeight: '700',
   },
   compact: {
@@ -71,8 +89,11 @@ const styles = StyleSheet.create({
     height: 18,
     paddingHorizontal: 3,
     paddingVertical: 0,
-    fontSize: 12,
-    lineHeight: 18,
+    fontFamily: 'Pretendard',
+    fontWeight: '500',
+    fontSize: tokens.typographyPrimitiveFontSize12,
+    lineHeight: tokens.typographyPrimitiveLineHeight18,
+    letterSpacing: 0,
     textAlign: 'center',
   },
 });

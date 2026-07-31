@@ -103,3 +103,12 @@ export async function createUnavailable(
 ) {
   return apiClient.post(`/stores/${storeId}/unavailable`, data);
 }
+
+export async function deleteUnavailable(
+  storeId: string,
+  unavailableId: string,
+) {
+  return apiClient.delete(
+    `/stores/${storeId}/unavailable/${unavailableId}`,
+  );
+}

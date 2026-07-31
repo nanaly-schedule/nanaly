@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { isAxiosError } from 'axios';
+import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import {
   Modal,
@@ -18,6 +19,7 @@ import {
   updateSchedule,
 } from '@/src/features/schedule/api/schedule';
 import { getMembers } from '@/src/features/store/api/member';
+import * as tokens from '@/src/init/styles/tokens';
 import {
   backgroundColorWhite,
   buttonColorCta,
@@ -152,6 +154,14 @@ export default function ScheduleFormBottomSheet({
     !!startTime ||
     !!endTime ||
     !!memo;
+  const hasEditChanges =
+    !!schedule &&
+    (selectedMemberId !== schedule.memberId ||
+      selectedPositionId !== (schedule.positionId ?? null) ||
+      selectedDate !== schedule.date ||
+      startTime !== schedule.startTime ||
+      endTime !== schedule.endTime ||
+      memo !== (schedule.memo ?? ''));
   const hasRequiredValues =
     !!selectedMemberId && !!displayDate && !!startTime && !!endTime;
 
@@ -162,6 +172,11 @@ export default function ScheduleFormBottomSheet({
     }
 
     if (isEditMode) {
+      if (hasEditChanges) {
+        setExitConfirmVisible(true);
+        return;
+      }
+
       setIsEditMode(false);
       return;
     }
@@ -172,6 +187,22 @@ export default function ScheduleFormBottomSheet({
     }
 
     onClose();
+  };
+
+  const discardEditChanges = () => {
+    const originalPosition =
+      positions.find((position) => position.id === schedule?.positionId) ??
+      null;
+
+    setSelectedMember(null);
+    setSelectedPosition(originalPosition);
+    setPositionCleared(false);
+    setSelectedDate(schedule?.date ?? '');
+    setStartTime(schedule?.startTime ?? '');
+    setEndTime(schedule?.endTime ?? '');
+    setMemo(schedule?.memo ?? '');
+    setExitConfirmVisible(false);
+    setIsEditMode(false);
   };
 
   const handleSave = () => {
@@ -379,10 +410,10 @@ export default function ScheduleFormBottomSheet({
             style={styles.headerButton}
             onPress={() => setMenuVisible((v) => !v)}
           >
-            <Ionicons
-              name="ellipsis-vertical"
-              size={24}
-              color={typoColorPrimary}
+            <Image
+              source={require('@/src/shared/assets/more_option_btn.svg')}
+              style={styles.moreOptionIcon}
+              contentFit="contain"
             />
           </Pressable>
         )}
@@ -397,7 +428,7 @@ export default function ScheduleFormBottomSheet({
               setIsEditMode(true);
             }}
           >
-            <NText variant="m16" style={styles.menuText}>
+            <NText variant="r12" style={styles.menuText}>
               수정하기
             </NText>
           </Pressable>
@@ -408,7 +439,7 @@ export default function ScheduleFormBottomSheet({
               setDeleteConfirmVisible(true);
             }}
           >
-            <NText variant="m16" style={styles.menuText}>
+            <NText variant="r12" style={styles.menuText}>
               삭제하기
             </NText>
           </Pressable>
@@ -420,7 +451,7 @@ export default function ScheduleFormBottomSheet({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.content}
       >
-        <NText variant="r12" style={styles.sectionTitle}>
+        <NText variant="sb14" style={styles.sectionTitle}>
           근무자 정보
         </NText>
 
@@ -428,6 +459,7 @@ export default function ScheduleFormBottomSheet({
           <InfoRow
             label="근무자"
             value={memberName}
+            isPlaceholder={isEditMode}
             onPress={
               isFormMode ? () => setMemberPickerVisible(true) : undefined
             }
@@ -435,6 +467,7 @@ export default function ScheduleFormBottomSheet({
           <InfoRow
             label="포지션"
             value={positionName}
+            isPlaceholder={isEditMode || positionName === '지정안됨'}
             onPress={
               isFormMode ? () => setPositionPickerVisible(true) : undefined
             }
@@ -442,13 +475,17 @@ export default function ScheduleFormBottomSheet({
         </View>
 
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             날짜
           </NText>
           <TitleButton
             title={displayDate ? formatDate(displayDate) : 'YYYY.MM.DD'}
-            isPlaceholder={!displayDate}
+            isPlaceholder={isEditMode || !displayDate}
             showIcon={false}
+            textStyle={[
+              styles.dateValue,
+              (isEditMode || !displayDate) && styles.placeholderValue,
+            ]}
             onPress={() => {
               if (isFormMode) {
                 setDatePickerVisible(true);
@@ -458,17 +495,17 @@ export default function ScheduleFormBottomSheet({
         </View>
 
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             시간
           </NText>
           <View style={styles.timeRow}>
             <View style={styles.timeColumn}>
-              <NText variant="r12" style={styles.timeLabel}>
+              <NText variant="m14" style={styles.timeLabel}>
                 시작
               </NText>
               <TitleButton
                 title={startTime ? startTime : '00:00'}
-                isPlaceholder={!startTime}
+                isPlaceholder={isEditMode || !startTime}
                 showIcon={false}
                 onPress={() => {
                   if (isFormMode) {
@@ -478,12 +515,12 @@ export default function ScheduleFormBottomSheet({
               />
             </View>
             <View style={styles.timeColumn}>
-              <NText variant="r12" style={styles.timeLabel}>
+              <NText variant="m14" style={styles.timeLabel}>
                 종료
               </NText>
               <TitleButton
                 title={endTime ? endTime : '00:00'}
-                isPlaceholder={!endTime}
+                isPlaceholder={isEditMode || !endTime}
                 showIcon={false}
                 onPress={() => {
                   if (isFormMode) {
@@ -496,17 +533,21 @@ export default function ScheduleFormBottomSheet({
         </View>
 
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             메모
           </NText>
           <TextInput
             value={memo}
             multiline
             placeholder="전달사항 및 특이사항을 입력해주세요"
-            placeholderTextColor={typoColorSub2}
+            placeholderTextColor="#434343"
             onChangeText={setMemo}
             editable={isFormMode}
-            style={[styles.input, styles.memoInput]}
+            style={[
+              styles.input,
+              styles.memoInput,
+              isEditMode && styles.placeholderValue,
+            ]}
           />
         </View>
       </ScrollView>
@@ -581,7 +622,7 @@ export default function ScheduleFormBottomSheet({
             variant="secondary"
             onPress={() => setSaveConfirmVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button
             onPress={isCreateMode ? handleCreateSchedule : handleUpdateSchedule}
@@ -601,22 +642,31 @@ export default function ScheduleFormBottomSheet({
         onClose={() => setExitConfirmVisible(false)}
       >
         <BaseModal.Content>
-          <BaseModal.Text>저장하지 않고 나갈까요?</BaseModal.Text>
+          <BaseModal.Text>
+            {isEditMode
+              ? '수정사항을 저장하지 않고 나갈까요?'
+              : '저장하지 않고 나갈까요?'}
+          </BaseModal.Text>
         </BaseModal.Content>
         <BaseModal.Actions>
           <BaseModal.Button
             variant="secondary"
             onPress={() => setExitConfirmVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button
             onPress={() => {
+              if (isEditMode) {
+                discardEditChanges();
+                return;
+              }
+
               setExitConfirmVisible(false);
               onClose();
             }}
           >
-            마무리
+            나가기
           </BaseModal.Button>
         </BaseModal.Actions>
       </BaseModal>
@@ -665,7 +715,7 @@ export default function ScheduleFormBottomSheet({
             variant="secondary"
             onPress={() => setDeleteConfirmVisible(false)}
           >
-            취소
+            아니요
           </BaseModal.Button>
           <BaseModal.Button onPress={handleDeleteSchedule}>
             {deleting ? '삭제중' : '삭제하기'}
@@ -700,24 +750,26 @@ function toTimeString(totalMinutes: number) {
 function InfoRow({
   label,
   value,
+  isPlaceholder = false,
   onPress,
 }: {
   label: string;
   value: string;
+  isPlaceholder?: boolean;
   onPress?: () => void;
 }) {
   const RowComponent = onPress ? Pressable : View;
 
   return (
     <RowComponent style={styles.infoRow} onPress={onPress}>
-      <NText variant="r14" style={styles.infoLabel}>
+      <NText variant="m14" style={styles.infoLabel}>
         {label}
       </NText>
       <NText
         variant="r14"
         style={[
           styles.infoValue,
-          value === '지정안됨' && styles.placeholderValue,
+          (isPlaceholder || value === '지정안됨') && styles.placeholderValue,
         ]}
       >
         {value}
@@ -752,7 +804,7 @@ function PositionPickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.pickerSheet}
     >
       <NText variant="b16" style={styles.pickerTitle}>
@@ -777,7 +829,10 @@ function PositionPickerBottomSheet({
                   { backgroundColor: position.color },
                 ]}
               />
-              <NText variant="b16" style={styles.memberText}>
+              <NText
+                variant="sb14"
+                style={[styles.memberText, styles.positionText]}
+              >
                 {position.name}
               </NText>
               {selected && (
@@ -808,7 +863,7 @@ function MemberPickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.pickerSheet}
     >
       <NText variant="b16" style={styles.pickerTitle}>
@@ -825,7 +880,7 @@ function MemberPickerBottomSheet({
               onPress={() => onSelect(member)}
             >
               <NText variant="r14" style={styles.memberText}>
-                <NText variant="b16" style={styles.memberName}>
+                <NText variant="sb14" style={styles.memberName}>
                   {member.name}
                 </NText>
                 {member.roleName ? ` · ${member.roleName}` : ''}
@@ -889,26 +944,31 @@ function ScheduleDatePickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={years}
           selectedValue={draft.year}
-          formatLabel={(year) => `${year}년`}
+          formatLabel={(year) => `${year}`}
+          unit="년"
+          unitOffset={26}
           onChange={(year) => updateDraft({ year })}
         />
         <DateWheelColumn
           items={months}
           selectedValue={draft.month}
-          formatLabel={(month) => `${month}월`}
+          formatLabel={(month) => `${month}`}
+          unit="월"
           onChange={(month) => updateDraft({ month })}
         />
         <DateWheelColumn
           items={days}
           selectedValue={draft.day}
-          formatLabel={(day) => `${String(day).padStart(2, '0')}일`}
+          formatLabel={(day) => String(day).padStart(2, '0')}
+          unit="일"
           onChange={(day) => updateDraft({ day })}
         />
       </View>
@@ -995,14 +1055,16 @@ function ScheduleTimePickerBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      showBackdrop={false}
+      backdropVariant="light"
       style={styles.wheelSheet}
     >
       <View style={styles.wheelRow}>
+        <View pointerEvents="none" style={styles.wheelSelectionHighlight} />
         <DateWheelColumn
           items={hours}
           selectedValue={normalizedHour}
-          formatLabel={(hour) => `${hour}시`}
+          formatLabel={(hour) => `${hour}`}
+          unit="시"
           onChange={(hour) =>
             setDraft((prev) => ({
               ...prev,
@@ -1013,7 +1075,8 @@ function ScheduleTimePickerBottomSheet({
         <DateWheelColumn
           items={minutes}
           selectedValue={normalizedMinute}
-          formatLabel={(minute) => `${String(minute).padStart(2, '0')}분`}
+          formatLabel={(minute) => String(minute).padStart(2, '0')}
+          unit="분"
           onChange={(minute) =>
             setDraft((prev) => ({
               ...prev,
@@ -1044,9 +1107,11 @@ function ConfirmButton({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   sheet: {
+    height: 720,
     minHeight: 720,
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    maxHeight: 720,
+    paddingHorizontal: tokens.spacingSpacing16,
+    paddingTop: tokens.spacingSpacing8,
     paddingBottom: 32,
   },
   header: {
@@ -1055,7 +1120,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginHorizontal: -10,
-    marginBottom: 16,
+    marginBottom: tokens.spacingSpacing16,
   },
   headerButton: {
     width: 36,
@@ -1065,6 +1130,11 @@ const styles = StyleSheet.create({
   },
   title: {
     color: typoColorPrimary,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+  },
+  moreOptionIcon: {
+    width: 24,
+    height: 24,
   },
   menu: {
     position: 'absolute',
@@ -1072,39 +1142,41 @@ const styles = StyleSheet.create({
     top: 58,
     right: 16,
     width: 140,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    shadowColor: '#000000',
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing8,
+    paddingVertical: 0,
+    shadowColor: tokens.basicColorBlackBase,
     shadowOffset: {
       width: 0,
-      height: 12,
+      height: 8,
     },
-    shadowOpacity: 0.18,
-    shadowRadius: 28,
-    elevation: 12,
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
   },
   menuItem: {
     height: 40,
     justifyContent: 'center',
-    paddingHorizontal: 18,
   },
   menuText: {
-    color: typoColorPrimary,
+    color: tokens.typoColorSecondary,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   content: {
-    paddingBottom: 20,
+    paddingBottom: tokens.spacingSpacing20,
   },
   sectionTitle: {
     color: typoColorPrimary,
-    marginBottom: 10,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+    marginBottom: tokens.spacingSpacing10,
   },
   infoCard: {
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 10,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing10,
     paddingVertical: 4,
-    marginBottom: 20,
+    marginBottom: tokens.spacingSpacing20,
   },
   infoRow: {
     minHeight: 44,
@@ -1113,83 +1185,123 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   infoLabel: {
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   infoValue: {
-    color: typoColorPrimary,
+    color: '#434343',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+    textAlign: 'right',
   },
   placeholderValue: {
     color: typoColorSub2,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: tokens.spacingSpacing20,
   },
   input: {
     height: 44,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius8,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing12,
     color: typoColorPrimary,
-    fontSize: 12,
+    fontSize: tokens.typographyPrimitiveFontSize12,
   },
   memoInput: {
-    height: 76,
-    paddingTop: 12,
+    width: '100%',
+    height: 80,
+    paddingHorizontal: tokens.spacingSpacing10,
+    paddingVertical: tokens.spacingSpacing10,
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight24,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+    includeFontPadding: false,
     textAlignVertical: 'top',
   },
   timeRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: tokens.spacingSpacing12,
   },
   timeColumn: {
     flex: 1,
-    gap: 8,
+    gap: tokens.spacingSpacing8,
   },
   timeLabel: {
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
+  },
+  dateValue: {
+    color: '#434343',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing2,
   },
   pickerSheet: {
     minHeight: 520,
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingHorizontal: 0,
+    paddingTop: tokens.spacingSpacing8,
   },
   pickerTitle: {
-    color: typoColorPrimary,
-    textAlign: 'center',
-    marginBottom: 36,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+    marginLeft: tokens.spacingSpacing16,
+    marginTop: 26,
+    marginBottom: tokens.spacingSpacing30,
   },
   memberList: {
-    gap: 14,
+    gap: tokens.spacingSpacing10,
+    marginHorizontal: tokens.spacingSpacing16,
   },
   memberRow: {
-    minHeight: 70,
+    width: '100%',
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: tokens.basicColorWhiteBase,
+    paddingHorizontal: tokens.spacingSpacing10,
   },
   memberText: {
     flex: 1,
-    color: typoColorPrimary,
+    color: '#575757',
+    fontFamily: 'Pretendard',
+    fontWeight: '400',
+    fontSize: tokens.typographyPrimitiveFontSize14,
+    lineHeight: tokens.typographyPrimitiveLineHeight16,
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
   },
   memberName: {
-    color: typoColorPrimary,
+    color: '#333333',
+    letterSpacing: tokens.typographyPrimitiveLetterSpacing0,
+  },
+  positionText: {
+    color: '#333333',
+    fontWeight: '600',
   },
   positionDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginRight: 10,
+    marginRight: tokens.spacingSpacing10,
   },
   wheelSheet: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingHorizontal: tokens.spacingSpacing16,
+    paddingTop: tokens.spacingSpacing12,
   },
   wheelRow: {
+    position: 'relative',
     flexDirection: 'row',
     gap: spacingSpacing20,
     marginBottom: spacingSpacing20,
+  },
+  wheelSelectionHighlight: {
+    position: 'absolute',
+    top: 91,
+    left: 0,
+    right: 0,
+    height: 38,
+    borderRadius: tokens.radiusRadius12,
+    backgroundColor: '#E7EBF2',
   },
   confirmButton: {
     height: 46,

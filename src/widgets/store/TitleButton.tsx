@@ -1,8 +1,11 @@
 import {
   GestureResponderEvent,
   Pressable,
+  StyleProp,
   StyleSheet,
+  TextStyle,
   View,
+  ViewStyle,
 } from 'react-native';
 
 import {
@@ -19,6 +22,8 @@ interface TitleButtonProps {
   title: string;
   isPlaceholder?: boolean;
   showIcon?: boolean;
+  textStyle?: StyleProp<TextStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
   onPress: (e: GestureResponderEvent) => void;
 }
 
@@ -27,12 +32,17 @@ export default function TitleButton({
   onPress,
   isPlaceholder = false,
   showIcon = true,
+  textStyle,
+  containerStyle,
 }: TitleButtonProps) {
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <Pressable style={[styles.container, containerStyle]} onPress={onPress}>
       <NText
         variant="m14"
-        style={{ color: isPlaceholder ? typoColorSub1 : typoColorPrimary }}
+        style={[
+          { color: isPlaceholder ? typoColorSub1 : typoColorPrimary },
+          textStyle,
+        ]}
       >
         {title}
       </NText>

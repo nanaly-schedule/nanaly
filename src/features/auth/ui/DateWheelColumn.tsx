@@ -7,7 +7,9 @@ import {
   View,
 } from 'react-native';
 
-import { basicColorGrey300, typoColorPrimary } from '@/src/init/styles/tokens';
+import {
+  typographyPrimitiveLetterSpacing2,
+} from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 
 const rowHeight = 44;
@@ -17,6 +19,8 @@ interface DateWheelColumnProps {
   items: number[];
   selectedValue: number;
   formatLabel: (value: number, isSelected: boolean) => string;
+  unit?: string;
+  unitOffset?: number;
   onChange: (value: number) => void;
 }
 
@@ -24,6 +28,8 @@ export default function DateWheelColumn({
   items,
   selectedValue,
   formatLabel,
+  unit,
+  unitOffset = 16,
   onChange,
 }: DateWheelColumnProps) {
   const listRef = useRef<FlatList<number>>(null);
@@ -87,6 +93,15 @@ export default function DateWheelColumn({
           );
         }}
       />
+      {unit && (
+        <NText
+          pointerEvents="none"
+          variant="m16"
+          style={[styles.unit, { marginLeft: unitOffset }]}
+        >
+          {unit}
+        </NText>
+      )}
     </View>
   );
 }
@@ -105,12 +120,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   text: {
+    fontFamily: 'Pretendard',
+    fontWeight: '700',
+    fontSize: 18,
+    lineHeight: 24,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
     textAlign: 'center',
   },
   selectedText: {
-    color: typoColorPrimary,
+    color: '#333333',
   },
   unselectedText: {
-    color: basicColorGrey300,
+    color: '#D6D6D6',
+  },
+  unit: {
+    position: 'absolute',
+    top: rowHeight * 2 + 12,
+    left: '50%',
+    color: '#333333',
+    fontFamily: 'Pretendard',
+    fontWeight: '500',
+    fontSize: 16,
+    lineHeight: 20,
+    letterSpacing: typographyPrimitiveLetterSpacing2,
+    textAlign: 'center',
   },
 });
