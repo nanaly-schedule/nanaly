@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E1E3E6',
     borderRadius: tokens.radiusRadius8,
-    backgroundColor: '#F5F7FA',
+    backgroundColor: tokens.backgroundColorPrimary,
     paddingLeft: tokens.spacingSpacing10,
     paddingRight: 6,
   },

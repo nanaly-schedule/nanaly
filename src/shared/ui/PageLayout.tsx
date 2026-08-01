@@ -2,7 +2,10 @@ import { ReactNode } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { spacingSpacing16 } from '@/src/init/styles/tokens';
+import {
+  backgroundColorPrimary,
+  spacingSpacing16,
+} from '@/src/init/styles/tokens';
 
 import Header from './Header';
 
@@ -49,5 +52,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginHorizontal: spacingSpacing16,
+    backgroundColor: backgroundColorPrimary,
   },
 });

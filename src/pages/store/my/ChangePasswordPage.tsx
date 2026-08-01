@@ -107,7 +107,6 @@ export default function ChangePasswordPage() {
 const styles = StyleSheet.create({
   container: {
     marginTop: spacingSpaicng14,
-    paddingHorizontal: spacingSpacing16,
     gap: spacingSpacing16,
   },
   errorConditionContainer: {
