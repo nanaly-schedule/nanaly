@@ -1,5 +1,11 @@
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import {
+  Keyboard,
+  StyleSheet,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
 import { spacingSpacing20 } from '@/src/init/styles/tokens';
@@ -45,12 +51,15 @@ export default function BusinessInfo({
   onChangeOwnerName,
   onChangeStartDate,
 }: BusinessInfoProps) {
+  const ownerNameInputRef = useRef<TextInput>(null);
+  const openDateInputRef = useRef<TextInput>(null);
   const [isOpenDatePickerOpen, setIsOpenDatePickerOpen] = useState(false);
   const openDate = parseBirthDate(startDate);
   const formattedBusinessNumber =
     formatBusinessRegistrationNumber(businessNumber);
 
   const handleChangeOpenDate = (value: BirthDateValue) => {
+    openDateInputRef.current?.blur();
     onChangeStartDate(formatBirthDate(value));
   };
 
@@ -63,55 +72,61 @@ export default function BusinessInfo({
       return;
     }
 
+    ownerNameInputRef.current?.blur();
+    Keyboard.dismiss();
     setIsOpenDatePickerOpen(true);
   };
 
   return (
-    <View style={styles.container}>
-      <View>
-        <InputLabel label="사업자등록번호" />
-        <Input
-          editable={editable}
-          placeholder="000-00-00000"
-          value={formattedBusinessNumber}
-          onChangeText={handleChangeBusinessNumber}
-          keyboardType="number-pad"
-          maxLength={12}
-          variant=""
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.container}>
+        <View>
+          <InputLabel label="사업자등록번호" />
+          <Input
+            editable={editable}
+            placeholder="000-00-00000"
+            value={formattedBusinessNumber}
+            onChangeText={handleChangeBusinessNumber}
+            keyboardType="number-pad"
+            maxLength={12}
+            variant=""
+          />
+        </View>
+        <View>
+          <InputLabel label="대표자명" />
+          <Input
+            ref={ownerNameInputRef}
+            editable={editable}
+            placeholder="대표자명을 입력해 주세요"
+            value={ownerName}
+            onChangeText={onChangeOwnerName}
+            variant=""
+          />
+        </View>
+        <View>
+          <InputLabel label="개업일" />
+          <Input
+            ref={openDateInputRef}
+            placeholder="개업일을 선택해 주세요"
+            value={openDate ? formatBirthDate(openDate) : ''}
+            variant=""
+            editable={editable}
+            caretHidden
+            contextMenuHidden
+            showSoftInputOnFocus={false}
+            onFocus={handlePressOpenDate}
+            onPressIn={handlePressOpenDate}
+            onChangeText={() => {}}
+          />
+        </View>
+        <BirthDatePickerBottomSheet
+          visible={isOpenDatePickerOpen}
+          value={openDate}
+          onChange={handleChangeOpenDate}
+          onClose={() => setIsOpenDatePickerOpen(false)}
         />
       </View>
-      <View>
-        <InputLabel label="대표자명" />
-        <Input
-          editable={editable}
-          placeholder="대표자명을 입력해 주세요"
-          value={ownerName}
-          onChangeText={onChangeOwnerName}
-          variant=""
-        />
-      </View>
-      <View>
-        <InputLabel label="개업일" />
-        <Input
-          placeholder="개업일을 선택해 주세요"
-          value={openDate ? formatBirthDate(openDate) : ''}
-          variant=""
-          editable={editable}
-          caretHidden
-          contextMenuHidden
-          showSoftInputOnFocus={false}
-          onFocus={handlePressOpenDate}
-          onPressIn={handlePressOpenDate}
-          onChangeText={() => {}}
-        />
-      </View>
-      <BirthDatePickerBottomSheet
-        visible={isOpenDatePickerOpen}
-        value={openDate}
-        onChange={handleChangeOpenDate}
-        onClose={() => setIsOpenDatePickerOpen(false)}
-      />
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
