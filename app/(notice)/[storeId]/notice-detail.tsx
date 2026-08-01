@@ -27,25 +27,10 @@ import {
   typographyPrimitiveLetterSpacing2,
 } from '@/src/init/styles/tokens';
 import MoreOptionButtonIcon from '@/src/shared/assets/MoreOptionButtonIcon';
+import { formatKoreanDateWithWeekday } from '@/src/shared/lib/date';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
-
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-
-function formatNoticeDate(createdAt?: string) {
-  if (!createdAt) {
-    return '';
-  }
-
-  const date = new Date(createdAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]})`;
-}
 
 export default function NoticeDetailPage() {
   const router = useRouter();
@@ -177,7 +162,7 @@ export default function NoticeDetailPage() {
     }
   };
 
-  const createdAt = formatNoticeDate(notice?.createdAt);
+  const createdAt = formatKoreanDateWithWeekday(notice?.createdAt);
   const metaItems = [
     createdAt,
     notice?.authorName,
