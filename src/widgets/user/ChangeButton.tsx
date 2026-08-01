@@ -1,13 +1,7 @@
-import { GestureResponderEvent, Pressable, StyleSheet } from 'react-native';
+import { GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  backgroundColorWhite,
-  basicColorGrey200,
-  buttonColorCta,
-  radiusRadius8,
-} from '@/src/init/styles/tokens';
-import NText from '@/src/shared/ui/NText';
+import CtaButton from '@/src/shared/ui/CtaButton';
 
 interface ChangeButtonProps {
   disabled: boolean;
@@ -17,31 +11,12 @@ interface ChangeButtonProps {
 export default function ChangeButton({ disabled, onPress }: ChangeButtonProps) {
   const insets = useSafeAreaInsets();
   return (
-    <Pressable
+    <CtaButton
       disabled={disabled}
-      style={[
-        styles.verifyBtn,
-        {
-          backgroundColor: disabled ? basicColorGrey200 : buttonColorCta,
-          marginBottom: insets.bottom + 12,
-        },
-      ]}
+      style={{ marginTop: 'auto', marginBottom: insets.bottom + 12 }}
       onPress={onPress}
     >
-      <NText variant="m16" style={{ color: backgroundColorWhite }}>
-        변경하기
-      </NText>
-    </Pressable>
+      <CtaButton.Text>변경하기</CtaButton.Text>
+    </CtaButton>
   );
 }
-
-const styles = StyleSheet.create({
-  verifyBtn: {
-    marginTop: 'auto',
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
-  },
-});

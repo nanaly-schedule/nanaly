@@ -1,17 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  backgroundColorWhite,
-  buttonColorCta,
-  radiusRadius8,
   spacingSpacing12,
   spacingSpacing24,
   spacingSpaicng14,
 } from '@/src/init/styles/tokens';
-import NText from '@/src/shared/ui/NText';
+import CtaButton from '@/src/shared/ui/CtaButton';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import BusinessInfo from '@/src/widgets/store/BusinessInfo';
 import SectionHeader from '@/src/widgets/store/SectionHeader';
@@ -65,11 +62,11 @@ export default function BusinessStep2Page() {
           onChangeStartDate={() => {}}
         />
       </View>
-      <Pressable
-        style={[
-          styles.nextBtn,
-          { marginBottom: insets.bottom + spacingSpacing12 },
-        ]}
+      <CtaButton
+        style={{
+          marginTop: 'auto',
+          marginBottom: insets.bottom + spacingSpacing12,
+        }}
         onPress={() =>
           router.push({
             pathname: '/store/create/step3',
@@ -82,26 +79,8 @@ export default function BusinessStep2Page() {
           })
         }
       >
-        <NText
-          variant="m16"
-          style={{
-            color: backgroundColorWhite,
-          }}
-        >
-          다음으로
-        </NText>
-      </Pressable>
+        <CtaButton.Text>다음으로</CtaButton.Text>
+      </CtaButton>
     </PageLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  nextBtn: {
-    marginTop: 'auto',
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
-  },
-});

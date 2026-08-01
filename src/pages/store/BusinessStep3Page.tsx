@@ -1,27 +1,18 @@
 import { isAxiosError } from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { createStore } from '@/src/features/store/api/store';
 import {
-  backgroundColorWhite,
-  buttonColorCta,
-  radiusRadius8,
   spacingSpacing12,
   spacingSpacing24,
   spacingSpaicng14,
 } from '@/src/init/styles/tokens';
 import BaseModal from '@/src/shared/ui/BaseModal';
+import CtaButton from '@/src/shared/ui/CtaButton';
 import Input from '@/src/shared/ui/Input';
-import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import InputLabel from '@/src/widgets/shared/InputLabel';
 import SectionHeader from '@/src/widgets/store/SectionHeader';
@@ -103,22 +94,12 @@ export default function BusinessStep3Page() {
           />
         </View>
         <View style={{ margin: 'auto' }} />
-        <Pressable
-          style={[
-            styles.createBtn,
-            { marginBottom: insets.bottom + spacingSpacing12 },
-          ]}
+        <CtaButton
+          style={{ marginBottom: insets.bottom + spacingSpacing12 }}
           onPress={handlePressNextButton}
         >
-          <NText
-            variant="m16"
-            style={{
-              color: backgroundColorWhite,
-            }}
-          >
-            다음으로
-          </NText>
-        </Pressable>
+          <CtaButton.Text>다음으로</CtaButton.Text>
+        </CtaButton>
         <BaseModal
           visible={isDuplicateBusinessNumberModalVisible}
           onClose={() => setIsDuplicateBusinessNumberModalVisible(false)}
@@ -139,13 +120,3 @@ export default function BusinessStep3Page() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  createBtn: {
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
-  },
-});

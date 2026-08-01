@@ -1,15 +1,9 @@
 import { useRef, useState } from 'react';
-import { Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Keyboard, StyleSheet, TextInput, View } from 'react-native';
 
-import {
-  backgroundColorPrimary,
-  brandColorPrimary,
-  radiusRadius12,
-  spacingSpacing12,
-  spacingSpacing16,
-} from '@/src/init/styles/tokens';
+import { spacingSpacing12 } from '@/src/init/styles/tokens';
+import CtaButton from '@/src/shared/ui/CtaButton';
 import Input from '@/src/shared/ui/Input';
-import NText from '@/src/shared/ui/NText';
 
 import AuthLinks from './AuthLinks';
 import OrDivider from './OrDivider';
@@ -65,16 +59,13 @@ export default function SignInForm({
           onSubmitEditing={handleSubmit}
         />
       </View>
-      <Pressable
-        style={styles.cta}
+      <CtaButton
         onPressIn={() => onPressStateChange?.(true)}
         onPressOut={() => onPressStateChange?.(false)}
         onPress={handleSubmit}
       >
-        <NText variant="m16" style={styles.ctaText}>
-          로그인
-        </NText>
-      </Pressable>
+        <CtaButton.Text>로그인</CtaButton.Text>
+      </CtaButton>
       <AuthLinks />
       <OrDivider />
     </View>
@@ -84,16 +75,5 @@ export default function SignInForm({
 const styles = StyleSheet.create({
   input: {
     gap: spacingSpacing12,
-    marginBottom: spacingSpacing16,
-  },
-  cta: {
-    borderRadius: radiusRadius12,
-    height: 46,
-    backgroundColor: brandColorPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ctaText: {
-    color: backgroundColorPrimary,
   },
 });

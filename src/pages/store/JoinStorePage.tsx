@@ -1,24 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import { Image, StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import LogoutModal from '@/src/features/auth/ui/LogoutModal';
-import useUser from '@/src/features/user/lib/useUser';
-import {
-  backgroundColorWhite,
-  buttonColorCta,
-  radiusRadius8,
-  spacingSpacing12,
-  spacingSpacing16,
-  typoColorRed,
-} from '@/src/init/styles/tokens';
-import NText from '@/src/shared/ui/NText';
+import { spacingSpacing12, spacingSpacing16 } from '@/src/init/styles/tokens';
+import CtaButton from '@/src/shared/ui/CtaButton';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import InviteLinkBottomSheet from '@/src/widgets/store/InviteLinkBottomSheet';
 import SectionHeader from '@/src/widgets/store/SectionHeader';
@@ -48,22 +34,15 @@ export default function JoinStorePage() {
         ]}
         resizeMode="contain"
       />
-      <Pressable
-        style={[
-          styles.verifyBtn,
-          { marginBottom: spacingSpacing12 + insets.bottom },
-        ]}
+      <CtaButton
+        style={{
+          marginTop: 'auto',
+          marginBottom: spacingSpacing12 + insets.bottom,
+        }}
         onPress={() => setIsInviteLinkBottomSheetVisible(true)}
       >
-        <NText
-          variant="m16"
-          style={{
-            color: backgroundColorWhite,
-          }}
-        >
-          링크 입력하기
-        </NText>
-      </Pressable>
+        <CtaButton.Text>링크 입력하기</CtaButton.Text>
+      </CtaButton>
       <InviteLinkBottomSheet
         visible={isInviteLinkBottomSheetVisible}
         onClose={() => setIsInviteLinkBottomSheetVisible(false)}
@@ -84,13 +63,5 @@ export default function JoinStorePage() {
 const styles = StyleSheet.create({
   inviteImage: {
     alignSelf: 'center',
-  },
-  verifyBtn: {
-    marginTop: 'auto',
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
   },
 });

@@ -1,21 +1,15 @@
 import { isAxiosError } from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   checkInviteCode,
   joinStoreWithInviteCode,
 } from '@/src/features/invite/api/invite';
-import {
-  backgroundColorWhite,
-  buttonColorCta,
-  radiusRadius8,
-  spacingSpacing12,
-} from '@/src/init/styles/tokens';
+import { spacingSpacing12 } from '@/src/init/styles/tokens';
 import BaseModal from '@/src/shared/ui/BaseModal';
-import NText from '@/src/shared/ui/NText';
+import CtaButton from '@/src/shared/ui/CtaButton';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import InviteStoreCard from '@/src/widgets/store/InviteStoreCard';
 import SectionHeader from '@/src/widgets/store/SectionHeader';
@@ -102,22 +96,15 @@ export default function SelectStorePage() {
         ownerName={storeInfo?.representativeName ?? ''}
         inviterName={storeInfo?.invitedBy ?? ''}
       />
-      <Pressable
-        style={[
-          styles.joinBtn,
-          { marginBottom: insets.bottom + spacingSpacing12 },
-        ]}
+      <CtaButton
+        style={{
+          marginTop: 'auto',
+          marginBottom: insets.bottom + spacingSpacing12,
+        }}
         onPress={handlePressJoin}
       >
-        <NText
-          variant="m16"
-          style={{
-            color: backgroundColorWhite,
-          }}
-        >
-          참여하기
-        </NText>
-      </Pressable>
+        <CtaButton.Text>참여하기</CtaButton.Text>
+      </CtaButton>
 
       <BaseModal
         visible={isExpiredCode}
@@ -137,14 +124,3 @@ export default function SelectStorePage() {
     </PageLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  joinBtn: {
-    marginTop: 'auto',
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
-  },
-});
