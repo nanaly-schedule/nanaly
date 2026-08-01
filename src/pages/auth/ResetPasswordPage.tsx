@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
@@ -27,14 +28,18 @@ export default function ResetPasswordPage() {
         setEmailErrorMessage('유효하지 않은 이메일 입니다.');
         return;
       }
+      setEmailErrorMessage('');
       await resetPassword({ email: normalizedEmail });
       setEmailStatus(EmailVerifyStatus.Sent);
       setTimeout(() => {
         router.back();
       }, 1000);
     } catch (error) {
-      //todo: 400 에러 시 이메일이 존재하지 않는다는 에러 메세지 띄우기
-      console.error(error);
+      if (isAxiosError(error) && error.response?.status === 400) {
+        setEmailErrorMessage('존재하지 않는 이메일입니다.');
+        setEmailStatus(EmailVerifyStatus.Idle);
+        return;
+      }
     }
   };
   return (
