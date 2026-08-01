@@ -183,7 +183,7 @@ export default function AuthVerifyPage() {
 
       setEmailStatus(EmailVerifyStatus.Sent);
       setEmailSendCount((prev) => prev + 1);
-      setTimer(60);
+      setTimer(180);
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 400) {
         setCode('');
