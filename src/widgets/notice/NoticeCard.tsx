@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Notice } from '@/src/entities/notice/notice';
@@ -7,6 +6,8 @@ import {
   typoColorPlaceholder,
   typoColorPrimary,
 } from '@/src/init/styles/tokens';
+import MegaphonePrivateIcon from '@/src/shared/assets/MegaphonePrivateIcon';
+import MegaphonePublicIcon from '@/src/shared/assets/MegaphonePublicIcon';
 
 type NoticeCardProps = {
   notice: Notice;
@@ -113,15 +114,13 @@ export default function NoticeCard({
           isList && styles.listIcon,
         ]}
       >
-        <Image
-          source={
-            isPublic
-              ? require('@/src/shared/assets/megaphone_pub.svg')
-              : require('@/src/shared/assets/megaphone_prv.svg')
-          }
-          style={styles.noticeIcon}
-          contentFit="contain"
-        />
+        <View style={styles.noticeIcon}>
+          {isPublic ? (
+            <MegaphonePublicIcon size={24} />
+          ) : (
+            <MegaphonePrivateIcon size={24} />
+          )}
+        </View>
       </View>
       <View style={{ flex: 1 }}>
         <Text

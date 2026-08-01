@@ -26,6 +26,7 @@ import {
   typoColorSub1,
   typographyPrimitiveLetterSpacing2,
 } from '@/src/init/styles/tokens';
+import MoreOptionButtonIcon from '@/src/shared/assets/MoreOptionButtonIcon';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -180,24 +181,12 @@ export default function NoticeDetailPage() {
   const metaItems = [
     createdAt,
     notice?.authorName,
-    canViewPrivateNotice && notice
-      ? notice.isPublic
-        ? '공개'
-        : '비공개'
-      : '',
+    canViewPrivateNotice && notice ? (notice.isPublic ? '공개' : '비공개') : '',
   ].filter(Boolean);
 
   return (
     <PageLayout
-      icon={
-        canManageNotice ? (
-          <Image
-            source={require('@/src/shared/assets/more_option_btn.svg')}
-            style={styles.moreOptionIcon}
-            contentFit="contain"
-          />
-        ) : undefined
-      }
+      icon={canManageNotice ? <MoreOptionButtonIcon size={24} /> : undefined}
       onPressCheckIcon={() => setMenuVisible((visible) => !visible)}
     >
       {canManageNotice && menuVisible && (
@@ -221,10 +210,7 @@ export default function NoticeDetailPage() {
               </NText>
             </Pressable>
 
-            <Pressable
-              style={styles.menuItem}
-              onPress={handlePressEdit}
-            >
+            <Pressable style={styles.menuItem} onPress={handlePressEdit}>
               <NText variant="r12" style={styles.menuText}>
                 수정하기
               </NText>
@@ -313,10 +299,6 @@ export default function NoticeDetailPage() {
 }
 
 const styles = StyleSheet.create({
-  moreOptionIcon: {
-    width: 24,
-    height: 24,
-  },
   menuBackdrop: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1,

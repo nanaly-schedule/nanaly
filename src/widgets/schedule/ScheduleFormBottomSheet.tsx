@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
 import { isAxiosError } from 'axios';
-import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import {
   Modal,
@@ -28,6 +27,7 @@ import {
   typoColorPrimary,
   typoColorSub2,
 } from '@/src/init/styles/tokens';
+import MoreOptionButtonIcon from '@/src/shared/assets/MoreOptionButtonIcon';
 import {
   BirthDateValue,
   createNumberRange,
@@ -410,11 +410,9 @@ export default function ScheduleFormBottomSheet({
             style={styles.headerButton}
             onPress={() => setMenuVisible((v) => !v)}
           >
-            <Image
-              source={require('@/src/shared/assets/more_option_btn.svg')}
-              style={styles.moreOptionIcon}
-              contentFit="contain"
-            />
+            <View style={styles.moreOptionIcon}>
+              <MoreOptionButtonIcon size={24} />
+            </View>
           </Pressable>
         )}
       </View>
