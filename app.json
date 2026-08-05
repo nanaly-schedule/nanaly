@@ -2,7 +2,7 @@
   "expo": {
     "name": "나날이",
     "slug": "nanaly",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "orientation": "portrait",
     "icon": "./src/shared/assets/app_icon.png",
     "scheme": "nanaly",
