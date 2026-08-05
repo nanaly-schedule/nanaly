@@ -22,6 +22,13 @@ export default function ResetPasswordPage() {
 
   const router = useRouter();
 
+  const completePasswordResetRequest = () => {
+    setEmailStatus(EmailVerifyStatus.Sent);
+    setTimeout(() => {
+      router.back();
+    }, 1000);
+  };
+
   const handleSendPassword = async () => {
     try {
       if (!isEmailValid) {
@@ -30,16 +37,17 @@ export default function ResetPasswordPage() {
       }
       setEmailErrorMessage('');
       await resetPassword({ email: normalizedEmail });
-      setEmailStatus(EmailVerifyStatus.Sent);
-      setTimeout(() => {
-        router.back();
-      }, 1000);
+      completePasswordResetRequest();
     } catch (error) {
-      if (isAxiosError(error) && error.response?.status === 400) {
-        setEmailErrorMessage('존재하지 않는 이메일입니다.');
-        setEmailStatus(EmailVerifyStatus.Idle);
-        return;
+      if (isAxiosError(error) && error.response?.status !== undefined) {
+        if (error.response.status < 500) {
+          completePasswordResetRequest();
+          return;
+        }
       }
+
+      setEmailErrorMessage('메일 전송 중 오류가 발생했습니다.');
+      setEmailStatus(EmailVerifyStatus.Idle);
     }
   };
   return (
