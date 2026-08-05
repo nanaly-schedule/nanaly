@@ -1,5 +1,4 @@
 import { isAxiosError } from 'axios';
-import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -19,6 +18,7 @@ import {
   typoColorRed,
   typoColorSub2,
 } from '@/src/init/styles/tokens';
+import DeleteButtonIcon from '@/src/shared/assets/DeleteButtonIcon';
 import AccessDenied from '@/src/shared/ui/AccessDenied';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
@@ -237,11 +237,9 @@ export default function PositionManagePage() {
                     setDeleteTarget(position);
                   }}
                 >
-                  <Image
-                    source={require('@/src/shared/assets/delete_btn.svg')}
-                    style={styles.deleteIcon}
-                    contentFit="contain"
-                  />
+                  <View style={styles.deleteIcon}>
+                    <DeleteButtonIcon size={24} />
+                  </View>
                 </Pressable>
               </View>
             ))}

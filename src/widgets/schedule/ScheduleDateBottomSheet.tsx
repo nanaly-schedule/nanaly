@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import {
   ActivityIndicator,
   Pressable,
@@ -13,6 +12,7 @@ import {
   typoColorPrimary,
   typoColorRed,
 } from '@/src/init/styles/tokens';
+import ArrowButtonIcon from '@/src/shared/assets/ArrowButtonIcon';
 import BottomSheet from '@/src/shared/ui/BottomSheet';
 import NText from '@/src/shared/ui/NText';
 
@@ -125,11 +125,9 @@ export default function ScheduleDateBottomSheet({
                       </Text>
                     </Text>
                     {isEditable && (
-                      <Image
-                        source={require('@/src/shared/assets/arrow_btn.svg')}
-                        style={styles.arrowIcon}
-                        contentFit="contain"
-                      />
+                      <View style={styles.arrowIcon}>
+                        <ArrowButtonIcon size={24} />
+                      </View>
                     )}
                   </Pressable>
                 )}

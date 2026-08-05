@@ -25,6 +25,22 @@ export function formatBirthDate({ year, month, day }: BirthDateValue) {
   )}`;
 }
 
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+export function formatKoreanDateWithWeekday(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]})`;
+}
+
 export function parseBirthDate(value?: string | null): BirthDateValue | null {
   if (!value) {
     return null;

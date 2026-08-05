@@ -1,5 +1,4 @@
 import { useIsFocused } from '@react-navigation/native';
-import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -24,6 +23,8 @@ import {
 import useUser from '@/src/features/user/lib/useUser';
 import * as tokens from '@/src/init/styles/tokens';
 import { typoColorPrimary, typoColorRed } from '@/src/init/styles/tokens';
+import ArrowButtonIcon from '@/src/shared/assets/ArrowButtonIcon';
+import PlusButtonIcon from '@/src/shared/assets/PlusButtonIcon';
 import BaseModal from '@/src/shared/ui/BaseModal';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -1166,11 +1167,9 @@ export default function SchedulePage() {
           <NText variant="h2" style={styles.monthTitle}>
             {formatMonthTitle(currentMonth)}
           </NText>
-          <Image
-            source={require('@/src/shared/assets/arrow_btn.svg')}
-            style={styles.monthButtonIcon}
-            contentFit="contain"
-          />
+          <View style={styles.monthButtonIcon}>
+            <ArrowButtonIcon size={24} />
+          </View>
         </Pressable>
       </View>
 
@@ -1241,11 +1240,9 @@ export default function SchedulePage() {
             setFormVisible(true);
           }}
         >
-          <Image
-            source={require('@/src/shared/assets/plus_btn.svg')}
-            style={styles.floatingButtonIcon}
-            contentFit="contain"
-          />
+          <View style={styles.floatingButtonIcon}>
+            <PlusButtonIcon size={76} />
+          </View>
         </Pressable>
       )}
 
@@ -1401,7 +1398,7 @@ export default function SchedulePage() {
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: '#F5F7FA',
+    backgroundColor: tokens.backgroundColorPrimary,
   },
   header: {
     flexDirection: 'row',

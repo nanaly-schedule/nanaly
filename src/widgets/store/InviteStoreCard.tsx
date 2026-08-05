@@ -1,4 +1,4 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import {
   backgroundColorWhite,
@@ -11,6 +11,7 @@ import {
   spacingSpacing20,
   spacingSpacing24,
 } from '@/src/init/styles/tokens';
+import StoreIcon from '@/src/shared/assets/StoreIcon';
 import NText from '@/src/shared/ui/NText';
 
 interface InviteStoreCardProps {
@@ -30,10 +31,7 @@ export default function InviteStoreCard({
     <View style={styles.container}>
       <View style={[styles.row, styles.contentContainer]}>
         <View style={styles.image}>
-          <Image
-            source={require('../../shared/assets/storeIcon.png')}
-            style={styles.icon}
-          />
+          <StoreIcon size={24} color={backgroundColorWhite} />
         </View>
         <View>
           <NText variant="b16">{storeName}</NText>
@@ -69,10 +67,6 @@ const styles = StyleSheet.create({
     width: 36,
     borderRadius: '50%',
     padding: 6,
-  },
-  icon: {
-    width: 24,
-    height: 24,
   },
   divider: {
     backgroundColor: borderDividerPrimary,

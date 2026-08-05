@@ -1,23 +1,15 @@
 import {
   GestureResponderEvent,
-  Pressable,
-  StyleSheet,
+  type StyleProp,
   ViewStyle,
 } from 'react-native';
 
-import {
-  backgroundColorWhite,
-  basicColorGrey200,
-  buttonColorCta,
-  radiusRadius8,
-  typoColorPlaceholder,
-} from '@/src/init/styles/tokens';
-import NText from '@/src/shared/ui/NText';
+import CtaButton from '@/src/shared/ui/CtaButton';
 
 interface VerifyButtonProps {
   isVerifyDisabled: boolean;
   onVerify: (e: GestureResponderEvent) => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export default function VerifyButton({
@@ -26,38 +18,12 @@ export default function VerifyButton({
   style,
 }: VerifyButtonProps) {
   return (
-    <Pressable
+    <CtaButton
       disabled={isVerifyDisabled}
-      style={[
-        styles.verifyBtn,
-        {
-          backgroundColor: isVerifyDisabled
-            ? basicColorGrey200
-            : buttonColorCta,
-        },
-        style,
-      ]}
+      style={style}
       onPress={onVerify}
     >
-      <NText
-        variant="m16"
-        style={{
-          color: isVerifyDisabled ? typoColorPlaceholder : backgroundColorWhite,
-        }}
-      >
-        인증하기
-      </NText>
-    </Pressable>
+      <CtaButton.Text>인증하기</CtaButton.Text>
+    </CtaButton>
   );
 }
-
-const styles = StyleSheet.create({
-  verifyBtn: {
-    marginTop: 20,
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
-  },
-});

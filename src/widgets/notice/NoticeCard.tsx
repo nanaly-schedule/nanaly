@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Notice } from '@/src/entities/notice/notice';
@@ -7,28 +6,15 @@ import {
   typoColorPlaceholder,
   typoColorPrimary,
 } from '@/src/init/styles/tokens';
+import MegaphonePrivateIcon from '@/src/shared/assets/MegaphonePrivateIcon';
+import MegaphonePublicIcon from '@/src/shared/assets/MegaphonePublicIcon';
+import { formatKoreanDateWithWeekday } from '@/src/shared/lib/date';
 
 type NoticeCardProps = {
   notice: Notice;
   onPress?: () => void;
   variant?: 'card' | 'list';
 };
-
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-
-function formatNoticeDate(createdAt?: string) {
-  if (!createdAt) {
-    return '';
-  }
-
-  const date = new Date(createdAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]})`;
-}
 
 function getBooleanLikeValue(value?: boolean | string | number) {
   if (typeof value === 'boolean') {
@@ -95,7 +81,7 @@ export default function NoticeCard({
   variant = 'card',
 }: NoticeCardProps) {
   const isList = variant === 'list';
-  const createdAt = formatNoticeDate(notice.createdAt);
+  const createdAt = formatKoreanDateWithWeekday(notice.createdAt);
   const preview = notice.content?.trim() || '내용이 표시됩니다';
   const isPublic = getNoticeIsPublic(notice);
   const isRead = isList && notice.isRead === true;
@@ -113,15 +99,13 @@ export default function NoticeCard({
           isList && styles.listIcon,
         ]}
       >
-        <Image
-          source={
-            isPublic
-              ? require('@/src/shared/assets/megaphone_pub.svg')
-              : require('@/src/shared/assets/megaphone_prv.svg')
-          }
-          style={styles.noticeIcon}
-          contentFit="contain"
-        />
+        <View style={styles.noticeIcon}>
+          {isPublic ? (
+            <MegaphonePublicIcon size={24} />
+          ) : (
+            <MegaphonePrivateIcon size={24} />
+          )}
+        </View>
       </View>
       <View style={{ flex: 1 }}>
         <Text

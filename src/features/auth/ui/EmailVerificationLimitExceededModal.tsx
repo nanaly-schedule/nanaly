@@ -1,30 +1,21 @@
 import BaseModal from '@/src/shared/ui/BaseModal';
 
-interface VerificationCodeResendModalProps {
+interface EmailVerificationLimitExceededModalProps {
   visible: boolean;
-  remainingAttempts: number;
   onConfirm: () => void;
   onClose: () => void;
 }
 
-const MAX_RESEND_COUNT = 3;
-
-export default function VerificationCodeResendModal({
+export default function EmailVerificationLimitExceededModal({
   visible,
-  remainingAttempts,
   onConfirm,
   onClose,
-}: VerificationCodeResendModalProps) {
-  const safeRemainingAttempts = Math.min(
-    Math.max(remainingAttempts, 0),
-    MAX_RESEND_COUNT,
-  );
-
+}: EmailVerificationLimitExceededModalProps) {
   return (
     <BaseModal visible={visible} onClose={onClose}>
       <BaseModal.Content>
         <BaseModal.Text>
-          {`인증 시간이 지나 코드를 다시 받아 주세요\n남은 재발송 횟수 ${safeRemainingAttempts}회`}
+          이메일 인증 횟수가 초과되었습니다. 다음날 다시 시도해주세요
         </BaseModal.Text>
       </BaseModal.Content>
       <BaseModal.Actions>

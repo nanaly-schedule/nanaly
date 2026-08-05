@@ -1,4 +1,3 @@
-import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   GestureResponderEvent,
   Platform,
@@ -19,7 +18,7 @@ interface SocialLoginButtonsProps {
   onApple: (e: GestureResponderEvent) => void;
 }
 
-const isIOS = Platform.OS == 'ios';
+const isIOS = Platform.OS === 'ios';
 export default function SocialLoginButtons({
   onGoogle,
   onApple,

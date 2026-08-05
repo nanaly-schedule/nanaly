@@ -185,7 +185,7 @@ export default function ScheduleUnavailableFormBottomSheet({
 
       <View style={styles.content}>
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             날짜
           </NText>
           <TextInput
@@ -199,11 +199,11 @@ export default function ScheduleUnavailableFormBottomSheet({
         </View>
 
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             시간
           </NText>
           <View style={styles.allDayRow}>
-            <NText variant="r12" style={styles.timeLabel}>
+            <NText variant="m14" style={styles.timeLabel}>
               종일
             </NText>
             <Switch
@@ -216,7 +216,7 @@ export default function ScheduleUnavailableFormBottomSheet({
           </View>
           <View style={styles.timeRow}>
             <View style={styles.timeColumn}>
-              <NText variant="r12" style={styles.timeLabel}>
+              <NText variant="m14" style={styles.timeLabel}>
                 시작
               </NText>
               <TextInput
@@ -233,7 +233,7 @@ export default function ScheduleUnavailableFormBottomSheet({
               />
             </View>
             <View style={styles.timeColumn}>
-              <NText variant="r12" style={styles.timeLabel}>
+              <NText variant="m14" style={styles.timeLabel}>
                 종료
               </NText>
               <TextInput
@@ -253,7 +253,7 @@ export default function ScheduleUnavailableFormBottomSheet({
         </View>
 
         <View style={styles.section}>
-          <NText variant="r12" style={styles.sectionTitle}>
+          <NText variant="sb14" style={styles.sectionTitle}>
             사유
           </NText>
           <TextInput

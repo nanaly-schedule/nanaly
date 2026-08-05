@@ -6,6 +6,7 @@ import {
   backgroundColorWhite,
   borderDividerPrimary,
   radiusRadius8,
+  spacingSpacing8,
   typoColorPlaceholder,
   typoColorPrimary,
   typoColorRed,
@@ -61,7 +62,7 @@ export default Input;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: backgroundColorWhite,
-    paddingHorizontal: 8,
+    paddingHorizontal: spacingSpacing8,
     borderRadius: radiusRadius8,
     borderColor: backgroundColorWhite,
     borderWidth: 1,

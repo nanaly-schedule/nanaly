@@ -1,20 +1,15 @@
 import { useRouter } from 'expo-router';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  backgroundColorWhite,
-  buttonColorCta,
-  buttonColorSecondary,
-  radiusRadius8,
-  radiusRadius12,
   spacingSpacing12,
-  spacingSpacing16,
   spacingSpacing24,
   typoColorPrimary,
   typoColorSub1,
 } from '@/src/init/styles/tokens';
 
+import CtaButton from './CtaButton';
 import Main from './Main';
 import NText from './NText';
 import PageLayout from './PageLayout';
@@ -46,22 +41,15 @@ export default function AccessDenied({
           {message}
         </NText>
       </Main>
-      <Pressable
-        style={[
-          styles.button,
-          { marginBottom: insets.bottom + spacingSpacing12 },
-        ]}
+      <CtaButton
+        style={{
+          marginTop: 'auto',
+          marginBottom: insets.bottom + spacingSpacing12,
+        }}
         onPress={() => router.back()}
       >
-        <NText
-          variant="m16"
-          style={{
-            color: backgroundColorWhite,
-          }}
-        >
-          뒤로가기
-        </NText>
-      </Pressable>
+        <CtaButton.Text>뒤로가기</CtaButton.Text>
+      </CtaButton>
     </PageLayout>
   );
 }
@@ -69,13 +57,5 @@ export default function AccessDenied({
 const styles = StyleSheet.create({
   img: {
     marginBottom: spacingSpacing24,
-  },
-  button: {
-    marginTop: 'auto',
-    backgroundColor: buttonColorCta,
-    borderRadius: radiusRadius8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
   },
 });

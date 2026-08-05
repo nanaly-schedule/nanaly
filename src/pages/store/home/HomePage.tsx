@@ -9,6 +9,7 @@ import { UserStorePermissions } from '@/src/entities/user/user';
 import { getDashboardInfos } from '@/src/features/store/api/dashboard';
 import { getMyStore } from '@/src/features/store/api/store';
 import useUser from '@/src/features/user/lib/useUser';
+import { backgroundColorPrimary } from '@/src/init/styles/tokens';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import NoticeWidget from '@/src/widgets/notice/NoticeWidget';
 import CurrentWeekSchedules from '@/src/widgets/store/home/CurrentWeekSchedules';
@@ -156,7 +157,10 @@ export default function HomePage() {
     }, [storeId, syncCurrentStoreAccess]),
   );
   return (
-    <PageLayout showHeader={false} style={{ backgroundColor: '#F5F7FA' }}>
+    <PageLayout
+      showHeader={false}
+      style={{ backgroundColor: backgroundColorPrimary }}
+    >
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <StoreHeader
           storeName={displayStoreName ?? headerInfo?.storeName ?? ''}

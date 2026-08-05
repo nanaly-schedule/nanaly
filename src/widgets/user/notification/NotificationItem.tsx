@@ -1,30 +1,17 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import NotificationResponse from '@/src/features/user/model/notification';
 import {
   spacingSpacing12,
-  spacingSpacing16,
-  spacingSpacing24,
   typoColorPrimary,
   typoColorSub1,
 } from '@/src/init/styles/tokens';
+import { formatKoreanDateWithWeekday } from '@/src/shared/lib/date';
 import NText from '@/src/shared/ui/NText';
 
 interface NotificationItemProps {
   item: NotificationResponse;
   onPress: () => void;
-}
-
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-
-function formatNotificationDate(createdAt: string) {
-  const date = new Date(createdAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]})`;
 }
 
 export default function NotificationItem({
@@ -40,7 +27,7 @@ export default function NotificationItem({
         </NText>
       </NText>
       <NText variant="r12" style={styles.date}>
-        {formatNotificationDate(item.createdAt)}
+        {formatKoreanDateWithWeekday(item.createdAt)}
       </NText>
     </Pressable>
   );

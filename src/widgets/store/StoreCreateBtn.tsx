@@ -1,6 +1,5 @@
 import {
   GestureResponderEvent,
-  Image,
   Pressable,
   StyleSheet,
   View,
@@ -12,7 +11,10 @@ import {
   spacingSpacing8,
   spacingSpacing12,
   typoColorPrimary,
+  typoColorSecondary,
 } from '@/src/init/styles/tokens';
+import DoorIcon from '@/src/shared/assets/DoorIcon';
+import StoreIcon from '@/src/shared/assets/StoreIcon';
 import NText from '@/src/shared/ui/NText';
 
 interface StoreCreateBtnProps {
@@ -27,7 +29,7 @@ export default function StoreCreateBtn({
   return (
     <View style={styles.container}>
       <Pressable style={styles.btnContainer} onPress={onCreateStore}>
-        <Image source={require('../../shared/assets/storeIcon.png')} />
+        <StoreIcon size={30} color={typoColorSecondary} />
         <View style={styles.textContainer}>
           <NText variant="b16" style={{ color: typoColorPrimary }}>
             매장 만들기
@@ -38,7 +40,7 @@ export default function StoreCreateBtn({
         </View>
       </Pressable>
       <Pressable style={styles.btnContainer} onPress={onJoinStore}>
-        <Image source={require('../../shared/assets/doorIcon.png')} />
+        <DoorIcon size={30} color={typoColorSecondary} />
         <View style={styles.textContainer}>
           <NText variant="b16" style={{ color: typoColorPrimary }}>
             매장 참여하기

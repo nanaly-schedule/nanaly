@@ -1,48 +1,21 @@
 import { Tabs, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { Image, ImageSourcePropType } from 'react-native';
 
 import { MemberRole } from '@/src/entities/member/member';
 import { UserStorePermissions } from '@/src/entities/user/user';
 import { getMyStore } from '@/src/features/store/api/store';
 import useUser from '@/src/features/user/lib/useUser';
 import {
+  backgroundColorPrimary,
   typoColorPrimary,
   typoColorSub1,
 } from '@/src/init/styles/tokens';
-
-const TAB_ICONS = {
-  home: {
-    on: require('@/src/shared/assets/home_on.png'),
-    off: require('@/src/shared/assets/home_off.png'),
-  },
-  schedule: {
-    on: require('@/src/shared/assets/schedule_on.png'),
-    off: require('@/src/shared/assets/schedule_off.png'),
-  },
-  my: {
-    on: require('@/src/shared/assets/my_on.png'),
-    off: require('@/src/shared/assets/my_off.png'),
-  },
-} satisfies Record<string, { on: ImageSourcePropType; off: ImageSourcePropType }>;
-
-function TabIcon({
-  focused,
-  color,
-  icon,
-}: {
-  focused: boolean;
-  color: string;
-  icon: { on: ImageSourcePropType; off: ImageSourcePropType };
-}) {
-  return (
-    <Image
-      source={focused ? icon.on : icon.off}
-      style={{ width: 24, height: 24, tintColor: color }}
-      resizeMode="contain"
-    />
-  );
-}
+import HomeOffIcon from '@/src/shared/assets/HomeOffIcon';
+import HomeOnIcon from '@/src/shared/assets/HomeOnIcon';
+import MyOffIcon from '@/src/shared/assets/MyOffIcon';
+import MyOnIcon from '@/src/shared/assets/MyOnIcon';
+import ScheduleOffIcon from '@/src/shared/assets/ScheduleOffIcon';
+import ScheduleOnIcon from '@/src/shared/assets/ScheduleOnIcon';
 
 type MyStoreItem = {
   storeId: string;
@@ -154,11 +127,14 @@ export default function Layout() {
         options={{
           title: '홈',
           sceneStyle: {
-            backgroundColor: '#F5F7FA',
+            backgroundColor: backgroundColorPrimary,
           },
-          tabBarIcon: ({ focused, color }) => (
-            <TabIcon focused={focused} color={color} icon={TAB_ICONS.home} />
-          ),
+          tabBarIcon: ({ focused, color }) =>
+            focused ? (
+              <HomeOnIcon size={24} color={color} />
+            ) : (
+              <HomeOffIcon size={24} color={color} />
+            ),
         }}
       />
       <Tabs.Screen
@@ -166,15 +142,14 @@ export default function Layout() {
         options={{
           title: '스케줄',
           sceneStyle: {
-            backgroundColor: '#F5F7FA',
+            backgroundColor: backgroundColorPrimary,
           },
-          tabBarIcon: ({ focused, color }) => (
-            <TabIcon
-              focused={focused}
-              color={color}
-              icon={TAB_ICONS.schedule}
-            />
-          ),
+          tabBarIcon: ({ focused, color }) =>
+            focused ? (
+              <ScheduleOnIcon size={24} color={color} />
+            ) : (
+              <ScheduleOffIcon size={24} color={color} />
+            ),
           href: storeId
             ? {
                 pathname: '/[storeId]/schedule',
@@ -187,9 +162,15 @@ export default function Layout() {
         name="my"
         options={{
           title: '마이',
-          tabBarIcon: ({ focused, color }) => (
-            <TabIcon focused={focused} color={color} icon={TAB_ICONS.my} />
-          ),
+          sceneStyle: {
+            backgroundColor: backgroundColorPrimary,
+          },
+          tabBarIcon: ({ focused, color }) =>
+            focused ? (
+              <MyOnIcon size={24} color={color} />
+            ) : (
+              <MyOffIcon size={24} color={color} />
+            ),
         }}
       />
     </Tabs>

@@ -65,12 +65,20 @@ apiClient.interceptors.response.use(
 
     const originalRequest = error.config as ExtendedAxiosRequestConfig;
     const requestUrl = originalRequest?.url ?? '';
-    const isLoginRequest = requestUrl.includes('/auth/login');
+    const isPublicAuthRequest = [
+      '/auth/login',
+      '/auth/signup',
+      '/auth/google',
+      '/auth/apple',
+      '/auth/send-code',
+      '/auth/verify-code',
+      'auth/reset-password',
+    ].some((path) => requestUrl.includes(path));
 
     // 401 에러이고, 아직 재시도하지 않은 경우
     if (
       error.response?.status === 401 &&
-      !isLoginRequest &&
+      !isPublicAuthRequest &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
