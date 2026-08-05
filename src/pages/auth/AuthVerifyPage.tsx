@@ -1,11 +1,13 @@
 import { isAxiosError } from 'axios';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { AppState } from 'react-native';
 
 import { signUp } from '@/src/features/auth/api/sign';
 import { sendCode, verifyCode } from '@/src/features/auth/api/verify';
+import { VerifyCodeErrorDetails } from '@/src/features/auth/model/verify';
 import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
+import EmailVerificationLimitExceededModal from '@/src/features/auth/ui/EmailVerificationLimitExceededModal';
 import ExistingEmailModal from '@/src/features/auth/ui/ExistingEmailModal';
 import VerificationCodeResendModal from '@/src/features/auth/ui/VerificationCodeResendModal';
 import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
@@ -20,6 +22,12 @@ import PasswordVerifyWidget, {
 } from '@/src/widgets/auth/sign-up/PasswordVerifyWidget';
 import SignUpButton from '@/src/widgets/auth/sign-up/SignUpButton';
 
+const VERIFICATION_CODE_TTL_SECONDS = 180;
+
+function getRemainingVerificationSeconds(expiresAt: number) {
+  return Math.max(Math.ceil((expiresAt - Date.now()) / 1000), 0);
+}
+
 export default function AuthVerifyPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -30,7 +38,11 @@ export default function AuthVerifyPage() {
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [codeErrorMessage, setCodeErrorMessage] = useState('');
   const [timer, setTimer] = useState(0);
+  const [verificationCodeExpiresAt, setVerificationCodeExpiresAt] = useState<
+    number | null
+  >(null);
   const [emailSendCount, setEmailSendCount] = useState(0);
+  const [remainingResendAttempts, setRemainingResendAttempts] = useState(3);
   const [isSendingEmailCode, setIsSendingEmailCode] = useState(false);
   const [isVerifyingEmailCode, setIsVerifyingEmailCode] = useState(false);
   const [isCodeValid, setIsCodeValid] = useState(false);
@@ -42,6 +54,10 @@ export default function AuthVerifyPage() {
   const [isSubmittingSignUp, setIsSubmittingSignUp] = useState(false);
   const [isExistingEmailModalVisible, setIsExistingEmailModalVisible] =
     useState(false);
+  const [
+    isEmailVerificationLimitExceededModalVisible,
+    setIsEmailVerificationLimitExceededModalVisible,
+  ] = useState(false);
   const [
     isVerificationCodeResendModalVisible,
     setIsVerificationCodeResendModalVisible,
@@ -73,14 +89,7 @@ export default function AuthVerifyPage() {
       await replaceToInitialRoute(router);
     } catch (error) {
       const status = isAxiosError(error) ? error.response?.status : undefined;
-      const errorMessage = isAxiosError(error)
-        ? typeof error.response?.data === 'string'
-          ? error.response.data
-          : (error.response?.data as { message?: string } | undefined)?.message
-        : undefined;
-      const errorPayload = isAxiosError(error) ? error.response?.data : error;
 
-      console.error('회원가입 실패:', errorPayload);
       if (status === 400) {
         setCode('');
         setIsCodeValid(false);
@@ -88,14 +97,12 @@ export default function AuthVerifyPage() {
         setEmailStatus(EmailVerifyStatus.Idle);
         setEmailErrorMessage('이메일 인증이 필요합니다. 다시 인증해 주세요');
         setTimer(0);
+        setVerificationCodeExpiresAt(null);
       }
 
-      Alert.alert(
-        '회원가입 실패',
-        status === 400
-          ? (errorMessage ?? '이메일 인증이 필요합니다. 다시 인증해 주세요')
-          : (errorMessage ?? '회원가입 중 오류가 발생했습니다'),
-      );
+      if (status === 409) {
+        setIsExistingEmailModalVisible(true);
+      }
     } finally {
       setIsSubmittingSignUp(false);
     }
@@ -123,16 +130,35 @@ export default function AuthVerifyPage() {
     isSubmittingSignUp;
 
   useEffect(() => {
-    if (timer === 0) {
+    if (
+      emailStatus !== EmailVerifyStatus.Sent ||
+      verificationCodeExpiresAt === null
+    ) {
+      setTimer(0);
       return;
     }
 
+    const updateRemainingTime = () => {
+      setTimer(getRemainingVerificationSeconds(verificationCodeExpiresAt));
+    };
+
+    updateRemainingTime();
+
     const interval = setInterval(() => {
-      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
+      updateRemainingTime();
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [timer]);
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        updateRemainingTime();
+      }
+    });
+
+    return () => {
+      clearInterval(interval);
+      subscription.remove();
+    };
+  }, [emailStatus, verificationCodeExpiresAt]);
 
   useEffect(() => {
     if (
@@ -152,8 +178,11 @@ export default function AuthVerifyPage() {
     setEmailStatus(EmailVerifyStatus.Idle);
     setEmailErrorMessage('');
     setEmailSendCount(0);
+    setRemainingResendAttempts(3);
     setTimer(0);
+    setVerificationCodeExpiresAt(null);
     setIsExistingEmailModalVisible(false);
+    setIsEmailVerificationLimitExceededModalVisible(false);
     setIsVerificationCodeResendModalVisible(false);
   };
 
@@ -182,15 +211,36 @@ export default function AuthVerifyPage() {
       });
 
       setEmailStatus(EmailVerifyStatus.Sent);
-      setEmailSendCount((prev) => prev + 1);
-      setTimer(180);
+      const nextExpiresAt = Date.now() + VERIFICATION_CODE_TTL_SECONDS * 1000;
+      setVerificationCodeExpiresAt(nextExpiresAt);
+      setTimer(getRemainingVerificationSeconds(nextExpiresAt));
+      setEmailSendCount((prev) => {
+        const nextCount = prev + 1;
+        setRemainingResendAttempts(Math.max(3 - nextCount, 0));
+        return nextCount;
+      });
     } catch (error) {
-      if (isAxiosError(error) && error.response?.status === 400) {
+      if (!isAxiosError(error)) {
+        return;
+      }
+
+      if (error.response?.status === 409) {
         setCode('');
         setEmailStatus(EmailVerifyStatus.Idle);
         setTimer(0);
+        setVerificationCodeExpiresAt(null);
         setEmailErrorMessage('');
         setIsExistingEmailModalVisible(true);
+        return;
+      }
+
+      if (error.response?.status === 429) {
+        setCode('');
+        setEmailStatus(EmailVerifyStatus.Idle);
+        setTimer(0);
+        setVerificationCodeExpiresAt(null);
+        setEmailErrorMessage('');
+        setIsEmailVerificationLimitExceededModalVisible(true);
       }
     } finally {
       setIsSendingEmailCode(false);
@@ -214,16 +264,34 @@ export default function AuthVerifyPage() {
       setCodeErrorMessage('');
       setEmailStatus(EmailVerifyStatus.Verified);
       setTimer(0);
+      setVerificationCodeExpiresAt(null);
     } catch (error) {
       setIsCodeValid(false);
 
-      if (isAxiosError(error) && error.response?.status === 400) {
-        setCodeErrorMessage('코드를 다시 확인해 주세요');
-        setEmailStatus(EmailVerifyStatus.Sent);
+      if (!isAxiosError(error)) {
         return;
       }
 
-      console.error('이메일 인증 실패:', error);
+      const details = error.response?.data as
+        | { details?: VerifyCodeErrorDetails }
+        | undefined;
+      const serverRemainingAttempts = details?.details?.remainingAttempts;
+
+      if (typeof serverRemainingAttempts === 'number') {
+        setRemainingResendAttempts(serverRemainingAttempts);
+        setCode('');
+        setCodeErrorMessage('');
+        setEmailStatus(EmailVerifyStatus.Sent);
+        setTimer(0);
+        setVerificationCodeExpiresAt(null);
+        setIsVerificationCodeResendModalVisible(true);
+        return;
+      }
+
+      if (error.response?.status === 400) {
+        setCodeErrorMessage('코드를 다시 확인해 주세요');
+        setEmailStatus(EmailVerifyStatus.Sent);
+      }
     } finally {
       setIsVerifyingEmailCode(false);
     }
@@ -286,9 +354,14 @@ export default function AuthVerifyPage() {
         onConfirm={() => setIsExistingEmailModalVisible(false)}
         onClose={() => setIsExistingEmailModalVisible(false)}
       />
+      <EmailVerificationLimitExceededModal
+        visible={isEmailVerificationLimitExceededModalVisible}
+        onConfirm={() => setIsEmailVerificationLimitExceededModalVisible(false)}
+        onClose={() => setIsEmailVerificationLimitExceededModalVisible(false)}
+      />
       <VerificationCodeResendModal
         visible={isVerificationCodeResendModalVisible}
-        resendCount={emailSendCount}
+        remainingAttempts={remainingResendAttempts}
         onConfirm={() => setIsVerificationCodeResendModalVisible(false)}
         onClose={() => setIsVerificationCodeResendModalVisible(false)}
       />

@@ -36,13 +36,17 @@ function CtaButtonRoot({
   style,
   ...props
 }: CtaButtonProps) {
+  const isDisabled = !!disabled;
+
   return (
-    <CtaButtonContext.Provider value={{ disabled }}>
+    <CtaButtonContext.Provider value={{ disabled: isDisabled }}>
       <Pressable
-        disabled={disabled}
+        disabled={isDisabled}
         style={[
           styles.button,
-          { backgroundColor: disabled ? basicColorGrey200 : buttonColorCta },
+          {
+            backgroundColor: isDisabled ? basicColorGrey200 : buttonColorCta,
+          },
           style,
         ]}
         {...props}

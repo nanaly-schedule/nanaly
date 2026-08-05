@@ -150,7 +150,7 @@ export default function SignInPage() {
       const savedAccessToken = tokenPayload.accessToken;
       const { refreshToken } = tokenPayload;
 
-      if (!accessToken || !refreshToken) {
+      if (!savedAccessToken || !refreshToken) {
         throw new Error('토큰 정보가 없습니다');
       }
 
@@ -163,15 +163,15 @@ export default function SignInPage() {
 
       await replaceToInitialRoute(router);
     } catch (error) {
-      // const errorMessage = isAxiosError(error)
-      //   ? typeof error.response?.data === 'string'
-      //     ? error.response.data
-      //     : (error.response?.data as { message?: string } | undefined)?.message
-      //   : error instanceof Error
-      //     ? error.message
-      //     : undefined;
+      const statusCode = isAxiosError(error)
+        ? error.response?.status
+        : undefined;
 
-      setLoginErrorMessage('구글 로그인 중 오류가 발생했습니다');
+      setLoginErrorMessage(
+        statusCode === 401
+          ? '구글 인증 정보가 만료되었습니다. 다시 시도해주세요'
+          : '구글 로그인 중 오류가 발생했습니다',
+      );
       setIsLoginErrorModalVisible(true);
     }
   };
@@ -216,7 +216,7 @@ export default function SignInPage() {
       }
 
       await replaceToInitialRoute(router);
-    } catch (error: any) {
+    } catch {
       // const errorMessage = isAxiosError(error)
       //   ? typeof error.response?.data === 'string'
       //     ? error.response.data
