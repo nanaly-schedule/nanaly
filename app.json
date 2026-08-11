@@ -20,9 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#4E80EE",
-        "foregroundImage": "./src/shared/assets/android-logo.png",
-        "backgroundImage": "./src/shared/assets/android-logo.png",
-        "monochromeImage": "./src/shared/assets/android-logo.png"
+        "foregroundImage": "./src/shared/assets/android-logo.png"
       },
       "intentFilters": [
         {
