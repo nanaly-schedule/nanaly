@@ -69,7 +69,6 @@ export default function AuthVerifyPage() {
       !isCodeValid ||
       !isPasswordValid ||
       !isPasswordConfirmValid ||
-      !birthDate ||
       isSubmittingSignUp
     ) {
       return;
@@ -81,9 +80,7 @@ export default function AuthVerifyPage() {
         email: normalizedEmail,
         password,
         name: name.trim(),
-        birthDate: `${birthDate.year}-${String(birthDate.month).padStart(2, '0')}-${String(
-          birthDate.day,
-        ).padStart(2, '0')}`,
+        birthDate: birthDate ? formatBirthDate(birthDate) : null,
       });
 
       await replaceToInitialRoute(router);
@@ -122,7 +119,7 @@ export default function AuthVerifyPage() {
   const isPasswordConfirmValid =
     passwordConfirm.length > 0 && passwordConfirm === password;
   const birthDateText = birthDate ? formatBirthDate(birthDate) : '';
-  const isAuthInfoValid = name.trim().length > 0 && birthDate !== null;
+  const isAuthInfoValid = name.trim().length > 0;
   const isVerifyDisabled =
     !isPasswordConfirmValid ||
     !isPasswordValid ||

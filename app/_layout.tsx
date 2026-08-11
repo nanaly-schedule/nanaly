@@ -137,7 +137,7 @@ export default Sentry.wrap(function Layout() {
           isTempPassword,
           name,
           email,
-          birthDate,
+          birthDate: birthDate ?? '',
         });
         Sentry.setUser({
           email,

@@ -54,14 +54,14 @@ export default function AuthInfoPage() {
   const birthDateText = birthDate ? formatBirthDate(birthDate) : '';
   const [isSubmittingSignUp, setIsSubmittingSignUp] = useState(false);
 
-  const isAuthInfoValid = name.trim().length > 0 && birthDate !== null;
+  const isAuthInfoValid = name.trim().length > 0;
 
   const isVerifyDisabled = !isAuthInfoValid || isSubmittingSignUp;
 
   const handleSignUpButton = async () => {
     try {
       await updateUserProfile({
-        birthDate: birthDate ? formatBirthDate(birthDate) : '',
+        birthDate: birthDate ? formatBirthDate(birthDate) : null,
       });
       setIsSubmittingSignUp(true);
       await replaceToInitialRoute(router);
