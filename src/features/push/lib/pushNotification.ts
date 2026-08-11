@@ -26,6 +26,37 @@ Notifications.setNotificationHandler({
   }),
 });
 
+let permissionRequestAttempted = false;
+let permissionRequestPromise: Promise<string> | null = null;
+let pushPreparationPromise: Promise<string | null> | null = null;
+
+async function getNotificationPermissionStatus() {
+  const permissions = await Notifications.getPermissionsAsync();
+
+  if (permissions.status === 'granted') {
+    return permissions.status;
+  }
+
+  if (permissionRequestPromise) {
+    return permissionRequestPromise;
+  }
+
+  if (permissionRequestAttempted) {
+    return permissions.status;
+  }
+
+  permissionRequestAttempted = true;
+  permissionRequestPromise = Notifications.requestPermissionsAsync().then(
+    (requestedPermissions) => requestedPermissions.status,
+  );
+
+  try {
+    return await permissionRequestPromise;
+  } finally {
+    permissionRequestPromise = null;
+  }
+}
+
 async function getExpoPushTokenAsync() {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
@@ -40,14 +71,7 @@ async function getExpoPushTokenAsync() {
     return null;
   }
 
-  const permissions = await Notifications.getPermissionsAsync();
-  let finalStatus = permissions.status;
-
-  if (finalStatus !== 'granted') {
-    const requestedPermissions =
-      await Notifications.requestPermissionsAsync();
-    finalStatus = requestedPermissions.status;
-  }
+  const finalStatus = await getNotificationPermissionStatus();
 
   if (finalStatus !== 'granted') {
     return null;
@@ -64,7 +88,7 @@ async function getExpoPushTokenAsync() {
   return (await Notifications.getExpoPushTokenAsync({ projectId })).data;
 }
 
-export async function preparePushNotificationsAsync() {
+async function preparePushNotifications() {
   const expoPushToken = await getExpoPushTokenAsync();
 
   if (!expoPushToken) {
@@ -103,6 +127,20 @@ export async function preparePushNotificationsAsync() {
   } catch {}
 
   return expoPushToken;
+}
+
+export async function preparePushNotificationsAsync() {
+  if (pushPreparationPromise) {
+    return pushPreparationPromise;
+  }
+
+  pushPreparationPromise = preparePushNotifications();
+
+  try {
+    return await pushPreparationPromise;
+  } finally {
+    pushPreparationPromise = null;
+  }
 }
 
 export async function unregisterCurrentDeviceAsync() {
