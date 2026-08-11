@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#4E80EE",
-        "foregroundImage": "./src/shared/assets/android-logo.png"
+        "foregroundImage": "./src/shared/assets/android-splash.png"
       },
       "intentFilters": [
         {
@@ -49,10 +49,17 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/shared/assets/logo_splash.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
           "backgroundColor": "#4E80EE",
+          "ios": {
+            "image": "./src/shared/assets/logo_splash.png",
+            "imageWidth": 200,
+            "resizeMode": "contain"
+          },
+          "android": {
+            "image": "./src/shared/assets/android-logo.png",
+            "imageWidth": 200,
+            "resizeMode": "contain"
+          },
           "dark": {
             "backgroundColor": "#4E80EE"
           }
