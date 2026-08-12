@@ -1,4 +1,10 @@
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import * as Sentry from '@sentry/react-native';
 import { isAxiosError } from 'axios';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
@@ -137,15 +143,27 @@ export default function SignInPage() {
   };
 
   const handlePressGoogleLoginButton = async () => {
+    let loginStage = 'play_services';
+
     try {
       await GoogleSignin.hasPlayServices();
+
+      loginStage = 'google_sign_in';
       const userInfo = await GoogleSignin.signIn();
+
+      if (!isSuccessResponse(userInfo)) {
+        return;
+      }
+
+      loginStage = 'get_google_tokens';
       const googleTokens = await GoogleSignin.getTokens();
-      const idToken = userInfo.data?.idToken ?? googleTokens.idToken ?? null;
+      const idToken = userInfo.data.idToken ?? googleTokens.idToken ?? null;
       const { accessToken } = googleTokens;
 
+      loginStage = 'backend_login';
       const response = await googleLogin({ idToken, accessToken });
 
+      loginStage = 'validate_backend_response';
       const tokenPayload = response.data as AuthResponse;
       const savedAccessToken = tokenPayload.accessToken;
       const { refreshToken } = tokenPayload;
@@ -154,8 +172,11 @@ export default function SignInPage() {
         throw new Error('토큰 정보가 없습니다');
       }
 
+      loginStage = 'save_tokens';
       await saveAccessToken(savedAccessToken);
       await saveRefreshToken(refreshToken);
+
+      loginStage = 'navigate';
       if (shouldRedirectToAuthInfo(tokenPayload)) {
         router.replace('/auth/info');
         return;
@@ -163,9 +184,34 @@ export default function SignInPage() {
 
       await replaceToInitialRoute(router);
     } catch (error) {
+      const isUserCancelled =
+        isErrorWithCode(error) &&
+        error.code === statusCodes.SIGN_IN_CANCELLED;
+
+      if (isUserCancelled) {
+        return;
+      }
+
       const statusCode = isAxiosError(error)
         ? error.response?.status
         : undefined;
+      const isCapturedByApiInterceptor =
+        isAxiosError(error) && (!statusCode || statusCode >= 500);
+
+      if (!isCapturedByApiInterceptor) {
+        Sentry.captureException(error, {
+          tags: {
+            area: 'auth',
+            provider: 'google',
+            action: 'signIn',
+            stage: loginStage,
+          },
+          extra: {
+            statusCode,
+            googleErrorCode: isErrorWithCode(error) ? error.code : undefined,
+          },
+        });
+      }
 
       setLoginErrorMessage(
         statusCode === 401

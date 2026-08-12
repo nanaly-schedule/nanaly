@@ -2,7 +2,7 @@ export interface SignUpRequest {
   email: string;
   password: string;
   name: string;
-  birthDate: string; // '1990-01-01';
+  birthDate: string | null; // '1990-01-01';
 }
 
 export interface GoogleLoginRequest {
