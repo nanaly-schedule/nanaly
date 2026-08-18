@@ -2,7 +2,7 @@
   "expo": {
     "name": "나날이",
     "slug": "nanaly",
-    "version": "1.0.7",
+    "version": "1.0.10",
     "orientation": "portrait",
     "icon": "./src/shared/assets/app_icon.png",
     "scheme": "nanaly",
@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#4E80EE",
-        "foregroundImage": "./src/shared/assets/android-splash.png"
+        "foregroundImage": "./src/shared/assets/android-logo.png"
       },
       "intentFilters": [
         {
