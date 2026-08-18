@@ -59,9 +59,6 @@ interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   isTempPassword: boolean;
-  isProfileComplete: boolean;
-  name?: string | null;
-  birthDate?: string | null;
 }
 
 export default function SignInPage() {
@@ -129,19 +126,6 @@ export default function SignInPage() {
     });
   }, [googleIosClientId, googleWebClientId]);
 
-  const shouldRedirectToAuthInfo = ({
-    isProfileComplete,
-    name,
-    birthDate,
-  }: AuthResponse) => {
-    const hasEmptyName = typeof name === 'string' && name.trim().length === 0;
-    const hasEmptyBirthDate =
-      typeof birthDate === 'string' && birthDate.trim().length === 0;
-
-    // return true;
-    return !isProfileComplete || hasEmptyName || hasEmptyBirthDate;
-  };
-
   const handlePressGoogleLoginButton = async () => {
     let loginStage = 'play_services';
 
@@ -177,11 +161,6 @@ export default function SignInPage() {
       await saveRefreshToken(refreshToken);
 
       loginStage = 'navigate';
-      if (shouldRedirectToAuthInfo(tokenPayload)) {
-        router.replace('/auth/info');
-        return;
-      }
-
       await replaceToInitialRoute(router);
     } catch (error) {
       const isUserCancelled =
@@ -256,11 +235,6 @@ export default function SignInPage() {
 
       await saveAccessToken(savedAccessToken);
       await saveRefreshToken(refreshToken);
-      if (shouldRedirectToAuthInfo(tokenPayload)) {
-        router.replace('/auth/info');
-        return;
-      }
-
       await replaceToInitialRoute(router);
     } catch {
       // const errorMessage = isAxiosError(error)
