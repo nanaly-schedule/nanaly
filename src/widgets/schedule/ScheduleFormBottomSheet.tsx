@@ -63,6 +63,7 @@ type StoreMemberResponse = {
   id?: string;
   memberId?: string;
   name: string;
+  nickname?: string | null;
   role?: MemberRole;
 };
 
@@ -372,7 +373,7 @@ export default function ScheduleFormBottomSheet({
             ...acc,
             {
               id,
-              name: member.name,
+              name: member.nickname?.trim() || member.name,
               roleName: member.role ? getMemberRoleLabel(member.role) : '',
             },
           ];
