@@ -1,6 +1,7 @@
 import { MemberRole } from '@/src/entities/member/member';
 
 export interface UpdateMemberRequest {
+  nickname: string | null;
   role: MemberRole; //'owner';
   joinDate: string; //'2026-01-15';
   leaveDate: string; //'2026-12-31';

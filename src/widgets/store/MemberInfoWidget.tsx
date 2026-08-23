@@ -29,14 +29,16 @@ import TitleButton from './TitleButton';
 type PermissionChangeHandler = (id: string) => (value: boolean) => void;
 type MemberInfoValue = {
   name: string;
+  nickname: string;
+  email: string;
   role?: MemberRoleType;
   memo: string | null;
-  birthDate: string;
   startDate: string;
   endDate: string | null;
 };
 type MemberInfoActions = {
   onChangeRole: (role: EditableMemberRole) => void;
+  onChangeNickname: (nickname: string) => void;
   onChangeMemo: (t: string) => void;
   onChangeStartDate: () => void;
   onChangeEndDate: () => void;
@@ -63,12 +65,18 @@ export default function MemberInfoWidget({
 }: MemberInfoWidgetBaseProps) {
   const currentStoreRole = useUser((state) => state.currentStoreRole);
   const [isRoleMenuVisible, setIsRoleMenuVisible] = useState(false);
-  const { name, role, memo, birthDate, startDate, endDate } = member;
-  const hasBirthDate = birthDate.trim().length > 0;
+  const { name, nickname, email, role, memo, startDate, endDate } = member;
+  const hasNickname = nickname.trim().length > 0;
+  const hasEmail = email.trim().length > 0;
   const hasEndDate = !!endDate?.trim();
   const hasMemo = !!memo?.trim();
-  const { onChangeMemo, onChangeRole, onChangeEndDate, onChangeStartDate } =
-    actions;
+  const {
+    onChangeMemo,
+    onChangeNickname,
+    onChangeRole,
+    onChangeEndDate,
+    onChangeStartDate,
+  } = actions;
   const handlePressRole = () => {
     if (!editable) {
       return;
@@ -133,12 +141,30 @@ export default function MemberInfoWidget({
         </View>
       </View>
       <View>
-        <InputLabel label="생년월일" />
+        <InputLabel label="닉네임" />
+        {editable ? (
+          <Input
+            variant=""
+            value={nickname}
+            onChangeText={onChangeNickname}
+            placeholder={name}
+          />
+        ) : (
+          <TitleButton
+            title={hasNickname ? nickname : name}
+            onPress={() => {}}
+            showIcon={false}
+            isPlaceholder={!hasNickname}
+          />
+        )}
+      </View>
+      <View>
+        <InputLabel label="이메일" />
         <TitleButton
-          title={hasBirthDate ? birthDate : '미지정'}
+          title={hasEmail ? email : '미지정'}
           onPress={() => {}}
           showIcon={false}
-          isPlaceholder
+          isPlaceholder={!hasEmail}
         />
       </View>
       {role === MemberRoleType.MANAGER && (

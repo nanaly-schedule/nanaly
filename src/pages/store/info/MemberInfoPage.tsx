@@ -38,12 +38,13 @@ type TypeUser = {
   canEditMemberInfo: boolean;
   canEditSchedule: boolean;
   canManageNotice: boolean;
-  birthDate: string;
+  email: string;
   id: string;
   joinDate: string;
   leaveDate: string | null;
   memo: string | null;
   name: string;
+  nickname: string | null;
   role: MemberRole;
 };
 
@@ -126,6 +127,9 @@ export default function MemberInfoPage() {
   const handleChangeMemo = (t: string) => {
     setUser((prev) => ({ ...prev, memo: t }));
   };
+  const handleChangeNickname = (nickname: string) => {
+    setUser((prev) => ({ ...prev, nickname }));
+  };
   const handleChangeRole = (role: EditableMemberRole) => {
     if (!editable) {
       return;
@@ -152,6 +156,7 @@ export default function MemberInfoPage() {
       }
 
       await updateMember(storeId, memberId, {
+        nickname: user.nickname?.trim() || null,
         role: user.role!,
         joinDate: user.joinDate!,
         leaveDate: user.leaveDate!,
@@ -203,9 +208,10 @@ export default function MemberInfoPage() {
   };
   const memberInfo = {
     name: user?.name ?? '',
+    nickname: user?.nickname ?? '',
+    email: user?.email ?? '',
     memo: user?.memo ?? '',
     role: user?.role,
-    birthDate: user?.birthDate ?? '',
     startDate: user?.joinDate ?? '',
     endDate: user?.leaveDate ?? '',
   };
@@ -220,16 +226,14 @@ export default function MemberInfoPage() {
   const memberActions = {
     onChangeStartDate: handlePressDate('start'),
     onChangeEndDate: handlePressDate('end'),
+    onChangeNickname: handleChangeNickname,
     onChangeMemo: handleChangeMemo,
     onChangeRole: handleChangeRole,
   };
   const isEditingSelf =
-    !!currentUser.name &&
-    !!currentUser.birthDate &&
-    !!user.name &&
-    !!user.birthDate &&
-    currentUser.name === user.name &&
-    currentUser.birthDate === user.birthDate;
+    !!currentUser.email &&
+    !!user.email &&
+    currentUser.email === user.email;
   const isOwnerTarget = user.role === MemberRole.OWNER;
   const canEditTargetMember =
     canEditMemberInfo(access) &&

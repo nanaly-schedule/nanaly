@@ -36,6 +36,7 @@ type TypeMember = {
   joinDate: string;
   leaveDate: string | null;
   name: string;
+  nickname?: string | null;
   role: MemberRole;
 };
 
@@ -137,7 +138,9 @@ export default function WorkerSection({ totalWorker }: WorkerSectionProps) {
                   })
                 }
               >
-                <NText variant="sb14">{item.name}</NText>
+                <NText variant="sb14">
+                  {item.nickname?.trim() || item.name}
+                </NText>
                 <NText variant="r14" style={{ color: typoColorSub1 }}>
                   ·
                 </NText>
