@@ -18,6 +18,7 @@ type UserStore = UserStoreState & UserStoreActions;
 const useUser = create<UserStore>((set) => ({
   isTempPassword: false,
   name: '',
+  nickname: '',
   email: '',
   birthDate: '',
   currentStoreAccessLoaded: false,
@@ -30,6 +31,7 @@ const useUser = create<UserStore>((set) => ({
     set({
       isTempPassword: false,
       name: '',
+      nickname: '',
       email: '',
       birthDate: '',
       currentStoreAccessLoaded: false,

@@ -24,7 +24,7 @@ export default function ProfileInfoPage() {
   const user = useUser();
   const [profile, setProfile] = useState({
     name: user.name,
-    birthDate: user.birthDate,
+    nickname: user.nickname.trim() || user.name,
     email: user.email,
     provider: null as 'google' | 'apple' | null,
   });
@@ -38,7 +38,7 @@ export default function ProfileInfoPage() {
         const { data } = await getUserProfile();
         setProfile({
           name: data.name ?? '',
-          birthDate: data.birthDate ?? '',
+          nickname: data.nickname?.trim() || data.name || '',
           email: data.email ?? '',
           provider: data.socialAccounts[0]?.provider ?? null,
         });
@@ -77,9 +77,9 @@ export default function ProfileInfoPage() {
         <TitleButton title={profile.name} onPress={() => {}} showIcon={false} />
       </View>
       <View>
-        <InputLabel label="생년월일" />
+        <InputLabel label="닉네임" />
         <TitleButton
-          title={profile.birthDate}
+          title={profile.nickname}
           onPress={() => {}}
           showIcon={false}
         />

@@ -132,12 +132,12 @@ export default Sentry.wrap(function Layout() {
           return;
         }
         const { data } = await getUserProfile();
-        const { name, email, birthDate, isTempPassword } = data;
+        const { name, nickname, email, isTempPassword } = data;
         setUser({
           isTempPassword,
           name,
+          nickname: nickname?.trim() || name || '',
           email,
-          birthDate: birthDate ?? '',
         });
         Sentry.setUser({
           email,
