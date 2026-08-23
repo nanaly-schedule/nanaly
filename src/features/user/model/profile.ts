@@ -1,6 +1,6 @@
 export interface UserProfileResponse {
   name: string;
-  birthDate: string | null;
+  nickname: string | null;
   email: string;
   hasPassword: boolean;
   isTempPassword: boolean;
@@ -12,6 +12,5 @@ export interface UserProfileResponse {
   ];
 }
 export interface UserProfileRequest {
-  birthDate: string | null;
-  // name: string
+  nickname: string | null;
 }

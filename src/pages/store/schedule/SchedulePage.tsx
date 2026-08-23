@@ -217,7 +217,9 @@ function getMappedFieldReport(item: unknown, inheritedDate?: string | null) {
       ]) ??
       getStringField(member, ['memberId', 'id', 'storeMemberId', 'staffId']),
     memberName:
-      getStringField(item, ['memberName', 'workerName', 'staffName']) ??
+      getStringField(item, ['nickname'])?.trim() ||
+      getStringField(member, ['nickname'])?.trim() ||
+      getStringField(item, ['memberName', 'workerName', 'staffName']) ||
       getStringField(member, ['name', 'memberName']),
     startTime: getStringField(item, ['startTime', 'start', 'workStartTime']),
     endTime: getStringField(item, ['endTime', 'end', 'workEndTime']),
@@ -259,7 +261,9 @@ function getScheduleMember(item: Record<string, unknown>) {
       ]) ??
       getStringField(member, ['memberId', 'id', 'storeMemberId', 'staffId']),
     memberName:
-      getStringField(item, ['memberName', 'workerName', 'staffName']) ??
+      getStringField(item, ['nickname'])?.trim() ||
+      getStringField(member, ['nickname'])?.trim() ||
+      getStringField(item, ['memberName', 'workerName', 'staffName']) ||
       getStringField(member, ['name', 'memberName']),
   };
 }
@@ -567,7 +571,9 @@ export default function SchedulePage() {
   const shouldOpenNotificationScheduleModal =
     normalizeStoreId(params.openScheduleModal) === 'true';
   const currentStoreId = useUser((state) => state.currentStoreId);
-  const userName = useUser((state) => state.name);
+  const userName = useUser(
+    (state) => state.nickname.trim() || state.name,
+  );
   const storeId = routeStoreId ?? currentStoreId ?? '';
   const isFocused = useIsFocused();
   const access = useCurrentStoreAccess();

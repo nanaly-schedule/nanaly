@@ -8,8 +8,9 @@ export interface UserStorePermissions {
 
 export interface User {
   name: string;
+  nickname: string;
   email: string;
-  birthDate: string; //YYYY-MM-DD
+  birthDate: string;
   isTempPassword: boolean;
   currentStoreAccessLoaded: boolean;
   currentStoreId: string | null;

@@ -6,12 +6,10 @@ import { AppState } from 'react-native';
 import { signUp } from '@/src/features/auth/api/sign';
 import { sendCode, verifyCode } from '@/src/features/auth/api/verify';
 import { VerifyCodeErrorDetails } from '@/src/features/auth/model/verify';
-import BirthDatePickerBottomSheet from '@/src/features/auth/ui/BirthDatePickerBottomSheet';
 import EmailVerificationLimitExceededModal from '@/src/features/auth/ui/EmailVerificationLimitExceededModal';
 import ExistingEmailModal from '@/src/features/auth/ui/ExistingEmailModal';
 import VerificationCodeResendModal from '@/src/features/auth/ui/VerificationCodeResendModal';
 import { replaceToInitialRoute } from '@/src/features/store/lib/replaceToInitialRoute';
-import { BirthDateValue, formatBirthDate } from '@/src/shared/lib/date';
 import PageLayout from '@/src/shared/ui/PageLayout';
 import AuthInfo from '@/src/widgets/auth/sign-up/AuthInfo';
 import EmailVerifyWidget, {
@@ -49,8 +47,6 @@ export default function AuthVerifyPage() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [name, setName] = useState('');
-  const [birthDate, setBirthDate] = useState<BirthDateValue | null>(null);
-  const [isBirthDatePickerOpen, setIsBirthDatePickerOpen] = useState(false);
   const [isSubmittingSignUp, setIsSubmittingSignUp] = useState(false);
   const [isExistingEmailModalVisible, setIsExistingEmailModalVisible] =
     useState(false);
@@ -80,7 +76,7 @@ export default function AuthVerifyPage() {
         email: normalizedEmail,
         password,
         name: name.trim(),
-        birthDate: birthDate ? formatBirthDate(birthDate) : null,
+        birthDate: null,
       });
 
       await replaceToInitialRoute(router);
@@ -118,7 +114,6 @@ export default function AuthVerifyPage() {
     passwordValidation.hasMin8Length;
   const isPasswordConfirmValid =
     passwordConfirm.length > 0 && passwordConfirm === password;
-  const birthDateText = birthDate ? formatBirthDate(birthDate) : '';
   const isAuthInfoValid = name.trim().length > 0;
   const isVerifyDisabled =
     !isPasswordConfirmValid ||
@@ -330,22 +325,11 @@ export default function AuthVerifyPage() {
         />
       )}
       {isPasswordConfirmValid && (
-        <AuthInfo
-          name={name}
-          birthDate={birthDateText}
-          onNameChange={setName}
-          onBirthDateFocus={() => setIsBirthDatePickerOpen(true)}
-        />
+        <AuthInfo name={name} onNameChange={setName} />
       )}
       {isPasswordConfirmValid && (
         <SignUpButton disabled={isVerifyDisabled} onPress={handleVerifyCode} />
       )}
-      <BirthDatePickerBottomSheet
-        visible={isBirthDatePickerOpen}
-        value={birthDate}
-        onChange={setBirthDate}
-        onClose={() => setIsBirthDatePickerOpen(false)}
-      />
       <ExistingEmailModal
         visible={isExistingEmailModalVisible}
         onConfirm={() => setIsExistingEmailModalVisible(false)}
