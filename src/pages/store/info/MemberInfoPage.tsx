@@ -88,6 +88,10 @@ export default function MemberInfoPage() {
     const fetch = async () => {
       try {
         const { data } = await getMember(storeId, memberId);
+        if (__DEV__) {
+          // eslint-disable-next-line no-console -- API 응답 구조 확인 후 제거할 임시 로그
+          console.log('[member-api] GET /members/{memberId}', data);
+        }
         setUser(data);
       } catch {
         setUser({});
