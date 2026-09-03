@@ -197,6 +197,13 @@ function getBooleanField(source: Record<string, unknown>, fields: string[]) {
   return false;
 }
 
+function logScheduleResponse(endpoint: string, data: unknown) {
+  if (__DEV__) {
+    // eslint-disable-next-line no-console -- API 응답 구조 확인 후 제거할 임시 로그
+    console.log(`[schedule-api] ${endpoint}`, data);
+  }
+}
+
 function getMappedFieldReport(item: unknown, inheritedDate?: string | null) {
   if (!isRecord(item)) {
     return { reason: 'item is not an object', item };
@@ -712,6 +719,7 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
+        logScheduleResponse('GET /schedules/monthly', data);
         const { entries, schedules } = mapScheduleEntries({
           data,
           markAsMine: requestScope === 'mine',
@@ -825,6 +833,7 @@ export default function SchedulePage() {
           year,
           month,
         });
+        logScheduleResponse('GET /unavailable/monthly', data);
         const { schedules } = mapUnavailableEntries({
           data,
           markAsMine: !canViewAllUnavailable,
@@ -918,6 +927,7 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
+        logScheduleResponse('GET /schedules/daily', data);
         const { schedules } = mapScheduleEntries({
           data,
           fallbackDate: selectedDate,
@@ -974,6 +984,7 @@ export default function SchedulePage() {
           storeId,
           date: selectedDate,
         });
+        logScheduleResponse('GET /unavailable/daily', data);
         const { schedules } = mapUnavailableEntries({
           data,
           fallbackDate: selectedDate,

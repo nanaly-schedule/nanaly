@@ -8,9 +8,14 @@ import DeleteAccountModal from '@/src/features/auth/ui/DeleteAccountModal';
 import { getUserProfile } from '@/src/features/user/api/profile';
 import useUser from '@/src/features/user/lib/useUser';
 import {
+  backgroundColorWhite,
+  radiusRadius8,
+  spacingSpacing8,
   spacingSpacing12,
   spacingSpacing20,
+  typoColorPrimary,
   typoColorRed,
+  typoColorSecondary,
 } from '@/src/init/styles/tokens';
 import NText from '@/src/shared/ui/NText';
 import PageLayout from '@/src/shared/ui/PageLayout';
@@ -24,7 +29,11 @@ export default function ProfileInfoPage() {
   const user = useUser();
   const [profile, setProfile] = useState({
     name: user.name,
-    nickname: user.nickname.trim() || user.name,
+    nicknameList: [] as {
+      nickname: string;
+      id: string;
+      storeName: string;
+    }[],
     email: user.email,
     provider: null as 'google' | 'apple' | null,
   });
@@ -38,7 +47,9 @@ export default function ProfileInfoPage() {
         const { data } = await getUserProfile();
         setProfile({
           name: data.name ?? '',
-          nickname: data.nickname?.trim() || data.name || '',
+          nicknameList: Array.isArray(data.nicknameList)
+            ? data.nicknameList
+            : [],
           email: data.email ?? '',
           provider: data.socialAccounts[0]?.provider ?? null,
         });
@@ -78,11 +89,22 @@ export default function ProfileInfoPage() {
       </View>
       <View>
         <InputLabel label="닉네임" />
-        <TitleButton
-          title={profile.nickname}
-          onPress={() => {}}
-          showIcon={false}
-        />
+        <View style={styles.nicknameList}>
+          {profile.nicknameList.map((item) => (
+            <View key={item.id} style={styles.nicknameItem}>
+              <NText variant="m14" style={styles.nickname}>
+                {item.nickname.trim() || profile.name}
+              </NText>
+              <NText
+                variant="m12"
+                style={styles.storeName}
+                numberOfLines={1}
+              >
+                {item.storeName}
+              </NText>
+            </View>
+          ))}
+        </View>
       </View>
       <EmailInfo provider={profile.provider} email={profile.email} />
       {!profile.provider && (
@@ -118,5 +140,25 @@ export default function ProfileInfoPage() {
 const styles = StyleSheet.create({
   container: {
     gap: spacingSpacing20,
+  },
+  nicknameList: {
+    gap: spacingSpacing8,
+  },
+  nicknameItem: {
+    height: 46,
+    borderRadius: radiusRadius8,
+    paddingHorizontal: spacingSpacing8,
+    backgroundColor: backgroundColorWhite,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  nickname: {
+    color: typoColorPrimary,
+  },
+  storeName: {
+    flexShrink: 1,
+    marginLeft: spacingSpacing8,
+    color: typoColorSecondary,
   },
 });
