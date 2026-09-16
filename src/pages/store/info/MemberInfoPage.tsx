@@ -1,7 +1,14 @@
 import { isAxiosError } from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EditableMemberRole, MemberRole } from '@/src/entities/member/member';
@@ -57,6 +64,8 @@ type TypeUser = {
 
 export default function MemberInfoPage() {
   const route = useRouter();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const isMemoFocusedRef = useRef(false);
   const { storeId, memberId } = useLocalSearchParams<{
     storeId: string;
     memberId: string;
@@ -100,6 +109,16 @@ export default function MemberInfoPage() {
     fetch();
   }, [storeId, memberId]);
 
+  useEffect(() => {
+    const keyboardDidShow = Keyboard.addListener('keyboardDidShow', () => {
+      if (isMemoFocusedRef.current) {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }
+    });
+
+    return () => keyboardDidShow.remove();
+  }, []);
+
   const handlePressEditMode = () => {
     if (editable) {
       setIsConfirmModalVisible(true);
@@ -130,6 +149,15 @@ export default function MemberInfoPage() {
 
   const handleChangeMemo = (t: string) => {
     setUser((prev) => ({ ...prev, memo: t }));
+  };
+  const handleMemoFocus = () => {
+    isMemoFocusedRef.current = true;
+    requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    });
+  };
+  const handleMemoBlur = () => {
+    isMemoFocusedRef.current = false;
   };
   const handleChangeNickname = (nickname: string) => {
     setUser((prev) => ({ ...prev, nickname }));
@@ -232,6 +260,8 @@ export default function MemberInfoPage() {
     onChangeEndDate: handlePressDate('end'),
     onChangeNickname: handleChangeNickname,
     onChangeMemo: handleChangeMemo,
+    onMemoFocus: handleMemoFocus,
+    onMemoBlur: handleMemoBlur,
     onChangeRole: handleChangeRole,
   };
   const isEditingSelf =
@@ -270,19 +300,29 @@ export default function MemberInfoPage() {
       onPressCheckIcon={handlePressEditMode}
     >
       <View style={{ flex: 1, position: 'relative' }}>
-        <ScrollView
+        <KeyboardAvoidingView
           style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingBottom: spacingSpacing30 * 4 + insets.bottom,
-          }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <MemberInfoWidget
-            editable={editable}
-            member={memberInfo}
-            permissions={memberPermissions}
-            actions={memberActions}
-          />
-        </ScrollView>
+          <ScrollView
+            ref={scrollViewRef}
+            style={{ flex: 1 }}
+            contentContainerStyle={{
+              paddingBottom: spacingSpacing30 * 4 + insets.bottom,
+            }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={
+              Platform.OS === 'ios' ? 'interactive' : 'on-drag'
+            }
+          >
+            <MemberInfoWidget
+              editable={editable}
+              member={memberInfo}
+              permissions={memberPermissions}
+              actions={memberActions}
+            />
+          </ScrollView>
+        </KeyboardAvoidingView>
         {canEditTargetMember && (
           <Pressable
             onPress={() => setIsDeleteMemberModalVisible(true)}

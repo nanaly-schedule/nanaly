@@ -40,6 +40,8 @@ type MemberInfoActions = {
   onChangeRole: (role: EditableMemberRole) => void;
   onChangeNickname: (nickname: string) => void;
   onChangeMemo: (t: string) => void;
+  onMemoFocus: () => void;
+  onMemoBlur: () => void;
   onChangeStartDate: () => void;
   onChangeEndDate: () => void;
 };
@@ -72,6 +74,8 @@ export default function MemberInfoWidget({
   const hasMemo = !!memo?.trim();
   const {
     onChangeMemo,
+    onMemoFocus,
+    onMemoBlur,
     onChangeNickname,
     onChangeRole,
     onChangeEndDate,
@@ -199,6 +203,8 @@ export default function MemberInfoWidget({
           variant=""
           value={memo ?? ''}
           onChangeText={onChangeMemo}
+          onFocus={onMemoFocus}
+          onBlur={onMemoBlur}
           multiline
           placeholder="작성된 내용이 아직 없어요"
           placeholderTextColor={typoColorSub1}
