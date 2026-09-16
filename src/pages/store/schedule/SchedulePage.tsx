@@ -197,43 +197,6 @@ function getBooleanField(source: Record<string, unknown>, fields: string[]) {
   return false;
 }
 
-function logScheduleResponse(endpoint: string, data: unknown) {
-  if (__DEV__) {
-    // eslint-disable-next-line no-console -- API 응답 구조 확인 후 제거할 임시 로그
-    console.log(`[schedule-api] ${endpoint}`, data);
-  }
-}
-
-function getMappedFieldReport(item: unknown, inheritedDate?: string | null) {
-  if (!isRecord(item)) {
-    return { reason: 'item is not an object', item };
-  }
-
-  const member = getNestedRecord(item, ['member', 'worker', 'staff']);
-
-  return {
-    date:
-      inheritedDate ??
-      getStringField(item, ['date', 'workDate', 'scheduleDate']),
-    memberId:
-      getStringField(item, [
-        'memberId',
-        'storeMemberId',
-        'workerId',
-        'staffId',
-      ]) ??
-      getStringField(member, ['memberId', 'id', 'storeMemberId', 'staffId']),
-    memberName:
-      getStringField(item, ['nickname'])?.trim() ||
-      getStringField(member, ['nickname'])?.trim() ||
-      getStringField(item, ['memberName', 'workerName', 'staffName']) ||
-      getStringField(member, ['name', 'memberName']),
-    startTime: getStringField(item, ['startTime', 'start', 'workStartTime']),
-    endTime: getStringField(item, ['endTime', 'end', 'workEndTime']),
-    item,
-  };
-}
-
 function normalizeDate(value?: string | null) {
   if (!value) {
     return null;
@@ -723,7 +686,6 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
-        logScheduleResponse('GET /schedules/monthly', data);
         const { entries, schedules } = mapScheduleEntries({
           data,
           markAsMine: requestScope === 'mine',
@@ -837,7 +799,6 @@ export default function SchedulePage() {
           year,
           month,
         });
-        logScheduleResponse('GET /unavailable/monthly', data);
         const { schedules } = mapUnavailableEntries({
           data,
           markAsMine: !canViewAllUnavailable,
@@ -931,7 +892,6 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
-        logScheduleResponse('GET /schedules/daily', data);
         const { schedules } = mapScheduleEntries({
           data,
           fallbackDate: selectedDate,
@@ -988,7 +948,6 @@ export default function SchedulePage() {
           storeId,
           date: selectedDate,
         });
-        logScheduleResponse('GET /unavailable/daily', data);
         const { schedules } = mapUnavailableEntries({
           data,
           fallbackDate: selectedDate,
@@ -1046,30 +1005,6 @@ export default function SchedulePage() {
     currentMonth,
     positionId,
     positions,
-    unavailableSchedules,
-    userName,
-    viewType,
-    workType,
-  ]);
-
-  useEffect(() => {
-    if (!__DEV__ || viewType !== 'mine') {
-      return;
-    }
-
-    const sourceSchedules =
-      workType === 'unavailable' ? unavailableSchedules : assignedSchedules;
-
-    // eslint-disable-next-line no-console -- 나만보기 필터 데이터 확인 후 제거할 임시 로그
-    console.log('[schedule-mine] filter result', {
-      userName,
-      workType,
-      sourceSchedules,
-      filteredSchedules,
-    });
-  }, [
-    assignedSchedules,
-    filteredSchedules,
     unavailableSchedules,
     userName,
     viewType,
