@@ -578,10 +578,14 @@ export default function SchedulePage() {
   const shouldOpenNotificationScheduleModal =
     normalizeStoreId(params.openScheduleModal) === 'true';
   const currentStoreId = useUser((state) => state.currentStoreId);
-  const userName = useUser(
-    (state) => state.nickname.trim() || state.name,
-  );
   const storeId = routeStoreId ?? currentStoreId ?? '';
+  const userName = useUser((state) => {
+    const storeNickname = state.nicknameList
+      ?.find((item) => item.id === storeId)
+      ?.nickname.trim();
+
+    return storeNickname || state.nickname.trim() || state.name;
+  });
   const isFocused = useIsFocused();
   const access = useCurrentStoreAccess();
   const isManager = access.role === MemberRole.MANAGER;
@@ -1048,6 +1052,30 @@ export default function SchedulePage() {
     workType,
   ]);
 
+  useEffect(() => {
+    if (!__DEV__ || viewType !== 'mine') {
+      return;
+    }
+
+    const sourceSchedules =
+      workType === 'unavailable' ? unavailableSchedules : assignedSchedules;
+
+    // eslint-disable-next-line no-console -- 나만보기 필터 데이터 확인 후 제거할 임시 로그
+    console.log('[schedule-mine] filter result', {
+      userName,
+      workType,
+      sourceSchedules,
+      filteredSchedules,
+    });
+  }, [
+    assignedSchedules,
+    filteredSchedules,
+    unavailableSchedules,
+    userName,
+    viewType,
+    workType,
+  ]);
+
   const schedulesByDate = useMemo(
     () => groupSchedulesByDate(filteredSchedules),
     [filteredSchedules],
@@ -1217,10 +1245,7 @@ export default function SchedulePage() {
       >
         {workType === 'assigned' && !assignedSchedulesLoaded ? (
           <View style={styles.loading}>
-            <ActivityIndicator
-              size="large"
-              color={tokens.brandColorPrimary}
-            />
+            <ActivityIndicator size="large" color={tokens.brandColorPrimary} />
           </View>
         ) : (
           <ScheduleCalendar
@@ -1381,9 +1406,7 @@ export default function SchedulePage() {
         closeOnBackdropPress={!deletingUnavailable}
       >
         <BaseModal.Content>
-          <BaseModal.Text>
-            근무 불가 스케줄을 삭제하시겠습니까?
-          </BaseModal.Text>
+          <BaseModal.Text>근무 불가 스케줄을 삭제하시겠습니까?</BaseModal.Text>
           {unavailableDeleteError && (
             <NText variant="r12" style={styles.deleteError}>
               {unavailableDeleteError}
