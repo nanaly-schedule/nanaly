@@ -24,6 +24,7 @@ import DeleteMemberModal from '@/src/features/store/ui/DeleteMemberModal';
 import useUser from '@/src/features/user/lib/useUser';
 import {
   spacingSpacing12,
+  spacingSpacing20,
   spacingSpacing30,
   typoColorPrimary,
   typoColorRed,
@@ -66,6 +67,7 @@ export default function MemberInfoPage() {
   const route = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   const isMemoFocusedRef = useRef(false);
+  const memoOffsetRef = useRef(0);
   const { storeId, memberId } = useLocalSearchParams<{
     storeId: string;
     memberId: string;
@@ -74,6 +76,7 @@ export default function MemberInfoPage() {
   const currentUser = useUser();
 
   const [editable, setEditable] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const [user, setUser] = useState<Partial<TypeUser>>({});
 
@@ -110,14 +113,31 @@ export default function MemberInfoPage() {
   }, [storeId, memberId]);
 
   useEffect(() => {
-    const keyboardDidShow = Keyboard.addListener('keyboardDidShow', () => {
-      if (isMemoFocusedRef.current) {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }
+    const keyboardDidShow = Keyboard.addListener('keyboardDidShow', (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const keyboardDidHide = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
     });
 
-    return () => keyboardDidShow.remove();
+    return () => {
+      keyboardDidShow.remove();
+      keyboardDidHide.remove();
+    };
   }, []);
+
+  useEffect(() => {
+    if (!keyboardHeight || !isMemoFocusedRef.current) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollTo({
+        y: Math.max(memoOffsetRef.current - spacingSpacing20 + 10, 0),
+        animated: true,
+      });
+    });
+  }, [keyboardHeight]);
 
   const handlePressEditMode = () => {
     if (editable) {
@@ -153,11 +173,17 @@ export default function MemberInfoPage() {
   const handleMemoFocus = () => {
     isMemoFocusedRef.current = true;
     requestAnimationFrame(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
+      scrollViewRef.current?.scrollTo({
+        y: Math.max(memoOffsetRef.current - spacingSpacing20 + 10, 0),
+        animated: true,
+      });
     });
   };
   const handleMemoBlur = () => {
     isMemoFocusedRef.current = false;
+  };
+  const handleMemoLayout = (y: number) => {
+    memoOffsetRef.current = y;
   };
   const handleChangeNickname = (nickname: string) => {
     setUser((prev) => ({ ...prev, nickname }));
@@ -262,12 +288,11 @@ export default function MemberInfoPage() {
     onChangeMemo: handleChangeMemo,
     onMemoFocus: handleMemoFocus,
     onMemoBlur: handleMemoBlur,
+    onMemoLayout: handleMemoLayout,
     onChangeRole: handleChangeRole,
   };
   const isEditingSelf =
-    !!currentUser.email &&
-    !!user.email &&
-    currentUser.email === user.email;
+    !!currentUser.email && !!user.email && currentUser.email === user.email;
   const isOwnerTarget = user.role === MemberRole.OWNER;
   const canEditTargetMember =
     canEditMemberInfo(access) &&
@@ -308,7 +333,10 @@ export default function MemberInfoPage() {
             ref={scrollViewRef}
             style={{ flex: 1 }}
             contentContainerStyle={{
-              paddingBottom: spacingSpacing30 * 4 + insets.bottom,
+              paddingBottom:
+                spacingSpacing30 * 4 +
+                insets.bottom +
+                Math.min(keyboardHeight, spacingSpacing30 * 2),
             }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={

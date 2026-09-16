@@ -42,6 +42,7 @@ type MemberInfoActions = {
   onChangeMemo: (t: string) => void;
   onMemoFocus: () => void;
   onMemoBlur: () => void;
+  onMemoLayout: (y: number) => void;
   onChangeStartDate: () => void;
   onChangeEndDate: () => void;
 };
@@ -76,6 +77,7 @@ export default function MemberInfoWidget({
     onChangeMemo,
     onMemoFocus,
     onMemoBlur,
+    onMemoLayout,
     onChangeNickname,
     onChangeRole,
     onChangeEndDate,
@@ -197,7 +199,9 @@ export default function MemberInfoWidget({
           isPlaceholder={!hasEndDate}
         />
       </View>
-      <View>
+      <View
+        onLayout={(event) => onMemoLayout(event.nativeEvent.layout.y)}
+      >
         <InputLabel label="메모" />
         <Input
           variant=""
