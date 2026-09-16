@@ -1,7 +1,14 @@
 import { isAxiosError } from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EditableMemberRole, MemberRole } from '@/src/entities/member/member';
@@ -17,6 +24,7 @@ import DeleteMemberModal from '@/src/features/store/ui/DeleteMemberModal';
 import useUser from '@/src/features/user/lib/useUser';
 import {
   spacingSpacing12,
+  spacingSpacing20,
   spacingSpacing30,
   typoColorPrimary,
   typoColorRed,
@@ -57,6 +65,9 @@ type TypeUser = {
 
 export default function MemberInfoPage() {
   const route = useRouter();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const isMemoFocusedRef = useRef(false);
+  const memoOffsetRef = useRef(0);
   const { storeId, memberId } = useLocalSearchParams<{
     storeId: string;
     memberId: string;
@@ -65,6 +76,7 @@ export default function MemberInfoPage() {
   const currentUser = useUser();
 
   const [editable, setEditable] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const [user, setUser] = useState<Partial<TypeUser>>({});
 
@@ -88,10 +100,6 @@ export default function MemberInfoPage() {
     const fetch = async () => {
       try {
         const { data } = await getMember(storeId, memberId);
-        if (__DEV__) {
-          // eslint-disable-next-line no-console -- API 응답 구조 확인 후 제거할 임시 로그
-          console.log('[member-api] GET /members/{memberId}', data);
-        }
         setUser(data);
       } catch {
         setUser({});
@@ -99,6 +107,33 @@ export default function MemberInfoPage() {
     };
     fetch();
   }, [storeId, memberId]);
+
+  useEffect(() => {
+    const keyboardDidShow = Keyboard.addListener('keyboardDidShow', (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const keyboardDidHide = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      keyboardDidShow.remove();
+      keyboardDidHide.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!keyboardHeight || !isMemoFocusedRef.current) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollTo({
+        y: Math.max(memoOffsetRef.current - spacingSpacing20 + 10, 0),
+        animated: true,
+      });
+    });
+  }, [keyboardHeight]);
 
   const handlePressEditMode = () => {
     if (editable) {
@@ -130,6 +165,21 @@ export default function MemberInfoPage() {
 
   const handleChangeMemo = (t: string) => {
     setUser((prev) => ({ ...prev, memo: t }));
+  };
+  const handleMemoFocus = () => {
+    isMemoFocusedRef.current = true;
+    requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollTo({
+        y: Math.max(memoOffsetRef.current - spacingSpacing20 + 10, 0),
+        animated: true,
+      });
+    });
+  };
+  const handleMemoBlur = () => {
+    isMemoFocusedRef.current = false;
+  };
+  const handleMemoLayout = (y: number) => {
+    memoOffsetRef.current = y;
   };
   const handleChangeNickname = (nickname: string) => {
     setUser((prev) => ({ ...prev, nickname }));
@@ -232,12 +282,13 @@ export default function MemberInfoPage() {
     onChangeEndDate: handlePressDate('end'),
     onChangeNickname: handleChangeNickname,
     onChangeMemo: handleChangeMemo,
+    onMemoFocus: handleMemoFocus,
+    onMemoBlur: handleMemoBlur,
+    onMemoLayout: handleMemoLayout,
     onChangeRole: handleChangeRole,
   };
   const isEditingSelf =
-    !!currentUser.email &&
-    !!user.email &&
-    currentUser.email === user.email;
+    !!currentUser.email && !!user.email && currentUser.email === user.email;
   const isOwnerTarget = user.role === MemberRole.OWNER;
   const canEditTargetMember =
     canEditMemberInfo(access) &&
@@ -270,19 +321,32 @@ export default function MemberInfoPage() {
       onPressCheckIcon={handlePressEditMode}
     >
       <View style={{ flex: 1, position: 'relative' }}>
-        <ScrollView
+        <KeyboardAvoidingView
           style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingBottom: spacingSpacing30 * 4 + insets.bottom,
-          }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <MemberInfoWidget
-            editable={editable}
-            member={memberInfo}
-            permissions={memberPermissions}
-            actions={memberActions}
-          />
-        </ScrollView>
+          <ScrollView
+            ref={scrollViewRef}
+            style={{ flex: 1 }}
+            contentContainerStyle={{
+              paddingBottom:
+                spacingSpacing30 * 4 +
+                insets.bottom +
+                Math.min(keyboardHeight, spacingSpacing30 * 2),
+            }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={
+              Platform.OS === 'ios' ? 'interactive' : 'on-drag'
+            }
+          >
+            <MemberInfoWidget
+              editable={editable}
+              member={memberInfo}
+              permissions={memberPermissions}
+              actions={memberActions}
+            />
+          </ScrollView>
+        </KeyboardAvoidingView>
         {canEditTargetMember && (
           <Pressable
             onPress={() => setIsDeleteMemberModalVisible(true)}

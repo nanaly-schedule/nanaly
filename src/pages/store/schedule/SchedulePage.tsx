@@ -197,43 +197,6 @@ function getBooleanField(source: Record<string, unknown>, fields: string[]) {
   return false;
 }
 
-function logScheduleResponse(endpoint: string, data: unknown) {
-  if (__DEV__) {
-    // eslint-disable-next-line no-console -- API 응답 구조 확인 후 제거할 임시 로그
-    console.log(`[schedule-api] ${endpoint}`, data);
-  }
-}
-
-function getMappedFieldReport(item: unknown, inheritedDate?: string | null) {
-  if (!isRecord(item)) {
-    return { reason: 'item is not an object', item };
-  }
-
-  const member = getNestedRecord(item, ['member', 'worker', 'staff']);
-
-  return {
-    date:
-      inheritedDate ??
-      getStringField(item, ['date', 'workDate', 'scheduleDate']),
-    memberId:
-      getStringField(item, [
-        'memberId',
-        'storeMemberId',
-        'workerId',
-        'staffId',
-      ]) ??
-      getStringField(member, ['memberId', 'id', 'storeMemberId', 'staffId']),
-    memberName:
-      getStringField(item, ['nickname'])?.trim() ||
-      getStringField(member, ['nickname'])?.trim() ||
-      getStringField(item, ['memberName', 'workerName', 'staffName']) ||
-      getStringField(member, ['name', 'memberName']),
-    startTime: getStringField(item, ['startTime', 'start', 'workStartTime']),
-    endTime: getStringField(item, ['endTime', 'end', 'workEndTime']),
-    item,
-  };
-}
-
 function normalizeDate(value?: string | null) {
   if (!value) {
     return null;
@@ -578,10 +541,14 @@ export default function SchedulePage() {
   const shouldOpenNotificationScheduleModal =
     normalizeStoreId(params.openScheduleModal) === 'true';
   const currentStoreId = useUser((state) => state.currentStoreId);
-  const userName = useUser(
-    (state) => state.nickname.trim() || state.name,
-  );
   const storeId = routeStoreId ?? currentStoreId ?? '';
+  const userName = useUser((state) => {
+    const storeNickname = state.nicknameList
+      ?.find((item) => item.id === storeId)
+      ?.nickname.trim();
+
+    return storeNickname || state.nickname.trim() || state.name;
+  });
   const isFocused = useIsFocused();
   const access = useCurrentStoreAccess();
   const isManager = access.role === MemberRole.MANAGER;
@@ -719,7 +686,6 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
-        logScheduleResponse('GET /schedules/monthly', data);
         const { entries, schedules } = mapScheduleEntries({
           data,
           markAsMine: requestScope === 'mine',
@@ -833,7 +799,6 @@ export default function SchedulePage() {
           year,
           month,
         });
-        logScheduleResponse('GET /unavailable/monthly', data);
         const { schedules } = mapUnavailableEntries({
           data,
           markAsMine: !canViewAllUnavailable,
@@ -927,7 +892,6 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
-        logScheduleResponse('GET /schedules/daily', data);
         const { schedules } = mapScheduleEntries({
           data,
           fallbackDate: selectedDate,
@@ -984,7 +948,6 @@ export default function SchedulePage() {
           storeId,
           date: selectedDate,
         });
-        logScheduleResponse('GET /unavailable/daily', data);
         const { schedules } = mapUnavailableEntries({
           data,
           fallbackDate: selectedDate,
@@ -1217,10 +1180,7 @@ export default function SchedulePage() {
       >
         {workType === 'assigned' && !assignedSchedulesLoaded ? (
           <View style={styles.loading}>
-            <ActivityIndicator
-              size="large"
-              color={tokens.brandColorPrimary}
-            />
+            <ActivityIndicator size="large" color={tokens.brandColorPrimary} />
           </View>
         ) : (
           <ScheduleCalendar
@@ -1381,9 +1341,7 @@ export default function SchedulePage() {
         closeOnBackdropPress={!deletingUnavailable}
       >
         <BaseModal.Content>
-          <BaseModal.Text>
-            근무 불가 스케줄을 삭제하시겠습니까?
-          </BaseModal.Text>
+          <BaseModal.Text>근무 불가 스케줄을 삭제하시겠습니까?</BaseModal.Text>
           {unavailableDeleteError && (
             <NText variant="r12" style={styles.deleteError}>
               {unavailableDeleteError}

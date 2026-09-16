@@ -6,9 +6,16 @@ export interface UserStorePermissions {
   canEditMemberInfo: boolean;
 }
 
+export interface UserStoreNickname {
+  id: string;
+  nickname: string;
+  storeName: string;
+}
+
 export interface User {
   name: string;
   nickname: string;
+  nicknameList: UserStoreNickname[];
   email: string;
   birthDate: string;
   isTempPassword: boolean;
