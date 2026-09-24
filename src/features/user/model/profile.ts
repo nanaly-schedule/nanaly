@@ -2,7 +2,7 @@ export interface UserProfileResponse {
   name: string;
   nickname: string | null;
   nicknameList: {
-    nickname: string;
+    nickname: string | null;
     id: string;
     storeName: string;
   }[];

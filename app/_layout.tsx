@@ -132,6 +132,10 @@ export default Sentry.wrap(function Layout() {
           return;
         }
         const { data } = await getUserProfile();
+        // 백엔드 원본 응답 확인이 필요할 때 임시로 활성화합니다.
+        // if (__DEV__) {
+        //   console.log('[raw-api] GET /user/profile', data);
+        // }
         const { name, nickname, nicknameList, email, isTempPassword } = data;
         setUser({
           isTempPassword,

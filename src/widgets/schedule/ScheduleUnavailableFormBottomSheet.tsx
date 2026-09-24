@@ -188,14 +188,17 @@ export default function ScheduleUnavailableFormBottomSheet({
           <NText variant="sb14" style={styles.sectionTitle}>
             날짜
           </NText>
-          <TextInput
-            value={formatDate(date)}
-            placeholder="YYYY.MM.DD"
-            placeholderTextColor={typoColorSub2}
-            editable={false}
-            onPressIn={() => setDatePickerVisible(true)}
-            style={styles.input}
-          />
+          <Pressable
+            onPress={() => setDatePickerVisible(true)}
+            style={[styles.input, styles.selectInput]}
+          >
+            <NText
+              variant="m12"
+              style={date ? styles.inputText : styles.placeholderText}
+            >
+              {date ? formatDate(date) : 'YYYY.MM.DD'}
+            </NText>
+          </Pressable>
         </View>
 
         <View style={styles.section}>
@@ -219,35 +222,51 @@ export default function ScheduleUnavailableFormBottomSheet({
               <NText variant="m14" style={styles.timeLabel}>
                 시작
               </NText>
-              <TextInput
-                value={startTime}
-                placeholder="00:00"
-                placeholderTextColor={typoColorSub2}
-                editable={false}
-                onPressIn={() => {
-                  if (!allDay) {
-                    setTimePickerTarget('start');
+              <Pressable
+                disabled={allDay}
+                onPress={() => setTimePickerTarget('start')}
+                style={[
+                  styles.input,
+                  styles.selectInput,
+                  allDay && styles.disabledInput,
+                ]}
+              >
+                <NText
+                  variant="m12"
+                  style={
+                    startTime && !allDay
+                      ? styles.inputText
+                      : styles.placeholderText
                   }
-                }}
-                style={[styles.input, allDay && styles.disabledInput]}
-              />
+                >
+                  {startTime || '00:00'}
+                </NText>
+              </Pressable>
             </View>
             <View style={styles.timeColumn}>
               <NText variant="m14" style={styles.timeLabel}>
                 종료
               </NText>
-              <TextInput
-                value={endTime}
-                placeholder="00:00"
-                placeholderTextColor={typoColorSub2}
-                editable={false}
-                onPressIn={() => {
-                  if (!allDay) {
-                    setTimePickerTarget('end');
+              <Pressable
+                disabled={allDay}
+                onPress={() => setTimePickerTarget('end')}
+                style={[
+                  styles.input,
+                  styles.selectInput,
+                  allDay && styles.disabledInput,
+                ]}
+              >
+                <NText
+                  variant="m12"
+                  style={
+                    endTime && !allDay
+                      ? styles.inputText
+                      : styles.placeholderText
                   }
-                }}
-                style={[styles.input, allDay && styles.disabledInput]}
-              />
+                >
+                  {endTime || '00:00'}
+                </NText>
+              </Pressable>
             </View>
           </View>
         </View>
@@ -575,6 +594,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: tokens.spacingSpacing12,
     color: typoColorPrimary,
     fontSize: tokens.typographyPrimitiveFontSize12,
+  },
+  selectInput: {
+    justifyContent: 'center',
+  },
+  inputText: {
+    color: typoColorPrimary,
+  },
+  placeholderText: {
+    color: typoColorSub2,
   },
   disabledInput: {
     backgroundColor: tokens.borderDividerPrimary,
