@@ -8,7 +8,7 @@ export interface UserStorePermissions {
 
 export interface UserStoreNickname {
   id: string;
-  nickname: string;
+  nickname: string | null;
   storeName: string;
 }
 

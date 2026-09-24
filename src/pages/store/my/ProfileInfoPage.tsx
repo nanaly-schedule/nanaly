@@ -30,7 +30,7 @@ export default function ProfileInfoPage() {
   const [profile, setProfile] = useState({
     name: user.name,
     nicknameList: [] as {
-      nickname: string;
+      nickname: string | null;
       id: string;
       storeName: string;
     }[],
@@ -93,13 +93,9 @@ export default function ProfileInfoPage() {
           {profile.nicknameList.map((item) => (
             <View key={item.id} style={styles.nicknameItem}>
               <NText variant="m14" style={styles.nickname}>
-                {item.nickname.trim() || profile.name}
+                {item.nickname?.trim() || profile.name}
               </NText>
-              <NText
-                variant="m12"
-                style={styles.storeName}
-                numberOfLines={1}
-              >
+              <NText variant="m12" style={styles.storeName} numberOfLines={1}>
                 {item.storeName}
               </NText>
             </View>
