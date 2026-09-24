@@ -197,12 +197,12 @@ function getBooleanField(source: Record<string, unknown>, fields: string[]) {
   return false;
 }
 
-function logRawApiResponse(endpoint: string, data: unknown) {
-  if (__DEV__) {
-    // eslint-disable-next-line no-console -- 백엔드 원본 응답 확인 후 제거할 임시 로그
-    console.log(`[raw-api] ${endpoint}`, data);
-  }
-}
+// 백엔드 원본 응답 확인이 필요할 때 임시로 활성화합니다.
+// function logRawApiResponse(endpoint: string, data: unknown) {
+//   if (__DEV__) {
+//     console.log(`[raw-api] ${endpoint}`, data);
+//   }
+// }
 
 function normalizeDate(value?: string | null) {
   if (!value) {
@@ -693,7 +693,7 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
-        logRawApiResponse('GET /schedules/monthly', data);
+        // logRawApiResponse('GET /schedules/monthly', data);
         const { entries, schedules } = mapScheduleEntries({
           data,
           markAsMine: requestScope === 'mine',
@@ -727,10 +727,10 @@ export default function SchedulePage() {
                       ? positionId
                       : undefined,
                 });
-                logRawApiResponse(
-                  `GET /schedules/daily?date=${date}`,
-                  response.data,
-                );
+                // logRawApiResponse(
+                //   `GET /schedules/daily?date=${date}`,
+                //   response.data,
+                // );
 
                 return mapScheduleEntries({
                   data: response.data,
@@ -811,7 +811,7 @@ export default function SchedulePage() {
           year,
           month,
         });
-        logRawApiResponse('GET /unavailable/monthly', data);
+        // logRawApiResponse('GET /unavailable/monthly', data);
         const { schedules } = mapUnavailableEntries({
           data,
           markAsMine: !canViewAllUnavailable,
@@ -905,7 +905,7 @@ export default function SchedulePage() {
               ? positionId
               : undefined,
         });
-        logRawApiResponse('GET /schedules/daily', data);
+        // logRawApiResponse('GET /schedules/daily', data);
         const { schedules } = mapScheduleEntries({
           data,
           fallbackDate: selectedDate,
@@ -962,7 +962,7 @@ export default function SchedulePage() {
           storeId,
           date: selectedDate,
         });
-        logRawApiResponse('GET /unavailable/daily', data);
+        // logRawApiResponse('GET /unavailable/daily', data);
         const { schedules } = mapUnavailableEntries({
           data,
           fallbackDate: selectedDate,
