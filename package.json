@@ -9,8 +9,11 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "build:tokens": "node style-dictionary.config.mjs"
+    "build:tokens": "node style-dictionary.config.mjs",
+    "test": "jest --watch",
+    "test:ci": "jest --ci --runInBand"
   },
+  "private": true,
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
     "@react-native-google-signin/google-signin": "^16.1.2",
@@ -68,11 +71,6 @@
     "react-test-renderer": "^19.1.0",
     "style-dictionary": "^5.4.0",
     "typescript": "~5.9.2"
-  },
-  "private": true,
-  "scripts": {
-    "test": "jest --watch",
-    "test:ci": "jest --ci --runInBand"
   },
   "jest": {
     "preset": "jest-expo"
